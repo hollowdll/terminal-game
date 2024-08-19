@@ -1,3 +1,9 @@
+const HELP_MSG: &str = "Write /help or /h for available commands";
+
 fn main() {
-    println!("Hello, world!");
+    run();
+}
+
+fn run() {
+    println!("{}", HELP_MSG);
 }
