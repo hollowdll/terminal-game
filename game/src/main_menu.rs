@@ -29,23 +29,14 @@ fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
     Ok(())
 }
 
-pub fn main_menu() -> io::Result<()> {
-    enable_raw_mode()?;
-
+pub fn main_menu() -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, Hide)?;
 
-    let menu_items = vec![
-        "Load Game",
-        "New Game",
-        "Login (WIP)",
-        "Register (WIP)",
-        "Leaderboard (WIP)",
-        "Settings",
-        "Quit Game",
-    ];
+    let menu_items = vec![OPTION_LOAD_GAME, OPTION_NEW_GAME, OPTION_QUIT_GAME];
     let mut selected_index = 0;
     let start_column: u16 = 7;
+    let mut render_again = false;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -80,17 +71,74 @@ pub fn main_menu() -> io::Result<()> {
         }
     }
 
-    execute!(
-        stdout,
-        LeaveAlternateScreen,
-        Show,
-        cursor::MoveToNextLine(1)
-    )?;
-    disable_raw_mode()?;
+    match menu_items[selected_index] {
+        OPTION_LOAD_GAME => {
+            execute!(stdout, LeaveAlternateScreen, Show)?;
+            if let Ok(pressed_back) = load_game() {
+                if pressed_back {
+                    render_again = true;
+                }
+            }
+        }
+        OPTION_NEW_GAME => {}
+        OPTION_QUIT_GAME => {}
+        _ => {}
+    }
 
-    Ok(())
+    execute!(stdout, LeaveAlternateScreen, Show)?;
+
+    Ok(render_again)
 }
 
-fn load_game() -> io::Result<()> {
-    Ok(())
+/// Returns true if menu option "Back" was pressed.
+fn load_game() -> io::Result<bool> {
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, Hide)?;
+
+    let menu_items = vec!["Back"];
+    let mut selected_index = 0;
+    let start_column: u16 = 1;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("No save files found");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    match menu_items[selected_index] {
+        "Back" => {}
+        _ => {}
+    }
+
+    execute!(stdout, LeaveAlternateScreen, Show)?;
+
+    Ok(true)
 }
