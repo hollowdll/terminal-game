@@ -1,5 +1,13 @@
 const MAX_GAME_CHARACTERS: u8 = 5;
 
+pub enum ItemTier {
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+}
+
 /// Main game data.
 pub struct GameData {
     pub game_characters: Vec<CharacterData>,
@@ -72,9 +80,18 @@ pub struct TemporaryStatBoosts {
     pub critical_hit_rate: f64,
 }
 
-pub struct CharacterInventory {}
+pub struct CharacterInventory {
+    pub disposable_items: Vec<DisposableItem>,
+    pub armor_items: Vec<ArmorItem>,
+    pub weapon_items: Vec<WeaponItem>,
+}
 
-pub struct CharacterEquipment {}
+pub struct CharacterEquipment {
+    pub weapon: WeaponItem,
+    pub helmet: ArmorItem,
+    pub torso: ArmorItem,
+    pub leggings: ArmorItem,
+}
 
 pub struct DisposableItem {
     pub name: String,
