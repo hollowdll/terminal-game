@@ -202,3 +202,4 @@ fn menu_new_game() -> io::Result<bool> {
 
     Ok(true)
 }
+
