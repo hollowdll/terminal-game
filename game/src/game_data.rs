@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
 use std::{collections::HashMap, io};
 
-const MAX_GAME_CHARACTERS: u8 = 5;
+// const MAX_GAME_CHARACTERS: u8 = 5;
 const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
 const SUBDIR_NAME: &str = "terminal-rpg-game";
 
