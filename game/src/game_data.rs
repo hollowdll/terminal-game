@@ -18,6 +18,24 @@ pub struct GameData {
     pub achievements: Achievements,
 }
 
+impl GameData {
+    pub fn serialize_to_json(&self) -> io::Result<String> {
+        let json_str = serde_json::to_string(&self)?;
+        Ok(json_str)
+    }
+
+    /// Creates new game data.
+    pub fn new() -> GameData {
+        GameData {
+            game_characters: Vec::new(),
+            achievements: Achievements {
+                alltime_highest_dungeon_floor_record: 0,
+                alltime_highest_character_level: 0,
+            },
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Achievements {
     pub alltime_highest_dungeon_floor_record: u32,
@@ -151,6 +169,18 @@ pub fn load_save_file() -> io::Result<GameData> {
     Ok(game_data)
 }
 
+/// Creates new save file if it doesn't exist.
+pub fn create_savefile_if_not_exists() -> io::Result<()> {
+    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
+    let exists = cache_subdir.join(SAVEFILE_NAME).try_exists()?;
+    if !exists {
+        let game_data = GameData::new();
+        write_save_file(&game_data)?;
+    }
+
+    Ok(())
+}
+
 /// Gets the path to the game's cache subdirectory.
 /// Creates the directory if it doesn't exist.
 pub fn get_cache_subdir(subdir: &str) -> io::Result<PathBuf> {
@@ -164,13 +194,6 @@ pub fn get_cache_subdir(subdir: &str) -> io::Result<PathBuf> {
     fs::create_dir_all(&subdir_path)?;
 
     Ok(subdir_path)
-}
-
-impl GameData {
-    pub fn serialize_to_json(&self) -> io::Result<String> {
-        let json_str = serde_json::to_string(&self)?;
-        Ok(json_str)
-    }
 }
 
 pub fn deserialize_game_data_from_json(json_str: &str) -> io::Result<GameData> {
