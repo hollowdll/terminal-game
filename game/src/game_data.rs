@@ -1,4 +1,8 @@
+use base64::Engine;
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io::Write;
+use std::path::PathBuf;
 
 use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
 use std::{collections::HashMap, io};
@@ -108,22 +112,68 @@ pub struct CharacterCurrency {
     pub gold: u64,
 }
 
-pub fn write_save_file() -> io::Result<()> {
+/// Creates the save file if it doesn't exist and overwrites it.
+pub fn write_save_file(game_data: &GameData) -> io::Result<()> {
+    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
+    let json_str = game_data.serialize_to_json()?;
+    let encoded = base64::prelude::BASE64_STANDARD.encode(&json_str);
+
+    let mut file = fs::File::create(cache_subdir.join(SAVEFILE_NAME))?;
+    file.write_all(encoded.as_bytes())?;
+
     Ok(())
 }
 
-pub fn load_save_file() -> io::Result<()> {
-    Ok(())
+/// Reads the save file and loads the game data.
+pub fn load_save_file() -> io::Result<GameData> {
+    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
+    let content = fs::read_to_string(cache_subdir.join(SAVEFILE_NAME))?;
+    let decoded = match base64::prelude::BASE64_STANDARD.decode(content) {
+        Ok(decoded) => decoded,
+        Err(e) => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("cannot decode base64: {}", e),
+            ))
+        }
+    };
+    let json_str = match String::from_utf8(decoded) {
+        Ok(json_str) => json_str,
+        Err(e) => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("invalid utf8: {}", e),
+            ))
+        }
+    };
+    let game_data = deserialize_game_data_from_json(&json_str)?;
+
+    Ok(game_data)
 }
 
-pub fn create_save_file() -> io::Result<()> {
-    Ok(())
+/// Gets the path to the game's cache subdirectory.
+/// Creates the directory if it doesn't exist.
+pub fn get_cache_subdir(subdir: &str) -> io::Result<PathBuf> {
+    let cache_dir = dirs::cache_dir().ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::NotFound,
+            "cannot determine user's cache directory",
+        )
+    })?;
+    let subdir_path = cache_dir.join(subdir);
+    fs::create_dir_all(&subdir_path)?;
+
+    Ok(subdir_path)
 }
 
-pub fn serialize_game_data() -> io::Result<()> {
-    Ok(())
+impl GameData {
+    pub fn serialize_to_json(&self) -> io::Result<String> {
+        let json_str = serde_json::to_string(&self)?;
+        Ok(json_str)
+    }
 }
 
-pub fn deserialize_game_data() -> io::Result<()> {
-    Ok(())
+pub fn deserialize_game_data_from_json(json_str: &str) -> io::Result<GameData> {
+    let game_data: GameData = serde_json::from_str(json_str)?;
+    Ok(game_data)
 }
