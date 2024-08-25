@@ -1,4 +1,4 @@
-use crate::items::ItemRarity;
+use crate::items::{ArmorItem, DisposableItem, Spell, WeaponItem};
 use std::collections::HashMap;
 
 const MAX_GAME_CHARACTERS: u8 = 5;
@@ -93,34 +93,6 @@ pub struct CharacterEquipment {
     pub leggings: Option<ArmorItem>,
 }
 
-pub struct DisposableItem {
-    pub name: String,
-    pub description: String,
-    pub rarity: ItemRarity,
-    pub amount_in_inventory: u32,
-}
-
-pub struct ArmorItem {
-    pub global_id: String,
-    pub name: String,
-    pub rarity: ItemRarity,
-    pub base_health: u32,
-    pub base_defense: u32,
-}
-
-pub struct WeaponItem {
-    pub global_id: String,
-    pub name: String,
-    pub rarity: ItemRarity,
-    pub base_damage: u32,
-}
-
 pub struct CharacterCurrency {
     pub gold: u64,
-}
-
-pub struct Spell {
-    pub name: String,
-    pub description: String,
-    pub mana_cost: u32,
 }
