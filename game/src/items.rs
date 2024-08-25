@@ -8,6 +8,38 @@ pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
     category: ItemCategory::Disposable,
 };
 
+//---------------//
+// Weapon items //
+//-------------//
+
+pub const ITEM_SWORD: ItemInfo = ItemInfo {
+    name: "Sword",
+    description: "Medium damage, medium critical hit rate.",
+    category: ItemCategory::Weapon,
+};
+
+//--------------//
+// Armor items //
+//------------//
+
+pub const ITEM_ARMOR: ItemInfo = ItemInfo {
+    name: "Armor",
+    description: "A defensive armor.",
+    category: ItemCategory::Armor,
+};
+
+//--------//
+// Rings //
+//------//
+
+pub const ITEM_RING: ItemInfo = ItemInfo {
+    name: "Ring",
+    description: "A ring that increases some stats.",
+    category: ItemCategory::Ring,
+};
+
+//-----------------------------------//
+
 pub struct ItemInfo {
     pub name: &'static str,
     pub description: &'static str,
@@ -34,19 +66,26 @@ pub struct WeaponItem {
     pub global_id: String,
     pub rarity: ItemRarity,
     pub base_damage: u32,
+    pub base_critical_hit_rate: f64,
 }
 
-pub struct Spell {
-    pub name: String,
-    pub description: String,
-    pub mana_cost: u32,
+pub struct RingItem {
+    pub info: ItemInfo,
+    pub global_id: String,
+    pub rarity: ItemRarity,
+    pub base_mana: u32,
 }
 
 pub enum ItemRarity {
+    /// No enchantments.
     Common,
+    /// 1 enchantment.
     Uncommon,
+    /// 2 enchantments.
     Rare,
+    /// 3 enchantments.
     Epic,
+    /// 4 enchantments.
     Legendary,
 }
 
@@ -54,7 +93,7 @@ pub enum ItemCategory {
     Disposable,
     Weapon,
     Armor,
-    Spell,
+    Ring,
 }
 
 /// Returns the effect percentage of potions.

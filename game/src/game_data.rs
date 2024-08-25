@@ -1,4 +1,4 @@
-use crate::items::{ArmorItem, DisposableItem, Spell, WeaponItem};
+use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
 use std::collections::HashMap;
 
 const MAX_GAME_CHARACTERS: u8 = 5;
@@ -79,18 +79,17 @@ pub struct CharacterInventory {
     /// Hashmap key: item name.
     pub disposable_items: HashMap<String, DisposableItem>,
     /// HashMap key: item global id.
-    pub armor_items: HashMap<String, ArmorItem>,
+    pub armors: HashMap<String, ArmorItem>,
     /// HashMap key: item global id.
-    pub weapon_items: HashMap<String, WeaponItem>,
-    /// Hashmap key: spell name.
-    pub spells: HashMap<String, Spell>,
+    pub weapons: HashMap<String, WeaponItem>,
+    /// HashMap key: item global id.
+    pub rings: HashMap<String, RingItem>,
 }
 
 pub struct CharacterEquipment {
     pub weapon: Option<WeaponItem>,
-    pub helmet: Option<ArmorItem>,
-    pub torso: Option<ArmorItem>,
-    pub leggings: Option<ArmorItem>,
+    pub armor: Option<ArmorItem>,
+    pub ring: Option<RingItem>,
 }
 
 pub struct CharacterCurrency {
