@@ -1,20 +1,27 @@
+use serde::{Deserialize, Serialize};
+
 use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
-use std::collections::HashMap;
+use std::{collections::HashMap, io};
 
 const MAX_GAME_CHARACTERS: u8 = 5;
+const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
+const SUBDIR_NAME: &str = "terminal-rpg-game";
 
 /// Main game data.
+#[derive(Serialize, Deserialize)]
 pub struct GameData {
     pub game_characters: Vec<CharacterData>,
     pub achievements: Achievements,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Achievements {
     pub alltime_highest_dungeon_floor_record: u32,
     pub alltime_highest_character_level: u32,
 }
 
 /// Data of a game character.
+#[derive(Serialize, Deserialize)]
 pub struct CharacterData {
     pub metadata: CharacterMetadata,
     pub stats: CharacterStats,
@@ -23,6 +30,7 @@ pub struct CharacterData {
     pub equipment: CharacterEquipment,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CharacterMetadata {
     /// Name of the character.
     pub name: String,
@@ -32,13 +40,13 @@ pub struct CharacterMetadata {
     pub current_time_played_seconds: u64,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CharacterStats {
     pub general_stats: GeneralStats,
     pub combat_stats: CombatStats,
-    pub temp_stats: TemporaryStats,
-    pub temp_stat_boosts: TemporaryStatBoosts,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct GeneralStats {
     pub character_level: u32,
     pub total_exp: u32,
@@ -50,6 +58,7 @@ pub struct GeneralStats {
     pub deaths: u32,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CombatStats {
     pub max_health: u32,
     pub max_mana: u32,
@@ -75,6 +84,7 @@ pub struct TemporaryStatBoosts {
     pub critical_hit_rate: f64,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CharacterInventory {
     /// Hashmap key: item name.
     pub disposable_items: HashMap<String, DisposableItem>,
@@ -86,12 +96,34 @@ pub struct CharacterInventory {
     pub rings: HashMap<String, RingItem>,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CharacterEquipment {
     pub weapon: Option<WeaponItem>,
     pub armor: Option<ArmorItem>,
     pub ring: Option<RingItem>,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct CharacterCurrency {
     pub gold: u64,
+}
+
+pub fn write_save_file() -> io::Result<()> {
+    Ok(())
+}
+
+pub fn load_save_file() -> io::Result<()> {
+    Ok(())
+}
+
+pub fn create_save_file() -> io::Result<()> {
+    Ok(())
+}
+
+pub fn serialize_game_data() -> io::Result<()> {
+    Ok(())
+}
+
+pub fn deserialize_game_data() -> io::Result<()> {
+    Ok(())
 }

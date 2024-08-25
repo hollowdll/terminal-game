@@ -1,10 +1,14 @@
+use std::borrow::Cow;
+
+use serde::{Deserialize, Serialize};
+
 //-------------------//
 // Disposable items //
 //-----------------//
 
 pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
-    name: "Health Potion",
-    description: "A magical potion that restores health points.",
+    name: Cow::Borrowed("Health Potion"),
+    description: Cow::Borrowed("A magical potion that restores health points."),
     category: ItemCategory::Disposable,
 };
 
@@ -13,8 +17,8 @@ pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
 //-------------//
 
 pub const ITEM_SWORD: ItemInfo = ItemInfo {
-    name: "Sword",
-    description: "Medium damage, medium critical hit rate.",
+    name: Cow::Borrowed("Sword"),
+    description: Cow::Borrowed("Medium damage, medium critical hit rate."),
     category: ItemCategory::Weapon,
 };
 
@@ -23,8 +27,8 @@ pub const ITEM_SWORD: ItemInfo = ItemInfo {
 //------------//
 
 pub const ITEM_ARMOR: ItemInfo = ItemInfo {
-    name: "Armor",
-    description: "A defensive armor.",
+    name: Cow::Borrowed("Armor"),
+    description: Cow::Borrowed("A defensive armor."),
     category: ItemCategory::Armor,
 };
 
@@ -33,19 +37,21 @@ pub const ITEM_ARMOR: ItemInfo = ItemInfo {
 //------//
 
 pub const ITEM_RING: ItemInfo = ItemInfo {
-    name: "Ring",
-    description: "A ring that increases some stats.",
+    name: Cow::Borrowed("Ring"),
+    description: Cow::Borrowed("A ring that increases some stats."),
     category: ItemCategory::Ring,
 };
 
 //-----------------------------------//
 
+#[derive(Serialize, Deserialize)]
 pub struct ItemInfo {
-    pub name: &'static str,
-    pub description: &'static str,
+    pub name: Cow<'static, str>,
+    pub description: Cow<'static, str>,
     pub category: ItemCategory,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct DisposableItem {
     pub info: ItemInfo,
     pub effect: String,
@@ -53,6 +59,7 @@ pub struct DisposableItem {
     pub amount_in_inventory: u32,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct ArmorItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -61,6 +68,7 @@ pub struct ArmorItem {
     pub base_defense: u32,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct WeaponItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -69,6 +77,7 @@ pub struct WeaponItem {
     pub base_critical_hit_rate: f64,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct RingItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -76,6 +85,7 @@ pub struct RingItem {
     pub base_mana: u32,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum ItemRarity {
     /// No enchantments.
     Common,
@@ -89,6 +99,7 @@ pub enum ItemRarity {
     Legendary,
 }
 
+#[derive(Serialize, Deserialize)]
 pub enum ItemCategory {
     Disposable,
     Weapon,
