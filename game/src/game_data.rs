@@ -1,12 +1,7 @@
-const MAX_GAME_CHARACTERS: u8 = 5;
+use crate::items::ItemRarity;
+use std::collections::HashMap;
 
-pub enum ItemTier {
-    Common,
-    Uncommon,
-    Rare,
-    Epic,
-    Legendary,
-}
+const MAX_GAME_CHARACTERS: u8 = 5;
 
 /// Main game data.
 pub struct GameData {
@@ -81,31 +76,42 @@ pub struct TemporaryStatBoosts {
 }
 
 pub struct CharacterInventory {
-    pub disposable_items: Vec<DisposableItem>,
-    pub armor_items: Vec<ArmorItem>,
-    pub weapon_items: Vec<WeaponItem>,
+    /// Hashmap key: item name.
+    pub disposable_items: HashMap<String, DisposableItem>,
+    /// HashMap key: item global id.
+    pub armor_items: HashMap<String, ArmorItem>,
+    /// HashMap key: item global id.
+    pub weapon_items: HashMap<String, WeaponItem>,
+    /// Hashmap key: spell name.
+    pub spells: HashMap<String, Spell>,
 }
 
 pub struct CharacterEquipment {
-    pub weapon: WeaponItem,
-    pub helmet: ArmorItem,
-    pub torso: ArmorItem,
-    pub leggings: ArmorItem,
+    pub weapon: Option<WeaponItem>,
+    pub helmet: Option<ArmorItem>,
+    pub torso: Option<ArmorItem>,
+    pub leggings: Option<ArmorItem>,
 }
 
 pub struct DisposableItem {
     pub name: String,
     pub description: String,
+    pub rarity: ItemRarity,
+    pub amount_in_inventory: u32,
 }
 
 pub struct ArmorItem {
+    pub global_id: String,
     pub name: String,
+    pub rarity: ItemRarity,
     pub base_health: u32,
     pub base_defense: u32,
 }
 
 pub struct WeaponItem {
+    pub global_id: String,
     pub name: String,
+    pub rarity: ItemRarity,
     pub base_damage: u32,
 }
 
