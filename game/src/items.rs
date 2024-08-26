@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 //-------------------//
 // Disposable items //
@@ -118,5 +119,15 @@ pub fn get_potion_effect_percentage(rarity: ItemRarity) -> i32 {
         ItemRarity::Rare => 50,
         ItemRarity::Epic => 75,
         ItemRarity::Legendary => 100,
+    }
+}
+
+pub fn create_starter_weapon() -> WeaponItem {
+    WeaponItem {
+        info: ITEM_SWORD,
+        global_id: Uuid::new_v4().to_string(),
+        rarity: ItemRarity::Common,
+        base_damage: 10,
+        base_critical_hit_rate: 0.15,
     }
 }

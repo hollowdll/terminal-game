@@ -76,7 +76,7 @@ impl CharacterData {
                     defense: 0,
                     damage: 1,
                     critical_damage_multiplier: 2.0,
-                    critical_hit_rate: 0.15,
+                    critical_hit_rate: 0.0,
                 },
             },
             currency: CharacterCurrency { gold: 0 },

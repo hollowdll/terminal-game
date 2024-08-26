@@ -1,3 +1,19 @@
+use crate::{
+    game_data::{Achievements, CharacterData},
+    items::WeaponItem,
+};
+
+pub struct Player {
+    character: CharacterData,
+    achievements: Achievements,
+    session_data: SessionData,
+}
+
+impl Player {
+    pub fn give_weapon(_weapon: &WeaponItem) {}
+    pub fn equip_weapon(_weapon: &WeaponItem) {}
+}
+
 pub struct SessionData {
     pub temp_stats: TemporaryStats,
     pub temp_stat_boosts: TemporaryStatBoosts,
