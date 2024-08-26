@@ -1,5 +1,6 @@
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use game::{
+    config::GameConfig,
     game_data::{create_savefile_if_not_exists, load_save_file},
     main_menu::main_menu,
 };
@@ -11,6 +12,7 @@ fn main() -> io::Result<()> {
 }
 
 fn run() -> io::Result<()> {
+    let _config = GameConfig::new();
     create_savefile_if_not_exists()?;
     let _game_data = load_save_file()?;
 

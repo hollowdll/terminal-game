@@ -1,4 +1,5 @@
 use base64::Engine;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::Write;
@@ -7,7 +8,6 @@ use std::path::PathBuf;
 use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
 use std::{collections::HashMap, io};
 
-// const MAX_GAME_CHARACTERS: u8 = 5;
 const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
 const SUBDIR_NAME: &str = "terminal-rpg-game";
 
@@ -52,14 +52,55 @@ pub struct CharacterData {
     pub equipment: CharacterEquipment,
 }
 
+impl CharacterData {
+    pub fn new(character_name: &str) -> Self {
+        Self {
+            metadata: CharacterMetadata {
+                name: character_name.to_owned(),
+                created_at: Utc::now().timestamp(),
+            },
+            stats: CharacterStats {
+                general_stats: GeneralStats {
+                    character_level: 1,
+                    total_exp: 0,
+                    current_exp: 0,
+                    required_exp: 100,
+                    current_dungeon_floor: 1,
+                    highest_dungeon_floor_achieved: 1,
+                    highest_character_level_achieved: 1,
+                    deaths: 0,
+                },
+                combat_stats: CombatStats {
+                    max_health: 100,
+                    max_mana: 100,
+                    defense: 0,
+                    damage: 1,
+                    critical_damage_multiplier: 2.0,
+                    critical_hit_rate: 0.15,
+                },
+            },
+            currency: CharacterCurrency { gold: 0 },
+            inventory: CharacterInventory {
+                disposable_items: HashMap::new(),
+                armors: HashMap::new(),
+                weapons: HashMap::new(),
+                rings: HashMap::new(),
+            },
+            equipment: CharacterEquipment {
+                weapon: None,
+                armor: None,
+                ring: None,
+            },
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct CharacterMetadata {
     /// Name of the character.
     pub name: String,
     /// Unix timestamp when the character was created in seconds.
-    pub created_at: u64,
-    /// Current time played since last death in seconds.
-    pub current_time_played_seconds: u64,
+    pub created_at: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -82,22 +123,6 @@ pub struct GeneralStats {
 
 #[derive(Serialize, Deserialize)]
 pub struct CombatStats {
-    pub max_health: u32,
-    pub max_mana: u32,
-    pub defense: u32,
-    pub damage: u32,
-    pub critical_damage_multiplier: f64,
-    pub critical_hit_rate: f64,
-}
-
-/// Don't save in savefile.
-pub struct TemporaryStats {
-    pub health: u32,
-    pub mana: u32,
-}
-
-/// Don't save in savefile.
-pub struct TemporaryStatBoosts {
     pub max_health: u32,
     pub max_mana: u32,
     pub defense: u32,
