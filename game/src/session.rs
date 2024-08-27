@@ -42,8 +42,24 @@ impl PlayerCharacter {
         }
     }
 
-    pub fn give_weapon(_weapon: &WeaponItem) {}
-    pub fn equip_weapon(_weapon: &WeaponItem) {}
+    pub fn give_weapon(&mut self, weapon: WeaponItem) {
+        self.data
+            .inventory
+            .weapons
+            .insert(weapon.global_id.clone(), weapon);
+    }
+
+    /// The returned bool is true if the weapon is in the inventory and it was equipped.
+    /// If the item doesn't exist in the inventory, the returned bool is false.
+    pub fn equip_weapon(&mut self, weapon_id: &str) -> bool {
+        match self.data.inventory.weapons.get(weapon_id) {
+            Some(weapon) => {
+                self.data.equipment.weapon = Some(weapon.clone());
+                return true;
+            }
+            None => return false,
+        }
+    }
 }
 
 pub struct TemporaryStats {
