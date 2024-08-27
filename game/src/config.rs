@@ -1,7 +1,7 @@
-const MAX_GAME_CHARACTERS: u8 = 5;
+const MAX_GAME_CHARACTERS: usize = 5;
 
 pub struct GameConfig {
-    pub max_game_characters: u8,
+    pub max_game_characters: usize,
 }
 
 impl GameConfig {

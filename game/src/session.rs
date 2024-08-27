@@ -42,11 +42,11 @@ impl PlayerCharacter {
         }
     }
 
-    pub fn give_weapon(&mut self, weapon: WeaponItem) {
+    pub fn give_weapon(&mut self, weapon: &WeaponItem) {
         self.data
             .inventory
             .weapons
-            .insert(weapon.global_id.clone(), weapon);
+            .insert(weapon.global_id.clone(), weapon.clone());
     }
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.

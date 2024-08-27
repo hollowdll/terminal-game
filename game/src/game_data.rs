@@ -15,7 +15,7 @@ const SUBDIR_NAME: &str = "terminal-rpg-game";
 #[derive(Serialize, Deserialize)]
 pub struct GameData {
     /// HashMap key: character name.
-    pub game_characters: HashMap<String, CharacterData>,
+    pub characters: HashMap<String, CharacterData>,
 }
 
 impl GameData {
@@ -27,7 +27,7 @@ impl GameData {
     /// Creates new game data.
     pub fn new() -> GameData {
         GameData {
-            game_characters: HashMap::new(),
+            characters: HashMap::new(),
         }
     }
 }

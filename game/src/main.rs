@@ -3,6 +3,7 @@ use game::{
     config::GameConfig,
     game_data::{create_savefile_if_not_exists, load_save_file},
     main_menu::main_menu,
+    session::Player,
 };
 use std::io;
 
@@ -14,7 +15,8 @@ fn main() -> io::Result<()> {
 fn run() -> io::Result<()> {
     let _config = GameConfig::new();
     create_savefile_if_not_exists()?;
-    let _game_data = load_save_file()?;
+    let game_data = load_save_file()?;
+    let _player = Player::new(game_data);
 
     enable_raw_mode()?;
     loop {
