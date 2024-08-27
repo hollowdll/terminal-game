@@ -52,14 +52,14 @@ pub const ITEM_RING: ItemInfo = ItemInfo {
 
 //-----------------------------------//
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ItemInfo {
     pub name: Cow<'static, str>,
     pub description: Cow<'static, str>,
     pub category: ItemCategory,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct DisposableItem {
     pub info: ItemInfo,
     pub effect: String,
@@ -67,7 +67,7 @@ pub struct DisposableItem {
     pub amount_in_inventory: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ArmorItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -76,7 +76,7 @@ pub struct ArmorItem {
     pub base_defense: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct WeaponItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -85,7 +85,7 @@ pub struct WeaponItem {
     pub base_critical_hit_rate: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RingItem {
     pub info: ItemInfo,
     pub global_id: String,
@@ -101,7 +101,7 @@ pub struct ItemRarityDropRate {
     pub legendary: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum ItemRarity {
     /// No enchantments.
     Common,
@@ -115,7 +115,7 @@ pub enum ItemRarity {
     Legendary,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub enum ItemCategory {
     Disposable,
     Weapon,

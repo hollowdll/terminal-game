@@ -16,7 +16,6 @@ const SUBDIR_NAME: &str = "terminal-rpg-game";
 pub struct GameData {
     /// HashMap key: character name.
     pub game_characters: HashMap<String, CharacterData>,
-    pub achievements: Achievements,
 }
 
 impl GameData {
@@ -29,10 +28,6 @@ impl GameData {
     pub fn new() -> GameData {
         GameData {
             game_characters: HashMap::new(),
-            achievements: Achievements {
-                alltime_highest_dungeon_floor_record: 0,
-                alltime_highest_character_level: 0,
-            },
         }
     }
 }
@@ -44,7 +39,7 @@ pub struct Achievements {
 }
 
 /// Data of a game character.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterData {
     pub metadata: CharacterMetadata,
     pub stats: CharacterStats,
@@ -96,7 +91,7 @@ impl CharacterData {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterMetadata {
     /// Name of the character.
     pub name: String,
@@ -104,13 +99,13 @@ pub struct CharacterMetadata {
     pub created_at: i64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterStats {
     pub general_stats: GeneralStats,
     pub combat_stats: CombatStats,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct GeneralStats {
     pub character_level: u32,
     pub total_exp: u32,
@@ -122,7 +117,7 @@ pub struct GeneralStats {
     pub deaths: u32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CombatStats {
     pub max_health: u32,
     pub max_mana: u32,
@@ -132,7 +127,7 @@ pub struct CombatStats {
     pub critical_hit_rate: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterInventory {
     /// Hashmap key: item name.
     pub disposable_items: HashMap<String, DisposableItem>,
@@ -144,14 +139,14 @@ pub struct CharacterInventory {
     pub rings: HashMap<String, RingItem>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterEquipment {
     pub weapon: Option<WeaponItem>,
     pub armor: Option<ArmorItem>,
     pub ring: Option<RingItem>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterCurrency {
     pub gold: u64,
 }
