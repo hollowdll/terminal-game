@@ -1,7 +1,14 @@
-use std::borrow::Cow;
-
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use uuid::Uuid;
+
+pub const ITEM_RARITY_DROP_RATE: ItemRarityDropRate = ItemRarityDropRate {
+    common: 0.40,
+    uncommon: 0.25,
+    rare: 0.20,
+    epic: 0.10,
+    legendary: 0.05,
+};
 
 //-------------------//
 // Disposable items //
@@ -84,6 +91,14 @@ pub struct RingItem {
     pub global_id: String,
     pub rarity: ItemRarity,
     pub base_mana: u32,
+}
+
+pub struct ItemRarityDropRate {
+    pub common: f64,
+    pub uncommon: f64,
+    pub rare: f64,
+    pub epic: f64,
+    pub legendary: f64,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -14,7 +14,8 @@ const SUBDIR_NAME: &str = "terminal-rpg-game";
 /// Main game data.
 #[derive(Serialize, Deserialize)]
 pub struct GameData {
-    pub game_characters: Vec<CharacterData>,
+    /// HashMap key: character name.
+    pub game_characters: HashMap<String, CharacterData>,
     pub achievements: Achievements,
 }
 
@@ -27,7 +28,7 @@ impl GameData {
     /// Creates new game data.
     pub fn new() -> GameData {
         GameData {
-            game_characters: Vec::new(),
+            game_characters: HashMap::new(),
             achievements: Achievements {
                 alltime_highest_dungeon_floor_record: 0,
                 alltime_highest_character_level: 0,
