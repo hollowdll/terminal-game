@@ -1,6 +1,8 @@
+use std::io;
+
 use crate::{
     config::GameConfig,
-    game_data::CharacterData,
+    game_data::{write_save_file, CharacterData},
     items::create_starter_weapon,
     session::{Player, PlayerCharacter},
 };
@@ -24,4 +26,15 @@ pub fn create_new_character(player: &mut Player, character_name: &str) {
         .data
         .characters
         .insert(character_name.to_owned(), character);
+}
+
+pub fn save_game(player: &mut Player) -> io::Result<()> {
+    if let Some(player_character) = &player.character {
+        player.data.characters.insert(
+            player_character.data.metadata.name.clone(),
+            player_character.data.clone(),
+        );
+    }
+    write_save_file(&player.data)?;
+    Ok(())
 }
