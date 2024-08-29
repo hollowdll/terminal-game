@@ -13,14 +13,20 @@ fn main() -> io::Result<()> {
 }
 
 fn run() -> io::Result<()> {
-    let _config = GameConfig::new();
+    let cfg = GameConfig::new();
     create_savefile_if_not_exists()?;
-    let game_data = load_save_file()?;
-    let _player = Player::new(game_data);
+    let game_data = match load_save_file() {
+        Ok(game_data) => game_data,
+        Err(e) => {
+            eprintln!("Failed to load save file, it may be corrupted");
+            return Err(e);
+        }
+    };
+    let mut player = Player::new(game_data);
 
     enable_raw_mode()?;
     loop {
-        if let Ok(rerender) = main_menu() {
+        if let Ok(rerender) = main_menu(&mut player, &cfg) {
             if !rerender {
                 break;
             }
