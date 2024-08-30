@@ -41,7 +41,7 @@ fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
 /// Returned bool is true if the menu should be rerendered.
 pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, Hide)?;
+    execute!(stdout, Clear(ClearType::All))?;
 
     let menu_items = vec![OPTION_LOAD_GAME, OPTION_NEW_GAME, OPTION_QUIT_GAME];
     let mut selected_index = 0;
@@ -83,7 +83,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     match menu_items[selected_index] {
         OPTION_LOAD_GAME => {
-            execute!(stdout, LeaveAlternateScreen, Show)?;
+            // execute!(stdout, LeaveAlternateScreen, Show)?;
             if let Ok(go_back) = menu_load_game() {
                 if go_back {
                     rerender = true;
@@ -103,7 +103,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
         _ => {}
     }
 
-    execute!(stdout, LeaveAlternateScreen, Show)?;
+    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(rerender)
 }
@@ -111,7 +111,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 /// Returns true if menu option "Back" was selected.
 fn menu_load_game() -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, Hide)?;
+    execute!(stdout, Clear(ClearType::All))?;
 
     let menu_items = vec!["Back"];
     let mut selected_index = 0;
@@ -156,7 +156,7 @@ fn menu_load_game() -> io::Result<bool> {
         _ => {}
     }
 
-    execute!(stdout, LeaveAlternateScreen, Show)?;
+    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(true)
 }
@@ -164,19 +164,19 @@ fn menu_load_game() -> io::Result<bool> {
 /// Returns true if menu option "Back" was selected.
 fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, Hide)?;
+    execute!(stdout, Clear(ClearType::All))?;
 
     let menu_items = vec!["Back"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
 
     if !max_game_characters_reached(player, cfg) {
-        execute!(stdout, LeaveAlternateScreen, Show)?;
+        // execute!(stdout, LeaveAlternateScreen, Show)?;
         match menu_create_character(player) {
             Ok(character_created) => {
                 if character_created {
                     menu_tutorial()?;
-                    execute!(stdout, LeaveAlternateScreen, Show)?;
+                    // execute!(stdout, LeaveAlternateScreen, Show)?;
                     return Ok(false);
                 } else {
                     return Ok(true);
@@ -225,14 +225,14 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
         _ => {}
     }
 
-    execute!(stdout, LeaveAlternateScreen, Show)?;
+    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(true)
 }
 
 pub fn menu_create_character(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
+    execute!(stdout, Clear(ClearType::All), Show)?;
 
     let menu_items = vec!["Yes", "No"];
     let mut selected_index = 0;
@@ -297,14 +297,14 @@ pub fn menu_create_character(player: &mut Player) -> io::Result<bool> {
         _ => {}
     }
 
-    execute!(stdout, LeaveAlternateScreen)?;
+    // execute!(stdout, LeaveAlternateScreen)?;
 
     Ok(character_created)
 }
 
 pub fn menu_tutorial() -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, Hide)?;
+    execute!(stdout, Clear(ClearType::All))?;
 
     let menu_items = vec!["Skip tutorial"];
     let mut selected_index = 0;
@@ -350,7 +350,7 @@ pub fn menu_tutorial() -> io::Result<bool> {
         _ => {}
     }
 
-    execute!(stdout, LeaveAlternateScreen, Show)?;
+    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(true)
 }

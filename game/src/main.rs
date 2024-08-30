@@ -1,4 +1,11 @@
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use crossterm::{
+    cursor::{Hide, Show},
+    execute,
+    terminal::{
+        disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
+        LeaveAlternateScreen,
+    },
+};
 use game::{
     config::GameConfig,
     game_data::{create_savefile_if_not_exists, load_save_file},
@@ -8,7 +15,11 @@ use game::{
 use std::io;
 
 fn main() -> io::Result<()> {
-    run()?;
+    if let Err(e) = run() {
+        let mut stdout = io::stdout();
+        execute!(stdout, LeaveAlternateScreen, Show, Clear(ClearType::All))?;
+        eprintln!("Error: {}", e);
+    }
     Ok(())
 }
 
@@ -25,6 +36,9 @@ fn run() -> io::Result<()> {
     let mut player = Player::new(game_data);
 
     enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, Hide)?;
+
     loop {
         if let Ok(rerender) = main_menu(&mut player, &cfg) {
             if !rerender {
@@ -34,6 +48,8 @@ fn run() -> io::Result<()> {
             break;
         }
     }
+
+    execute!(stdout, LeaveAlternateScreen, Show)?;
     disable_raw_mode()?;
     Ok(())
 }
