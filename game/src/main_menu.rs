@@ -2,10 +2,7 @@ use crossterm::{
     cursor::{self, Hide, Show},
     event::{self, Event, KeyCode, KeyEvent},
     execute,
-    terminal::{
-        disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
-        LeaveAlternateScreen,
-    },
+    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
 };
 use std::io::{self, Write};
 
@@ -13,6 +10,7 @@ use crate::{
     config::GameConfig,
     game::{create_new_game_character, max_game_characters_reached, save_game},
     session::Player,
+    validation::{character_name_already_exists, character_name_too_long},
 };
 
 const OPTION_LOAD_GAME: &str = "Load Game";
@@ -172,7 +170,7 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     if !max_game_characters_reached(player, cfg) {
         // execute!(stdout, LeaveAlternateScreen, Show)?;
-        match menu_create_character(player) {
+        match menu_create_character(player, cfg) {
             Ok(character_created) => {
                 if character_created {
                     menu_tutorial()?;
@@ -230,26 +228,48 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     Ok(true)
 }
 
-pub fn menu_create_character(player: &mut Player) -> io::Result<bool> {
+pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All), Show)?;
 
     let menu_items = vec!["Yes", "No"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
+    let mut enter_name_column: u16 = 2;
     let mut character_created = false;
+    let mut msg = "";
+    let mut name = String::new();
 
     execute!(stdout, cursor::MoveTo(0, 0))?;
     println!("Create a new character");
     execute!(stdout, cursor::MoveTo(0, 1))?;
     disable_raw_mode()?;
 
-    print!("Enter name: ");
-    stdout.flush()?;
-    let mut name = String::new();
-    io::stdin().read_line(&mut name)?;
-    name = name.trim().to_string();
+    loop {
+        let mut is_invalid_name = false;
+        print!("Enter name: ");
+        stdout.flush()?;
+        io::stdin().read_line(&mut name)?;
+        name = name.trim().to_string();
 
+        if character_name_too_long(cfg, &name) {
+            msg = "Name is too long";
+            is_invalid_name = true;
+        } else if character_name_already_exists(player, &name) {
+            msg = "Character with the name already exists";
+            is_invalid_name = true;
+        }
+
+        if is_invalid_name {
+            execute!(stdout, cursor::MoveTo(0, enter_name_column))?;
+            println!("{}", msg);
+            execute!(stdout, cursor::MoveTo(0, enter_name_column + 1))?;
+            enter_name_column += 2;
+            name = "".to_string();
+        } else {
+            break;
+        }
+    }
     enable_raw_mode()?;
     execute!(stdout, Clear(ClearType::All), Hide)?;
 
