@@ -122,7 +122,7 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
     for (key, val) in &player.data.characters {
         menu_items.push(format!(
-            "{} (Level {}, Dungeon floor {})",
+            "{} (Level {}, Dungeon Floor {})",
             key,
             val.stats.general_stats.character_level,
             val.stats.general_stats.current_dungeon_floor
