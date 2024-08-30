@@ -82,7 +82,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     match menu_items[selected_index] {
         OPTION_LOAD_GAME => {
             // execute!(stdout, LeaveAlternateScreen, Show)?;
-            if let Ok(go_back) = menu_load_game() {
+            if let Ok(go_back) = menu_load_game(player) {
                 if go_back {
                     rerender = true;
                 }
@@ -107,17 +107,36 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 }
 
 /// Returns true if menu option "Back" was selected.
-fn menu_load_game() -> io::Result<bool> {
+fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Back"];
+    let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 1;
+    let mut no_characters = false;
+
+    if player.data.characters.is_empty() {
+        no_characters = true;
+    }
+
+    for (key, val) in &player.data.characters {
+        menu_items.push(format!(
+            "{} (Level {}, Dungeon floor {})",
+            key,
+            val.stats.general_stats.character_level,
+            val.stats.general_stats.current_dungeon_floor
+        ))
+    }
+    menu_items.push("Back".to_string());
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("No characters found");
+        if no_characters {
+            println!("No characters found");
+        } else {
+            println!("Select a character");
+        }
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
         for (i, item) in menu_items.iter().enumerate() {
@@ -149,12 +168,10 @@ fn menu_load_game() -> io::Result<bool> {
         }
     }
 
-    match menu_items[selected_index] {
+    match menu_items[selected_index].as_str() {
         "Back" => {}
         _ => {}
     }
-
-    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(true)
 }
