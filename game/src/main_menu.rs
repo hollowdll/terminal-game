@@ -7,10 +7,11 @@ use crossterm::{
 use std::io::{self, Write};
 
 use crate::{
-    character::{create_new_game_character, max_game_characters_reached},
+    character::{create_new_game_character, delete_game_character, max_game_characters_reached},
     config::GameConfig,
     game::save_game,
     session::Player,
+    util::extract_first_word,
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
 
@@ -114,7 +115,7 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
-    let start_column: u16 = 1;
+    let mut start_column: u16 = 1;
     let mut no_characters = false;
 
     if player.data.characters.is_empty() {
@@ -135,9 +136,82 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if no_characters {
             println!("No characters found");
+            execute!(stdout, cursor::MoveTo(0, 1))?;
         } else {
+            start_column = 2;
+            println!("Options (D = Delete character)");
+            execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("Select a character");
+            execute!(stdout, cursor::MoveTo(0, 2))?;
         }
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                KeyCode::Char('d') | KeyCode::Char('D') => {
+                    match menu_items[selected_index].as_str() {
+                        "Back" => {}
+                        _ => {
+                            let name = extract_first_word(menu_items[selected_index].as_str());
+                            let deleted = menu_confirm_character_deletion(player, name)?;
+                            if deleted {
+                                menu_items.remove(selected_index);
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    match menu_items[selected_index].as_str() {
+        "Back" => {}
+        _ => {}
+    }
+
+    Ok(true)
+}
+
+// fn menu_load_game_select_character()
+
+fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) -> io::Result<bool> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let menu_items = vec!["No", "Yes"];
+    let mut selected_index = 0;
+    let start_column: u16 = 1;
+    let mut character_deleted = false;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!(
+            "Delete character {}? It cannot be restored once deleted.",
+            character_name
+        );
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
         for (i, item) in menu_items.iter().enumerate() {
@@ -169,15 +243,18 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
         }
     }
 
-    match menu_items[selected_index].as_str() {
-        "Back" => {}
+    match menu_items[selected_index] {
+        "Yes" => {
+            delete_game_character(player, character_name);
+            save_game(player)?;
+            character_deleted = true;
+        }
+        "No" => {}
         _ => {}
     }
 
-    Ok(true)
+    Ok(character_deleted)
 }
-
-// fn menu_load_game_select_character()
 
 /// Returns true if menu option "Back" was selected.
 fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
