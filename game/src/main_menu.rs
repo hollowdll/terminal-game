@@ -7,10 +7,11 @@ use crossterm::{
 use std::io::{self, Write};
 
 use crate::{
+    character::{create_new_game_character, max_game_characters_reached},
     config::GameConfig,
-    game::{create_new_game_character, max_game_characters_reached, save_game},
+    game::save_game,
     session::Player,
-    validation::{character_name_already_exists, character_name_too_long},
+    validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
 
 const OPTION_LOAD_GAME: &str = "Load Game";
@@ -176,6 +177,8 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     Ok(true)
 }
 
+// fn menu_load_game_select_character()
+
 /// Returns true if menu option "Back" was selected.
 fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
@@ -269,7 +272,10 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
         io::stdin().read_line(&mut name)?;
         name = name.trim().to_string();
 
-        if character_name_too_long(cfg, &name) {
+        if character_name_empty(&name) {
+            msg = "Name cannot be blank";
+            is_invalid_name = true;
+        } else if character_name_too_long(cfg, &name) {
             msg = "Name is too long";
             is_invalid_name = true;
         } else if character_name_already_exists(player, &name) {
