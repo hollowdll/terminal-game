@@ -8,6 +8,19 @@ impl DungeonFloor {
     }
 }
 
+pub struct DungeonRoom {
+    pub kind: DungeonRoomKind,
+}
+
+pub enum DungeonRoomKind {
+    Start,
+    Boss,
+    OneWay,
+    TwoWay,
+    ThreeWay,
+    FourWay,
+}
+
 pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     return DungeonFloor::new(floor);
 }
