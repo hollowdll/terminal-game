@@ -4,6 +4,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum GameError {
     LoadSaveFile,
+    NoSelectedCharacter,
 }
 
 impl fmt::Display for GameError {
@@ -13,6 +14,7 @@ impl fmt::Display for GameError {
             "{}",
             match self {
                 Self::LoadSaveFile => "Failed to load save file, it may be corrupted",
+                Self::NoSelectedCharacter => "No selected character",
             }
         )
     }

@@ -96,6 +96,12 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             if let Ok(go_back) = menu_new_game(player, cfg) {
                 if go_back {
                     rerender = true;
+                } else {
+                    if let Ok(go_back) = menu_start_dungeon_floor(player) {
+                        if go_back {
+                            rerender = true;
+                        }
+                    }
                 }
             }
         }
@@ -271,7 +277,6 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             Ok(character_created) => {
                 if character_created {
                     menu_tutorial()?;
-                    // execute!(stdout, LeaveAlternateScreen, Show)?;
                     return Ok(false);
                 } else {
                     return Ok(true);
@@ -422,20 +427,18 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
     Ok(character_created)
 }
 
-pub fn menu_tutorial() -> io::Result<bool> {
+pub fn menu_tutorial() -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Skip tutorial"];
+    let menu_items = vec!["Continue", "Skip Tutorial"];
     let mut selected_index = 0;
-    let start_column: u16 = 2;
+    let start_column: u16 = 1;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("New character created!");
+        println!("(Tutorial)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!("Tutorial here");
-        execute!(stdout, cursor::MoveTo(0, 2))?;
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -467,10 +470,75 @@ pub fn menu_tutorial() -> io::Result<bool> {
     }
 
     match menu_items[selected_index] {
+        "Skip Tutorial" => {}
         _ => {}
     }
 
-    // execute!(stdout, LeaveAlternateScreen, Show)?;
+    Ok(())
+}
+
+/// Returns true if should go back to main menu.
+fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let menu_items = vec!["Start Dungeon Floor", "Save and Quit"];
+    let mut selected_index = 0;
+    let start_column: u16 = 1;
+    let character = match &player.character {
+        Some(character) => character,
+        None => {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "No selected character",
+            ))
+        }
+    };
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!(
+            "Character: {} (Level {}, Dungeon Floor {})",
+            character.data.metadata.name,
+            character.data.stats.general_stats.character_level,
+            character.data.stats.general_stats.current_dungeon_floor
+        );
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    match menu_items[selected_index] {
+        "Start Dungeon Floor" => {}
+        "Save and Quit" => {}
+        _ => {}
+    }
 
     Ok(true)
 }
