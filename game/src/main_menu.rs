@@ -83,7 +83,6 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     match menu_items[selected_index] {
         OPTION_LOAD_GAME => {
-            // execute!(stdout, LeaveAlternateScreen, Show)?;
             if let Ok(go_back) = menu_load_game(player) {
                 if go_back {
                     rerender = true;
@@ -91,8 +90,6 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             }
         }
         OPTION_NEW_GAME => {
-            // execute!(stdout, LeaveAlternateScreen, Show)?;
-            // execute!(stdout, EnterAlternateScreen, Hide)?;
             if let Ok(go_back) = menu_new_game(player, cfg) {
                 if go_back {
                     rerender = true;
@@ -108,8 +105,6 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
         OPTION_QUIT_GAME => {}
         _ => {}
     }
-
-    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(rerender)
 }
@@ -201,8 +196,6 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     Ok(true)
 }
 
-// fn menu_load_game_select_character()
-
 fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
@@ -272,7 +265,6 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let start_column: u16 = 1;
 
     if !max_game_characters_reached(player, cfg) {
-        // execute!(stdout, LeaveAlternateScreen, Show)?;
         match menu_create_character(player, cfg) {
             Ok(character_created) => {
                 if character_created {
@@ -324,8 +316,6 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
         "Back" => {}
         _ => {}
     }
-
-    // execute!(stdout, LeaveAlternateScreen, Show)?;
 
     Ok(true)
 }
@@ -421,8 +411,6 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
         "No" => {}
         _ => {}
     }
-
-    // execute!(stdout, LeaveAlternateScreen)?;
 
     Ok(character_created)
 }
