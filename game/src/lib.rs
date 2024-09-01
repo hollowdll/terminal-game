@@ -1,5 +1,7 @@
 pub mod character;
 pub mod config;
+pub mod dungeon;
+pub mod enemy;
 pub mod error;
 pub mod game;
 pub mod game_data;
