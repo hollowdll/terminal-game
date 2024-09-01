@@ -153,11 +153,11 @@ pub struct CharacterCurrency {
 
 /// Creates the save file if it doesn't exist and overwrites it.
 pub fn write_save_file(game_data: &GameData) -> io::Result<()> {
-    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
+    let subdir = get_config_subdir(SUBDIR_NAME)?;
     let json_str = game_data.serialize_to_json()?;
     let encoded = base64::prelude::BASE64_STANDARD.encode(&json_str);
 
-    let mut file = fs::File::create(cache_subdir.join(SAVEFILE_NAME))?;
+    let mut file = fs::File::create(subdir.join(SAVEFILE_NAME))?;
     file.write_all(encoded.as_bytes())?;
 
     Ok(())
@@ -165,8 +165,8 @@ pub fn write_save_file(game_data: &GameData) -> io::Result<()> {
 
 /// Reads the save file and loads the game data.
 pub fn load_save_file() -> io::Result<GameData> {
-    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
-    let content = fs::read_to_string(cache_subdir.join(SAVEFILE_NAME))?;
+    let subdir = get_config_subdir(SUBDIR_NAME)?;
+    let content = fs::read_to_string(subdir.join(SAVEFILE_NAME))?;
     let decoded = match base64::prelude::BASE64_STANDARD.decode(content) {
         Ok(decoded) => decoded,
         Err(e) => {
@@ -192,8 +192,8 @@ pub fn load_save_file() -> io::Result<GameData> {
 
 /// Creates new save file if it doesn't exist.
 pub fn create_savefile_if_not_exists() -> io::Result<()> {
-    let cache_subdir = get_cache_subdir(SUBDIR_NAME)?;
-    let exists = cache_subdir.join(SAVEFILE_NAME).try_exists()?;
+    let subdir = get_config_subdir(SUBDIR_NAME)?;
+    let exists = subdir.join(SAVEFILE_NAME).try_exists()?;
     if !exists {
         let game_data = GameData::new();
         write_save_file(&game_data)?;
@@ -204,14 +204,14 @@ pub fn create_savefile_if_not_exists() -> io::Result<()> {
 
 /// Gets the path to the game's cache subdirectory.
 /// Creates the directory if it doesn't exist.
-pub fn get_cache_subdir(subdir: &str) -> io::Result<PathBuf> {
-    let cache_dir = dirs::cache_dir().ok_or_else(|| {
+pub fn get_config_subdir(subdir: &str) -> io::Result<PathBuf> {
+    let dir = dirs::config_dir().ok_or_else(|| {
         io::Error::new(
             io::ErrorKind::NotFound,
-            "cannot determine user's cache directory",
+            "cannot determine user's config directory",
         )
     })?;
-    let subdir_path = cache_dir.join(subdir);
+    let subdir_path = dir.join(subdir);
     fs::create_dir_all(&subdir_path)?;
 
     Ok(subdir_path)
