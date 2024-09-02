@@ -3,11 +3,39 @@ use std::borrow::Cow;
 use uuid::Uuid;
 
 pub const ITEM_RARITY_DROP_RATE: ItemRarityDropRate = ItemRarityDropRate {
-    common: 0.40,
-    uncommon: 0.25,
+    common: 0.35,
+    uncommon: 0.30,
     rare: 0.20,
     epic: 0.10,
     legendary: 0.05,
+};
+pub const WEAPON_BASE_STATS: WeaponBaseStats = WeaponBaseStats {
+    min_damage: 12,
+    max_damage: 15,
+    min_crit_hit_rate: 0.15,
+    max_crit_hit_rate: 0.20,
+};
+pub const ARMOR_BASE_STATS: ArmorBaseStats = ArmorBaseStats {
+    min_health: 20,
+    max_health: 25,
+    min_defense: 1,
+    max_defense: 3,
+};
+pub const RING_BASE_STATS: RingBaseStats = RingBaseStats {
+    min_mana: 20,
+    max_mana: 25,
+};
+pub const ENCHANTMENT_BASE_STATS: EnchantmentBaseStats = EnchantmentBaseStats {
+    min_damage: 5,
+    max_damage: 7,
+    min_crit_hit_rate: 0.05,
+    max_crit_hit_rate: 0.08,
+    min_health: 10,
+    max_health: 15,
+    min_defense: 1,
+    max_defense: 2,
+    min_mana: 10,
+    max_mana: 15,
 };
 
 //-------------------//
@@ -26,7 +54,7 @@ pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
 
 pub const ITEM_SWORD: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Sword"),
-    description: Cow::Borrowed("Medium damage, medium critical hit rate."),
+    description: Cow::Borrowed("A sharp sword that can be used for fighting."),
     category: ItemCategory::Weapon,
 };
 
@@ -72,8 +100,9 @@ pub struct ArmorItem {
     pub info: ItemInfo,
     pub global_id: String,
     pub rarity: ItemRarity,
-    pub base_health: u32,
-    pub base_defense: u32,
+    pub health: u32,
+    pub defense: u32,
+    pub enchantments: Vec<Enchantment>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -81,8 +110,9 @@ pub struct WeaponItem {
     pub info: ItemInfo,
     pub global_id: String,
     pub rarity: ItemRarity,
-    pub base_damage: u32,
-    pub base_critical_hit_rate: f64,
+    pub damage: u32,
+    pub crit_hit_rate: f64,
+    pub enchantments: Vec<Enchantment>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -90,7 +120,8 @@ pub struct RingItem {
     pub info: ItemInfo,
     pub global_id: String,
     pub rarity: ItemRarity,
-    pub base_mana: u32,
+    pub mana: u32,
+    pub enchantments: Vec<Enchantment>,
 }
 
 pub struct ItemRarityDropRate {
@@ -99,6 +130,47 @@ pub struct ItemRarityDropRate {
     pub rare: f64,
     pub epic: f64,
     pub legendary: f64,
+}
+
+pub struct WeaponBaseStats {
+    pub min_damage: u32,
+    pub max_damage: u32,
+    pub min_crit_hit_rate: f64,
+    pub max_crit_hit_rate: f64,
+}
+
+pub struct ArmorBaseStats {
+    pub min_health: u32,
+    pub max_health: u32,
+    pub min_defense: u32,
+    pub max_defense: u32,
+}
+
+pub struct RingBaseStats {
+    pub min_mana: u32,
+    pub max_mana: u32,
+}
+
+pub struct EnchantmentBaseStats {
+    pub min_damage: u32,
+    pub max_damage: u32,
+    pub min_crit_hit_rate: f64,
+    pub max_crit_hit_rate: f64,
+    pub min_health: u32,
+    pub max_health: u32,
+    pub min_defense: u32,
+    pub max_defense: u32,
+    pub min_mana: u32,
+    pub max_mana: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Enchantment {
+    Damage(u32),
+    CritHitRate(f64),
+    Health(u32),
+    Defense(u32),
+    Mana(u32),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -142,7 +214,8 @@ pub fn create_starter_weapon() -> WeaponItem {
         info: ITEM_SWORD,
         global_id: Uuid::new_v4().to_string(),
         rarity: ItemRarity::Common,
-        base_damage: 10,
-        base_critical_hit_rate: 0.15,
+        damage: WEAPON_BASE_STATS.min_damage,
+        crit_hit_rate: WEAPON_BASE_STATS.min_crit_hit_rate,
+        enchantments: Vec::new(),
     }
 }
