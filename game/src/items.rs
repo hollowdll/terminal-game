@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
-pub const ITEM_RARITY_DROP_RATE: ItemRarityDropRate = ItemRarityDropRate {
+pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
     common: 0.35,
     uncommon: 0.30,
     rare: 0.20,
@@ -116,6 +116,25 @@ pub struct WeaponItem {
     pub enchantments: Vec<Enchantment>,
 }
 
+impl WeaponItem {
+    pub fn new(
+        info: ItemInfo,
+        rarity: ItemRarity,
+        damage: u32,
+        crit_hit_rate: f64,
+        enchantments: Vec<Enchantment>,
+    ) -> Self {
+        Self {
+            info,
+            global_id: Uuid::new_v4().to_string(),
+            rarity,
+            damage,
+            crit_hit_rate,
+            enchantments,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RingItem {
     pub info: ItemInfo,
@@ -125,7 +144,7 @@ pub struct RingItem {
     pub enchantments: Vec<Enchantment>,
 }
 
-pub struct ItemRarityDropRate {
+pub struct ItemRarityDropRates {
     pub common: f64,
     pub uncommon: f64,
     pub rare: f64,
@@ -172,20 +191,17 @@ pub enum Enchantment {
     Health(u32),
     Defense(u32),
     Mana(u32),
+    Unknown,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ItemRarity {
-    /// No enchantments.
     Common,
-    /// 1 enchantment.
     Uncommon,
-    /// 2 enchantments.
     Rare,
-    /// 3 enchantments.
     Epic,
-    /// 4 enchantments.
     Legendary,
+    Unknown,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -194,6 +210,7 @@ pub enum ItemCategory {
     Weapon,
     Armor,
     Ring,
+    Unknown,
 }
 
 /// Returns the effect percentage of potions.
@@ -207,81 +224,118 @@ pub fn get_potion_effect_percentage(rarity: ItemRarity) -> i32 {
         ItemRarity::Rare => 50,
         ItemRarity::Epic => 75,
         ItemRarity::Legendary => 100,
+        _ => 0,
     }
 }
 
 pub fn create_starter_weapon() -> WeaponItem {
-    WeaponItem {
-        info: ITEM_SWORD,
-        global_id: Uuid::new_v4().to_string(),
-        rarity: ItemRarity::Common,
-        damage: WEAPON_BASE_VALUES.min_damage,
-        crit_hit_rate: WEAPON_BASE_VALUES.min_crit_hit_rate,
-        enchantments: Vec::new(),
-    }
+    WeaponItem::new(
+        ITEM_SWORD,
+        ItemRarity::Common,
+        WEAPON_BASE_VALUES.min_damage,
+        WEAPON_BASE_VALUES.min_crit_hit_rate,
+        Vec::new(),
+    )
 }
 
-pub fn random_equipment_item() -> Option<ItemCategory> {
+pub fn random_equipment_item() -> ItemCategory {
     let mut rng = rand::thread_rng();
     let rand_num = rng.gen_range(0..=2);
     match rand_num {
-        0 => Some(ItemCategory::Weapon),
-        1 => Some(ItemCategory::Armor),
-        2 => Some(ItemCategory::Ring),
-        _ => None,
+        0 => ItemCategory::Weapon,
+        1 => ItemCategory::Armor,
+        2 => ItemCategory::Ring,
+        _ => ItemCategory::Unknown,
     }
 }
 
-pub fn random_item_rarity(drop_rates: ItemRarityDropRate) -> Option<ItemRarity> {
+pub fn random_item_rarity(drop_rates: &ItemRarityDropRates) -> ItemRarity {
     let mut rng = rand::thread_rng();
     let rand_num = rng.gen_range(0.0..1.0);
     let mut drop_rate = 0.0;
 
     drop_rate += drop_rates.common;
     if rand_num < drop_rate {
-        return Some(ItemRarity::Common);
+        return ItemRarity::Common;
     }
 
     drop_rate += drop_rates.uncommon;
     if rand_num < drop_rate {
-        return Some(ItemRarity::Uncommon);
+        return ItemRarity::Uncommon;
     }
 
     drop_rate += drop_rates.rare;
     if rand_num < drop_rate {
-        return Some(ItemRarity::Rare);
+        return ItemRarity::Rare;
     }
 
     drop_rate += drop_rates.epic;
     if rand_num < drop_rate {
-        return Some(ItemRarity::Epic);
+        return ItemRarity::Epic;
     }
 
     drop_rate += drop_rates.legendary;
     if rand_num < drop_rate {
-        return Some(ItemRarity::Legendary);
+        return ItemRarity::Legendary;
     }
 
-    None
+    ItemRarity::Unknown
 }
 
-pub fn random_weapon_enchantment(base_values: EnchantmentBaseValues) -> Option<Enchantment> {
+pub fn num_enchantments(rarity: &ItemRarity) -> u8 {
+    match rarity {
+        ItemRarity::Common => 0,
+        ItemRarity::Uncommon => 1,
+        ItemRarity::Rare => 2,
+        ItemRarity::Epic => 3,
+        ItemRarity::Legendary => 4,
+        _ => 0,
+    }
+}
+
+pub fn generate_item_enchantments(
+    num: u8,
+    category: ItemCategory,
+    base_values: &EnchantmentBaseValues,
+) -> Vec<Enchantment> {
+    let mut enchantments: Vec<Enchantment> = Vec::new();
+    for _ in 0..num {
+        match category {
+            ItemCategory::Weapon => enchantments.push(random_weapon_enchantment(base_values)),
+            _ => {}
+        }
+    }
+    enchantments
+}
+
+pub fn random_weapon_enchantment(base_values: &EnchantmentBaseValues) -> Enchantment {
     let mut rng = thread_rng();
     let rand_num = rng.gen_range(0..=1);
     match rand_num {
         0 => {
             let rand_damage = rng.gen_range(base_values.min_damage..=base_values.max_damage);
-            return Some(Enchantment::Damage(rand_damage));
+            return Enchantment::Damage(rand_damage);
         }
         1 => {
             let rand_crit_hit_rate =
                 rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
-            return Some(Enchantment::CritHitRate(rand_crit_hit_rate));
+            return Enchantment::CritHitRate(rand_crit_hit_rate);
         }
-        _ => None,
+        _ => Enchantment::Unknown,
     }
 }
 
-pub fn generate_random_weapon() -> Option<WeaponItem> {
-    None
+pub fn generate_random_weapon(base_values: WeaponBaseValues) -> WeaponItem {
+    let mut rng = thread_rng();
+    let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage);
+    let crit_hit_rate =
+        rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
+    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
+    let enchantments = generate_item_enchantments(
+        num_enchantments(&rarity),
+        ItemCategory::Weapon,
+        &ENCHANTMENT_BASE_VALUES,
+    );
+
+    WeaponItem::new(ITEM_SWORD, rarity, damage, crit_hit_rate, enchantments)
 }
