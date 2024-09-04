@@ -297,37 +297,45 @@ pub fn generate_item_enchantments(
     num: u8,
     category: ItemCategory,
     base_values: &EnchantmentBaseValues,
+    dungeon_floor: u32,
 ) -> Vec<Enchantment> {
     let mut enchantments: Vec<Enchantment> = Vec::new();
     for _ in 0..num {
         match category {
-            ItemCategory::Weapon => enchantments.push(random_weapon_enchantment(base_values)),
+            ItemCategory::Weapon => {
+                enchantments.push(random_weapon_enchantment(base_values, dungeon_floor))
+            }
             _ => {}
         }
     }
     enchantments
 }
 
-pub fn random_weapon_enchantment(base_values: &EnchantmentBaseValues) -> Enchantment {
+pub fn random_weapon_enchantment(
+    base_values: &EnchantmentBaseValues,
+    dungeon_floor: u32,
+) -> Enchantment {
     let mut rng = thread_rng();
     let rand_num = rng.gen_range(0..=1);
     match rand_num {
         0 => {
-            let rand_damage = rng.gen_range(base_values.min_damage..=base_values.max_damage);
-            return Enchantment::Damage(rand_damage);
+            let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage)
+                + (3 * dungeon_floor);
+            return Enchantment::Damage(damage);
         }
         1 => {
-            let rand_crit_hit_rate =
+            let crit_hit_rate =
                 rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
-            return Enchantment::CritHitRate(rand_crit_hit_rate);
+            return Enchantment::CritHitRate(crit_hit_rate);
         }
         _ => Enchantment::Unknown,
     }
 }
 
-pub fn generate_random_weapon(base_values: WeaponBaseValues) -> WeaponItem {
+pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32) -> WeaponItem {
     let mut rng = thread_rng();
-    let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage);
+    let damage =
+        rng.gen_range(base_values.min_damage..=base_values.max_damage) + (5 * dungeon_floor);
     let crit_hit_rate =
         rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
     let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
@@ -335,6 +343,7 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues) -> WeaponItem {
         num_enchantments(&rarity),
         ItemCategory::Weapon,
         &ENCHANTMENT_BASE_VALUES,
+        dungeon_floor,
     );
 
     WeaponItem::new(ITEM_SWORD, rarity, damage, crit_hit_rate, enchantments)
