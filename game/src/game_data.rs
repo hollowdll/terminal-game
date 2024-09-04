@@ -5,7 +5,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::items::{ArmorItem, DisposableItem, RingItem, WeaponItem};
+use crate::items::{ArmorItem, ConsumableItem, RingItem, WeaponItem};
 use std::{collections::HashMap, io};
 
 const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
@@ -77,7 +77,7 @@ impl CharacterData {
             },
             currency: CharacterCurrency { gold: 0 },
             inventory: CharacterInventory {
-                disposable_items: HashMap::new(),
+                consumables: HashMap::new(),
                 armors: HashMap::new(),
                 weapons: HashMap::new(),
                 rings: HashMap::new(),
@@ -130,7 +130,7 @@ pub struct CombatStats {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterInventory {
     /// Hashmap key: item name.
-    pub disposable_items: HashMap<String, DisposableItem>,
+    pub consumables: HashMap<String, ConsumableItem>,
     /// HashMap key: item global id.
     pub armors: HashMap<String, ArmorItem>,
     /// HashMap key: item global id.

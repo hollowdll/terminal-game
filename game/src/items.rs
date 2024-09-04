@@ -46,7 +46,7 @@ pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues
 pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Health Potion"),
     description: Cow::Borrowed("A magical potion that restores health points."),
-    category: ItemCategory::Disposable,
+    category: ItemCategory::Consumable,
 };
 
 //---------------//
@@ -89,7 +89,7 @@ pub struct ItemInfo {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct DisposableItem {
+pub struct ConsumableItem {
     pub info: ItemInfo,
     pub effect: String,
     pub rarity: ItemRarity,
@@ -206,7 +206,7 @@ pub enum ItemRarity {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum ItemCategory {
-    Disposable,
+    Consumable,
     Weapon,
     Armor,
     Ring,

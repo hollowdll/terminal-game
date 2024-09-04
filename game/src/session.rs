@@ -42,6 +42,10 @@ impl PlayerCharacter {
         }
     }
 
+    pub fn give_gold(&mut self, amount: u64) {
+        self.data.currency.gold += amount;
+    }
+
     pub fn give_weapon(&mut self, weapon: &WeaponItem) {
         self.data
             .inventory
