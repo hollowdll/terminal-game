@@ -29,8 +29,8 @@ pub const RING_BASE_VALUES: RingBaseValues = RingBaseValues {
 pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues {
     min_damage: 5,
     max_damage: 7,
-    min_crit_hit_rate: 0.05,
-    max_crit_hit_rate: 0.08,
+    min_crit_hit_rate: 0.08,
+    max_crit_hit_rate: 0.12,
     min_health: 10,
     max_health: 15,
     min_defense: 1,
@@ -106,6 +106,25 @@ pub struct ArmorItem {
     pub enchantments: Vec<Enchantment>,
 }
 
+impl ArmorItem {
+    pub fn new(
+        info: ItemInfo,
+        rarity: ItemRarity,
+        health: u32,
+        defense: u32,
+        enchantments: Vec<Enchantment>,
+    ) -> Self {
+        Self {
+            info,
+            global_id: Uuid::new_v4().to_string(),
+            rarity,
+            health,
+            defense,
+            enchantments,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WeaponItem {
     pub info: ItemInfo,
@@ -142,6 +161,23 @@ pub struct RingItem {
     pub rarity: ItemRarity,
     pub mana: u32,
     pub enchantments: Vec<Enchantment>,
+}
+
+impl RingItem {
+    pub fn new(
+        info: ItemInfo,
+        rarity: ItemRarity,
+        mana: u32,
+        enchantments: Vec<Enchantment>,
+    ) -> Self {
+        Self {
+            info,
+            global_id: Uuid::new_v4().to_string(),
+            rarity,
+            mana,
+            enchantments,
+        }
+    }
 }
 
 pub struct ItemRarityDropRates {
@@ -305,6 +341,12 @@ pub fn generate_item_enchantments(
             ItemCategory::Weapon => {
                 enchantments.push(random_weapon_enchantment(base_values, dungeon_floor))
             }
+            ItemCategory::Armor => {
+                enchantments.push(random_armor_enchantment(base_values, dungeon_floor))
+            }
+            ItemCategory::Ring => {
+                enchantments.push(random_ring_enchantment(base_values, dungeon_floor))
+            }
             _ => {}
         }
     }
@@ -332,6 +374,57 @@ pub fn random_weapon_enchantment(
     }
 }
 
+pub fn random_armor_enchantment(
+    base_values: &EnchantmentBaseValues,
+    dungeon_floor: u32,
+) -> Enchantment {
+    let mut rng = thread_rng();
+    let rand_num = rng.gen_range(0..=1);
+    match rand_num {
+        0 => {
+            let health = rng.gen_range(base_values.min_health..=base_values.max_health)
+                + (5 * dungeon_floor);
+            return Enchantment::Health(health);
+        }
+        1 => {
+            let defense = rng.gen_range(base_values.min_defense..=base_values.max_defense)
+                + (1 * dungeon_floor);
+            return Enchantment::Defense(defense);
+        }
+        _ => Enchantment::Unknown,
+    }
+}
+
+pub fn random_ring_enchantment(
+    base_values: &EnchantmentBaseValues,
+    dungeon_floor: u32,
+) -> Enchantment {
+    let mut rng = thread_rng();
+    let rand_num = rng.gen_range(0..=3);
+    match rand_num {
+        0 => {
+            let mana = rng.gen_range(base_values.min_mana..=base_values.max_mana);
+            return Enchantment::Mana(mana);
+        }
+        1 => {
+            let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage)
+                + (3 * dungeon_floor);
+            return Enchantment::Damage(damage);
+        }
+        2 => {
+            let health = rng.gen_range(base_values.min_health..=base_values.max_health)
+                + (5 * dungeon_floor);
+            return Enchantment::Health(health);
+        }
+        3 => {
+            let crit_hit_rate =
+                rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
+            return Enchantment::CritHitRate(crit_hit_rate);
+        }
+        _ => Enchantment::Unknown,
+    }
+}
+
 pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32) -> WeaponItem {
     let mut rng = thread_rng();
     let damage =
@@ -347,4 +440,35 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32)
     );
 
     WeaponItem::new(ITEM_SWORD, rarity, damage, crit_hit_rate, enchantments)
+}
+
+pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -> ArmorItem {
+    let mut rng = thread_rng();
+    let health =
+        rng.gen_range(base_values.min_health..=base_values.max_health) + (10 * dungeon_floor);
+    let defense =
+        rng.gen_range(base_values.min_defense..=base_values.max_defense) + (2 * dungeon_floor);
+    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
+    let enchantments = generate_item_enchantments(
+        num_enchantments(&rarity),
+        ItemCategory::Armor,
+        &ENCHANTMENT_BASE_VALUES,
+        dungeon_floor,
+    );
+
+    ArmorItem::new(ITEM_ARMOR, rarity, health, defense, enchantments)
+}
+
+pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> RingItem {
+    let mut rng = thread_rng();
+    let mana = rng.gen_range(base_values.min_mana..=base_values.max_mana);
+    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
+    let enchantments = generate_item_enchantments(
+        num_enchantments(&rarity),
+        ItemCategory::Ring,
+        &ENCHANTMENT_BASE_VALUES,
+        dungeon_floor,
+    );
+
+    RingItem::new(ITEM_RING, rarity, mana, enchantments)
 }
