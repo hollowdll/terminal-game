@@ -2,6 +2,7 @@ use crate::session::PlayerCharacter;
 
 pub const TREASURE_CHEST_DESC: &str =
     "Open this chest to get gold and a random rarity weapon, armor, or ring.";
+pub const GOLD_MULTIPLIER_CHEST: u32 = 2;
 
 pub struct TreasureChest {
     pub gold: u64,

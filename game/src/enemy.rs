@@ -1,3 +1,8 @@
+pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
+pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
+pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
+pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
+
 pub const NORMAL_ENEMY_NAMES: NormalEnemyNames = NormalEnemyNames {
     skeleton_warrior: "Skeleton Warrior",
     skeleton_archer: "Skeleton Archer",

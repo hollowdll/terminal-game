@@ -4,6 +4,10 @@ use crate::{
     items::create_starter_weapon,
     session::{Player, PlayerCharacter},
 };
+use rand::{thread_rng, Rng};
+
+pub const BASE_EXP_MIN: u32 = 100;
+pub const BASE_EXP_MAX: u32 = 125;
 
 pub fn max_game_characters_reached(player: &Player, cfg: &GameConfig) -> bool {
     return player.data.characters.len() >= cfg.max_game_characters;
@@ -29,4 +33,10 @@ pub fn delete_game_character(player: &mut Player, character_name: &str) -> bool 
     } else {
         return false;
     }
+}
+
+pub fn random_exp_amount(min_exp: u32, max_exp: u32, multiplier: u32, dungeon_floor: u32) -> u32 {
+    let mut rng = thread_rng();
+    let base_exp = rng.gen_range(min_exp..=max_exp);
+    return base_exp * multiplier + (base_exp / 4 * dungeon_floor);
 }
