@@ -2,6 +2,7 @@ pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
+pub const ENEMY_SKILL_CHANCE: f64 = 0.25;
 
 pub const NORMAL_ENEMY_NAMES: NormalEnemyNames = NormalEnemyNames {
     skeleton_warrior: "Skeleton Warrior",
