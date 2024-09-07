@@ -1,19 +1,9 @@
+use crate::enemy::Enemy;
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 
-pub const MAX_ROOMS_PER_PATH: u32 = 3;
-pub const ENEMY_SPAWN_CHANCE_PER_ROOM: f64 = 0.5;
-pub const MIN_ENEMIES_PER_FLOOR: u32 = 1;
-
-pub const START_ROOM_POSSIBLE_ADJACENTS: [RoomKind; 7] = [
-    RoomKind::TwoWayUpDown,
-    RoomKind::TwoWayDownLeft,
-    RoomKind::TwoWayDownRight,
-    RoomKind::ThreeWayDownLeftRight,
-    RoomKind::ThreeWayUpDownLeft,
-    RoomKind::ThreeWayUpDownRight,
-    RoomKind::FourWay,
-];
+pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 2;
+pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 4;
 
 #[derive(Debug)]
 pub struct DungeonFloor {
@@ -32,6 +22,7 @@ impl DungeonFloor {
     }
 }
 
+/// Room grid coordinates. Start room has coordinates (0,0).
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct RoomCoordinates {
     pub x: i32,
@@ -49,6 +40,8 @@ pub struct Room {
     pub kind: RoomKind,
     pub coords: RoomCoordinates,
     pub adjacents: AdjacentRooms,
+    pub enemy: Option<Enemy>,
+    pub treasure: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -70,6 +63,8 @@ impl Room {
                 left: None,
                 right: None,
             },
+            enemy: None,
+            treasure: false,
         }
     }
 }
@@ -80,50 +75,110 @@ pub enum RoomKind {
     Start,
     /// OneWayDown room, contains boss room interaction.
     BossEntrance,
-    OneWayUp,
-    OneWayDown,
-    OneWayLeft,
-    OneWayRight,
-    TreasureUp,
-    TreasureDown,
-    TreasureLeft,
-    TreasureRight,
     TwoWayUpDown,
     TwoWayLeftRight,
     TwoWayUpLeft,
     TwoWayUpRight,
     TwoWayDownLeft,
     TwoWayDownRight,
-    ThreeWayDownLeftRight,
-    ThreeWayUpLeftRight,
-    ThreeWayUpDownLeft,
-    ThreeWayUpDownRight,
-    FourWay,
+    Unknown,
 }
 
+#[derive(Debug, Clone)]
 pub enum Direction {
     Up,
     Down,
     Left,
     Right,
+    Unknown,
 }
 
 pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     let mut rooms = HashMap::new();
     let mut start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0));
     rooms.insert(start_room.coords.clone(), start_room.clone());
-    generate_start_room_adjacent(&mut start_room, &mut rooms);
+    generate_random_rooms(&mut start_room, &mut rooms);
 
     DungeonFloor::new(floor, start_room, rooms)
 }
 
-fn generate_start_room_adjacent(start_room: &mut Room, rooms: &mut HashMap<RoomCoordinates, Room>) {
-    let mut rng = thread_rng();
-    let rand_num = rng.gen_range(0..START_ROOM_POSSIBLE_ADJACENTS.len());
-    let rand_room_kind = &START_ROOM_POSSIBLE_ADJACENTS[rand_num];
-    let mut room = Room::new(rand_room_kind.clone(), RoomCoordinates::new(0, 1));
-
-    start_room.adjacents.up = Some(room.coords.clone());
-    room.adjacents.down = Some(start_room.coords.clone());
-    rooms.insert(room.coords.clone(), room);
+fn connect_rooms(
+    room1: &mut Room,
+    room2: &mut Room,
+    room1_direction: &Direction,
+    room2_direction: &Direction,
+) {
+    match room1_direction {
+        Direction::Up => room1.adjacents.up = Some(room2.coords.clone()),
+        Direction::Down => room1.adjacents.down = Some(room2.coords.clone()),
+        Direction::Left => room1.adjacents.left = Some(room2.coords.clone()),
+        Direction::Right => room1.adjacents.right = Some(room2.coords.clone()),
+        _ => {}
+    }
+    match room2_direction {
+        Direction::Up => room2.adjacents.up = Some(room1.coords.clone()),
+        Direction::Down => room2.adjacents.down = Some(room1.coords.clone()),
+        Direction::Left => room2.adjacents.left = Some(room1.coords.clone()),
+        Direction::Right => room2.adjacents.right = Some(room1.coords.clone()),
+        _ => {}
+    }
 }
+
+fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordinates, Room>) {
+    let mut rng = thread_rng();
+    let mut rooms_generated = 0;
+    let mut boss_entrance_generated = false;
+    let mut current = start_room.clone();
+    let mut current_direction = Direction::Unknown;
+
+    loop {
+        if boss_entrance_generated {
+            break;
+        }
+        let mut room_kind = RoomKind::Unknown;
+        let mut room_direction = Direction::Unknown;
+        let mut room_coordinates = RoomCoordinates::new(0, 0);
+
+        match current.kind {
+            RoomKind::Start => {
+                room_kind = RoomKind::TwoWayUpDown;
+                current_direction = Direction::Up;
+                room_direction = Direction::Down;
+                room_coordinates = RoomCoordinates::new(0, 1);
+            }
+            RoomKind::TwoWayUpDown => {
+                let mut possible_rooms = vec![
+                    RoomKind::TwoWayUpDown,
+                    RoomKind::TwoWayDownRight,
+                    RoomKind::TwoWayDownLeft,
+                ];
+                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                    possible_rooms.push(RoomKind::BossEntrance);
+                }
+
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                current_direction = Direction::Up;
+                room_direction = Direction::Down;
+                room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
+            }
+            _ => {}
+        }
+
+        match room_kind {
+            RoomKind::BossEntrance => {
+                boss_entrance_generated = true;
+            }
+            _ => {}
+        }
+        let mut room = Room::new(room_kind.clone(), room_coordinates);
+        connect_rooms(&mut current, &mut room, &current_direction, &room_direction);
+        rooms.insert(room.coords.clone(), room.clone());
+        rooms_generated += 1;
+        current = room;
+    }
+}
+
+// fn randomize_enemy_locations() {}
+
+// fn randomize_treasure_location() {}

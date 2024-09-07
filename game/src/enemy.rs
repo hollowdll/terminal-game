@@ -31,6 +31,7 @@ pub struct BossEnemyNames {
     pub fire_dragon: &'static str,
 }
 
+#[derive(Debug, Clone)]
 pub struct Enemy {
     pub name: &'static str,
     pub kind: EnemyKind,
@@ -68,6 +69,7 @@ impl Enemy {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct EnemyStats {
     pub max_health: u32,
     pub health: u32,
@@ -75,11 +77,13 @@ pub struct EnemyStats {
     pub damage: u32,
 }
 
+#[derive(Debug, Clone)]
 pub enum EnemyKind {
     Boss,
     Normal,
 }
 
+#[derive(Debug, Clone)]
 pub struct EnemySkill {
     pub name: &'static str,
     pub effect: &'static str,
