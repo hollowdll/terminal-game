@@ -8,16 +8,24 @@ pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 5;
 #[derive(Debug)]
 pub struct DungeonFloor {
     pub floor: u32,
-    pub start_room: Room,
     pub rooms: HashMap<RoomCoordinates, Room>,
 }
 
 impl DungeonFloor {
-    pub fn new(floor: u32, start_room: Room, rooms: HashMap<RoomCoordinates, Room>) -> Self {
-        Self {
-            floor,
-            start_room,
-            rooms,
+    pub fn new(floor: u32, rooms: HashMap<RoomCoordinates, Room>) -> Self {
+        Self { floor, rooms }
+    }
+
+    pub fn pretty_print(&self) {
+        println!("Dungeon Floor: {}", self.floor);
+        println!("Rooms: {}", self.rooms.len());
+        for room in self.rooms.values() {
+            println!("  Room:");
+            println!("    Coordinates: ({}, {})", room.coords.x, room.coords.y);
+            println!("    Kind: {:?}", room.kind);
+            println!("    Enemy: {:?}", room.enemy);
+            println!("    Treasure: {}", room.treasure);
+            println!("    Adjacent Rooms: {:?}\n", room.adjacents);
         }
     }
 }
@@ -100,7 +108,7 @@ pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     generate_random_rooms(&mut start_room, &mut rooms);
     randomize_treasure_room(&mut rooms);
     randomize_enemy_rooms(&mut rooms, NORMAL_ENEMIES_PER_FLOOR, floor);
-    DungeonFloor::new(floor, start_room, rooms)
+    return DungeonFloor::new(floor, rooms);
 }
 
 fn connect_rooms(
