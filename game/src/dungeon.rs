@@ -98,6 +98,7 @@ pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     let mut start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0));
     rooms.insert(start_room.coords.clone(), start_room.clone());
     generate_random_rooms(&mut start_room, &mut rooms);
+    randomize_treasure_room(&mut rooms);
 
     DungeonFloor::new(floor, start_room, rooms)
 }
@@ -242,6 +243,20 @@ fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordina
     }
 }
 
-// fn randomize_enemy_locations() {}
+// fn randomize_enemy_rooms() {}
 
-// fn randomize_treasure_location() {}
+fn randomize_treasure_room(rooms: &mut HashMap<RoomCoordinates, Room>) {
+    let mut temp_rooms = Vec::new();
+    for room in rooms.values() {
+        match room.kind {
+            RoomKind::Start | RoomKind::BossEntrance => continue,
+            _ => temp_rooms.push(room.clone()),
+        }
+    }
+    let mut rng = thread_rng();
+    let rand_num = rng.gen_range(0..temp_rooms.len());
+    let treasure_room = temp_rooms[rand_num].clone();
+    if let Some(room) = rooms.get_mut(&treasure_room.coords) {
+        room.treasure = true;
+    }
+}
