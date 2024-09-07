@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 2;
 pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 5;
+/// Increasing this makes dungeon floors have more rooms.
+pub const FLOOR_LENGTH_SCALE: u32 = 8;
 
 #[derive(Debug)]
 pub struct DungeonFloor {
@@ -103,9 +105,9 @@ pub enum Direction {
 
 pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     let mut rooms = HashMap::new();
-    let mut start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0));
+    let start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0));
     rooms.insert(start_room.coords.clone(), start_room.clone());
-    generate_random_rooms(&mut start_room, &mut rooms);
+    generate_random_rooms(start_room, &mut rooms, FLOOR_LENGTH_SCALE);
     randomize_treasure_room(&mut rooms);
     randomize_enemy_rooms(&mut rooms, NORMAL_ENEMIES_PER_FLOOR, floor);
     return DungeonFloor::new(floor, rooms);
@@ -133,11 +135,15 @@ fn connect_rooms(
     }
 }
 
-fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordinates, Room>) {
+fn generate_random_rooms(
+    start_room: Room,
+    rooms: &mut HashMap<RoomCoordinates, Room>,
+    length_scale: u32,
+) {
     let mut rng = thread_rng();
     let mut rooms_generated = 0;
     let mut boss_entrance_generated = false;
-    let mut current = start_room.clone();
+    let mut current = start_room;
     let mut current_direction = Direction::Unknown;
 
     loop {
@@ -156,16 +162,20 @@ fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordina
                 room_coordinates = RoomCoordinates::new(0, 1);
             }
             RoomKind::TwoWayUpDown => {
-                let mut possible_rooms = vec![
-                    RoomKind::TwoWayUpDown,
-                    RoomKind::TwoWayDownRight,
-                    RoomKind::TwoWayDownLeft,
-                ];
-                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
-                    possible_rooms.push(RoomKind::BossEntrance);
+                if rooms_generated > length_scale {
+                    room_kind = RoomKind::BossEntrance;
+                } else {
+                    let mut possible_rooms = vec![
+                        RoomKind::TwoWayUpDown,
+                        RoomKind::TwoWayDownRight,
+                        RoomKind::TwoWayDownLeft,
+                    ];
+                    if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                        possible_rooms.push(RoomKind::BossEntrance);
+                    }
+                    let rand_num = rng.gen_range(0..possible_rooms.len());
+                    room_kind = possible_rooms[rand_num].clone();
                 }
-                let rand_num = rng.gen_range(0..possible_rooms.len());
-                room_kind = possible_rooms[rand_num].clone();
                 current_direction = Direction::Up;
                 room_direction = Direction::Down;
                 room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
@@ -205,31 +215,39 @@ fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordina
                 }
             }
             RoomKind::TwoWayUpRight => {
-                let mut possible_rooms = vec![
-                    RoomKind::TwoWayUpDown,
-                    RoomKind::TwoWayDownRight,
-                    RoomKind::TwoWayDownLeft,
-                ];
-                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
-                    possible_rooms.push(RoomKind::BossEntrance);
+                if rooms_generated > length_scale {
+                    room_kind = RoomKind::BossEntrance;
+                } else {
+                    let mut possible_rooms = vec![
+                        RoomKind::TwoWayUpDown,
+                        RoomKind::TwoWayDownRight,
+                        RoomKind::TwoWayDownLeft,
+                    ];
+                    if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                        possible_rooms.push(RoomKind::BossEntrance);
+                    }
+                    let rand_num = rng.gen_range(0..possible_rooms.len());
+                    room_kind = possible_rooms[rand_num].clone();
                 }
-                let rand_num = rng.gen_range(0..possible_rooms.len());
-                room_kind = possible_rooms[rand_num].clone();
                 current_direction = Direction::Up;
                 room_direction = Direction::Down;
                 room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
             }
             RoomKind::TwoWayUpLeft => {
-                let mut possible_rooms = vec![
-                    RoomKind::TwoWayUpDown,
-                    RoomKind::TwoWayDownRight,
-                    RoomKind::TwoWayDownLeft,
-                ];
-                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
-                    possible_rooms.push(RoomKind::BossEntrance);
+                if rooms_generated > length_scale {
+                    room_kind = RoomKind::BossEntrance;
+                } else {
+                    let mut possible_rooms = vec![
+                        RoomKind::TwoWayUpDown,
+                        RoomKind::TwoWayDownRight,
+                        RoomKind::TwoWayDownLeft,
+                    ];
+                    if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                        possible_rooms.push(RoomKind::BossEntrance);
+                    }
+                    let rand_num = rng.gen_range(0..possible_rooms.len());
+                    room_kind = possible_rooms[rand_num].clone();
                 }
-                let rand_num = rng.gen_range(0..possible_rooms.len());
-                room_kind = possible_rooms[rand_num].clone();
                 current_direction = Direction::Up;
                 room_direction = Direction::Down;
                 room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
@@ -246,6 +264,7 @@ fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordina
         let mut room = Room::new(room_kind.clone(), room_coordinates);
         connect_rooms(&mut current, &mut room, &current_direction, &room_direction);
         rooms.insert(room.coords.clone(), room.clone());
+        rooms.insert(current.coords.clone(), current);
         rooms_generated += 1;
         current = room;
     }
