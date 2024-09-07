@@ -3,7 +3,7 @@ use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 
 pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 2;
-pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 4;
+pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 5;
 
 #[derive(Debug)]
 pub struct DungeonFloor {
@@ -155,7 +155,70 @@ fn generate_random_rooms(start_room: &mut Room, rooms: &mut HashMap<RoomCoordina
                 if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
                     possible_rooms.push(RoomKind::BossEntrance);
                 }
-
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                current_direction = Direction::Up;
+                room_direction = Direction::Down;
+                room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
+            }
+            RoomKind::TwoWayDownRight => {
+                let possible_rooms = vec![RoomKind::TwoWayLeftRight, RoomKind::TwoWayUpLeft];
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                current_direction = Direction::Right;
+                room_direction = Direction::Left;
+                room_coordinates = RoomCoordinates::new(current.coords.x + 1, current.coords.y);
+            }
+            RoomKind::TwoWayDownLeft => {
+                let possible_rooms = vec![RoomKind::TwoWayLeftRight, RoomKind::TwoWayUpRight];
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                current_direction = Direction::Left;
+                room_direction = Direction::Right;
+                room_coordinates = RoomCoordinates::new(current.coords.x - 1, current.coords.y);
+            }
+            RoomKind::TwoWayLeftRight => {
+                let possible_rooms = vec![RoomKind::TwoWayUpLeft, RoomKind::TwoWayUpRight];
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                match current_direction {
+                    Direction::Right => {
+                        room_direction = Direction::Left;
+                        room_coordinates =
+                            RoomCoordinates::new(current.coords.x + 1, current.coords.y);
+                    }
+                    Direction::Left => {
+                        room_direction = Direction::Right;
+                        room_coordinates =
+                            RoomCoordinates::new(current.coords.x - 1, current.coords.y);
+                    }
+                    _ => {}
+                }
+            }
+            RoomKind::TwoWayUpRight => {
+                let mut possible_rooms = vec![
+                    RoomKind::TwoWayUpDown,
+                    RoomKind::TwoWayDownRight,
+                    RoomKind::TwoWayDownLeft,
+                ];
+                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                    possible_rooms.push(RoomKind::BossEntrance);
+                }
+                let rand_num = rng.gen_range(0..possible_rooms.len());
+                room_kind = possible_rooms[rand_num].clone();
+                current_direction = Direction::Up;
+                room_direction = Direction::Down;
+                room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
+            }
+            RoomKind::TwoWayUpLeft => {
+                let mut possible_rooms = vec![
+                    RoomKind::TwoWayUpDown,
+                    RoomKind::TwoWayDownRight,
+                    RoomKind::TwoWayDownLeft,
+                ];
+                if rooms_generated >= MIN_ROOMS_FOR_BOSS_ENTRANCE && !boss_entrance_generated {
+                    possible_rooms.push(RoomKind::BossEntrance);
+                }
                 let rand_num = rng.gen_range(0..possible_rooms.len());
                 room_kind = possible_rooms[rand_num].clone();
                 current_direction = Direction::Up;
