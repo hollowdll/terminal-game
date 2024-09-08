@@ -14,6 +14,7 @@ use crate::{
     },
     game_data::write_save_file,
     session::{Player, PlayerCharacter},
+    util::timestamp_to_datetime,
 };
 
 pub struct GameMenuReturnOptions {
@@ -168,21 +169,13 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
         "Back",
     ];
     let mut selected_index = 0;
-    let start_column: u16 = 2;
+    let start_column: u16 = 1;
     let mut return_to_main_menu = false;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Menu");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!(
-            "  Character: {} (Level {}, Dungeon Floor {}, Gold: {})",
-            character.data.metadata.name,
-            character.data.stats.general_stats.character_level,
-            character.data.stats.general_stats.current_dungeon_floor,
-            character.data.currency.gold,
-        );
-        execute!(stdout, cursor::MoveTo(0, 2))?;
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -214,7 +207,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
     }
 
     match menu_items[selected_index] {
-        "Stats" => {}
+        "Stats" => {
+            menu_character_stats(&character)?;
+        }
         "Inventory" => {}
         "Equipment" => {}
         "Return to main menu" => return_to_main_menu = true,
@@ -222,4 +217,60 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
     }
 
     Ok(return_to_main_menu)
+}
+
+fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let menu_items = vec!["Back"];
+    let mut selected_index = 0;
+    let start_column: u16 = 5;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Character Stats");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("  General:");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!("    Name: {}", character.data.metadata.name);
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!(
+            "    Created At: {}",
+            timestamp_to_datetime(character.data.metadata.created_at)
+        );
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!("");
+        execute!(stdout, cursor::MoveTo(0, 5))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    Ok(())
 }
