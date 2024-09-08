@@ -85,9 +85,12 @@ pub fn menu_dungeon_floor(
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Keyboard (Esc = Open Menu)");
+        println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!("S = Shop, B = Boss Room");
+        println!(
+            "Dungeon Floor {}, Room {}",
+            dungeon_floor.floor, current_room.room_num
+        );
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
         let start_column = match current_room.kind {
@@ -170,7 +173,6 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
     ];
     let mut selected_index = 0;
     let start_column: u16 = 1;
-    let mut return_to_main_menu = false;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -198,25 +200,21 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                         selected_index += 1;
                     }
                 }
-                KeyCode::Enter => {
-                    break;
-                }
+                KeyCode::Enter => match menu_items[selected_index] {
+                    "Stats" => {
+                        menu_character_stats(&character)?;
+                    }
+                    "Inventory" => {}
+                    "Equipment" => {}
+                    "Return to main menu" => return Ok(true),
+                    _ => break,
+                },
                 _ => {}
             }
         }
     }
 
-    match menu_items[selected_index] {
-        "Stats" => {
-            menu_character_stats(&character)?;
-        }
-        "Inventory" => {}
-        "Equipment" => {}
-        "Return to main menu" => return_to_main_menu = true,
-        _ => {}
-    }
-
-    Ok(return_to_main_menu)
+    Ok(false)
 }
 
 fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
@@ -225,7 +223,7 @@ fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
 
     let menu_items = vec!["Back"];
     let mut selected_index = 0;
-    let start_column: u16 = 5;
+    let start_column: u16 = 22;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -240,8 +238,89 @@ fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
             timestamp_to_datetime(character.data.metadata.created_at)
         );
         execute!(stdout, cursor::MoveTo(0, 4))?;
-        println!("");
+        println!(
+            "    Current Dungeon Floor: {}",
+            character.data.stats.general_stats.current_dungeon_floor
+        );
         execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!(
+            "    Level: {}",
+            character.data.stats.general_stats.character_level
+        );
+        execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!(
+            "    EXP: {}",
+            character.data.stats.general_stats.current_exp
+        );
+        execute!(stdout, cursor::MoveTo(0, 7))?;
+        println!(
+            "    Required EXP: {}",
+            character.data.stats.general_stats.required_exp
+        );
+        execute!(stdout, cursor::MoveTo(0, 8))?;
+        println!(
+            "    Total EXP: {}",
+            character.data.stats.general_stats.total_exp
+        );
+        execute!(stdout, cursor::MoveTo(0, 9))?;
+
+        println!(
+            "    Highest Dungeon Floor Reached: {}",
+            character
+                .data
+                .stats
+                .general_stats
+                .highest_dungeon_floor_achieved
+        );
+        execute!(stdout, cursor::MoveTo(0, 10))?;
+        println!(
+            "    Highest Level Reached: {}",
+            character
+                .data
+                .stats
+                .general_stats
+                .highest_character_level_achieved
+        );
+        execute!(stdout, cursor::MoveTo(0, 11))?;
+        println!(
+            "    Total Deaths: {}",
+            character.data.stats.general_stats.deaths
+        );
+        execute!(stdout, cursor::MoveTo(0, 12))?;
+
+        println!("  Combat:");
+        execute!(stdout, cursor::MoveTo(0, 13))?;
+        println!(
+            "    Max Health: {}",
+            character.data.stats.combat_stats.max_health
+        );
+        execute!(stdout, cursor::MoveTo(0, 14))?;
+        println!("    Health: {}", character.temp_stats.health);
+        execute!(stdout, cursor::MoveTo(0, 15))?;
+        println!(
+            "    Max Mana: {}",
+            character.data.stats.combat_stats.max_mana
+        );
+        execute!(stdout, cursor::MoveTo(0, 16))?;
+        println!("    Mana: {}", character.temp_stats.mana);
+        execute!(stdout, cursor::MoveTo(0, 17))?;
+        println!("    Defense: {}", character.data.stats.combat_stats.defense);
+        execute!(stdout, cursor::MoveTo(0, 18))?;
+        println!("    Damage: {}", character.data.stats.combat_stats.damage);
+        execute!(stdout, cursor::MoveTo(0, 19))?;
+        println!(
+            "    Critical Damage Multiplier: {}",
+            character.data.stats.combat_stats.critical_damage_multiplier
+        );
+        execute!(stdout, cursor::MoveTo(0, 20))?;
+        println!(
+            "    Critical Hit Rate: {}",
+            character.data.stats.combat_stats.critical_hit_rate
+        );
+        execute!(stdout, cursor::MoveTo(0, 21))?;
+
+        println!("");
+        execute!(stdout, cursor::MoveTo(0, 22))?;
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -271,6 +350,7 @@ fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
             }
         }
     }
+    execute!(stdout, Clear(ClearType::All))?;
 
     Ok(())
 }

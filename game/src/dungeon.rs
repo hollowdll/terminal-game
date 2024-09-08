@@ -54,6 +54,7 @@ pub struct Room {
     pub adjacents: AdjacentRooms,
     pub enemy: Option<Enemy>,
     pub treasure: bool,
+    pub room_num: u32,
 }
 
 #[derive(Debug, Clone)]
@@ -65,7 +66,7 @@ pub struct AdjacentRooms {
 }
 
 impl Room {
-    pub fn new(kind: RoomKind, coords: RoomCoordinates) -> Self {
+    pub fn new(kind: RoomKind, coords: RoomCoordinates, num: u32) -> Self {
         Self {
             coords,
             kind,
@@ -77,6 +78,7 @@ impl Room {
             },
             enemy: None,
             treasure: false,
+            room_num: num,
         }
     }
 }
@@ -107,7 +109,7 @@ pub enum Direction {
 
 pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
     let mut rooms = HashMap::new();
-    let start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0));
+    let start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0), 1);
     rooms.insert(start_room.coords.clone(), start_room.clone());
     generate_random_rooms(start_room, &mut rooms, FLOOR_LENGTH_SCALE);
     randomize_treasure_room(&mut rooms);
@@ -143,7 +145,7 @@ fn generate_random_rooms(
     length_scale: u32,
 ) {
     let mut rng = thread_rng();
-    let mut rooms_generated = 0;
+    let mut rooms_generated = 1;
     let mut boss_entrance_generated = false;
     let mut current = start_room;
     let mut current_direction = Direction::Unknown;
@@ -263,7 +265,7 @@ fn generate_random_rooms(
             }
             _ => {}
         }
-        let mut room = Room::new(room_kind.clone(), room_coordinates);
+        let mut room = Room::new(room_kind.clone(), room_coordinates, rooms_generated + 1);
         connect_rooms(&mut current, &mut room, &current_direction, &room_direction);
         rooms.insert(room.coords.clone(), room.clone());
         rooms.insert(current.coords.clone(), current);
