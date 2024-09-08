@@ -9,6 +9,7 @@ use std::io::{self, Write};
 use crate::{
     character::{create_new_game_character, delete_game_character, max_game_characters_reached},
     config::GameConfig,
+    dungeon::generate_random_dungeon_floor,
     game::save_game,
     session::Player,
     util::extract_first_word,
@@ -470,9 +471,10 @@ fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Start Dungeon Floor", "Save and Quit"];
+    let menu_items = vec!["Start Dungeon Floor", "Return to main menu"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
+    let mut go_back = true;
     let character = match &player.character {
         Some(character) => character,
         None => {
@@ -523,10 +525,14 @@ fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     }
 
     match menu_items[selected_index] {
-        "Start Dungeon Floor" => {}
-        "Save and Quit" => {}
+        "Start Dungeon Floor" => {
+            let dungeon_floor = generate_random_dungeon_floor(
+                character.data.stats.general_stats.current_dungeon_floor,
+            );
+        }
+        "Return to main menu" => {}
         _ => {}
     }
 
-    Ok(true)
+    Ok(go_back)
 }
