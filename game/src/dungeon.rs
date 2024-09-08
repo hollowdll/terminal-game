@@ -2,6 +2,8 @@ use crate::enemy::Enemy;
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 
+pub mod room;
+
 pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 2;
 pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 5;
 /// Increasing this makes dungeon floors have more rooms.
@@ -40,7 +42,7 @@ pub struct RoomCoordinates {
 }
 
 impl RoomCoordinates {
-    fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 }

@@ -9,9 +9,9 @@ use std::io::{self, Write};
 use crate::{
     character::{create_new_game_character, delete_game_character, max_game_characters_reached},
     config::GameConfig,
-    dungeon::generate_random_dungeon_floor,
-    game::save_game,
-    session::Player,
+    dungeon::{generate_random_dungeon_floor, RoomCoordinates},
+    game::{menu_dungeon_floor, save_game},
+    session::{Player, PlayerCharacter},
     util::extract_first_word,
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
@@ -87,6 +87,12 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             if let Ok(go_back) = menu_load_game(player) {
                 if go_back {
                     rerender = true;
+                } else {
+                    if let Ok(go_back) = menu_start_dungeon_floor(player) {
+                        if go_back {
+                            rerender = true;
+                        }
+                    }
                 }
             }
         }
@@ -191,7 +197,13 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
     match menu_items[selected_index].as_str() {
         "Back" => {}
-        _ => {}
+        _ => {
+            let character_name = extract_first_word(menu_items[selected_index].as_str());
+            if let Some(character) = player.data.characters.get(character_name) {
+                player.character = Some(PlayerCharacter::new(character));
+            }
+            return Ok(false);
+        }
     }
 
     Ok(true)
@@ -474,7 +486,7 @@ fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let menu_items = vec!["Start Dungeon Floor", "Return to main menu"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
-    let mut go_back = true;
+    let go_back = true;
     let character = match &player.character {
         Some(character) => character,
         None => {
@@ -526,9 +538,10 @@ fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
 
     match menu_items[selected_index] {
         "Start Dungeon Floor" => {
-            let dungeon_floor = generate_random_dungeon_floor(
+            let mut dungeon_floor = generate_random_dungeon_floor(
                 character.data.stats.general_stats.current_dungeon_floor,
             );
+            menu_dungeon_floor(&mut dungeon_floor, player, &RoomCoordinates::new(0, 0))?;
         }
         "Return to main menu" => {}
         _ => {}

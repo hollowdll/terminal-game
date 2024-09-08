@@ -8,10 +8,20 @@ use crossterm::{
 };
 
 use crate::{
-    dungeon::{DungeonFloor, RoomCoordinates},
+    dungeon::{
+        room::{display_start_room, display_twowayupdown_room},
+        DungeonFloor, RoomCoordinates, RoomKind,
+    },
     game_data::write_save_file,
     session::{Player, PlayerCharacter},
 };
+
+pub struct GameMenuReturnOptions {
+    /// If should return to main menu.
+    pub main_menu: bool,
+    /// If should rerender current menu.
+    pub rerender: bool,
+}
 
 pub fn save_game(player: &mut Player) -> io::Result<()> {
     if let Some(player_character) = &player.character {
@@ -29,13 +39,13 @@ pub fn menu_dungeon_floor(
     dungeon_floor: &mut DungeonFloor,
     player: &mut Player,
     current_room_coords: &RoomCoordinates,
-) -> io::Result<bool> {
+) -> io::Result<GameMenuReturnOptions> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let mut menu_items: Vec<String> = Vec::new();
+    let mut menu_items = Vec::new();
     let mut selected_index = 0;
-    let start_column: u16 = 1;
+    let mut start_column = 2;
     let mut character = match &mut player.character {
         Some(character) => character,
         None => {
@@ -50,15 +60,41 @@ pub fn menu_dungeon_floor(
         None => {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
-                "Room should exist, but was not found",
+                "Dungeon Room should exist, but was not found",
             ))
         }
     };
+
+    if let Some(_) = current_room.adjacents.up {
+        menu_items.push("Go Up");
+    }
+    if let Some(_) = current_room.adjacents.down {
+        menu_items.push("Go Down");
+    }
+    if let Some(_) = current_room.adjacents.right {
+        menu_items.push("Go Right");
+    }
+    if let Some(_) = current_room.adjacents.left {
+        menu_items.push("Go Left");
+    }
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Keyboard (Esc = Open Menu)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("S = Shop, B = Boss Room");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+
+        start_column = match current_room.kind {
+            RoomKind::Start => display_start_room(start_column)?,
+            RoomKind::TwoWayUpDown => display_twowayupdown_room(start_column)?,
+            _ => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "Invalid Dungeon Room",
+                ))
+            }
+        };
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -87,7 +123,12 @@ pub fn menu_dungeon_floor(
                 KeyCode::Esc => {
                     if let Ok(return_to_main_menu) = menu_character(&mut character) {
                         if return_to_main_menu {
-                            return Ok(true);
+                            return Ok(GameMenuReturnOptions {
+                                main_menu: true,
+                                rerender: false,
+                            });
+                        } else {
+                            execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
                 }
@@ -96,12 +137,18 @@ pub fn menu_dungeon_floor(
         }
     }
 
-    match menu_items[selected_index].as_str() {
-        "Back" => {}
+    match menu_items[selected_index] {
+        "Go Up" => {}
+        "Go Down" => {}
+        "Go Right" => {}
+        "Go Left" => {}
         _ => {}
     }
 
-    Ok(false)
+    Ok(GameMenuReturnOptions {
+        main_menu: false,
+        rerender: false,
+    })
 }
 
 /// Returns true if should go back to main menu.
@@ -136,9 +183,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
-                println!(">   {}", item);
+                println!("> {}", item);
             } else {
-                println!("    {}", item);
+                println!("  {}", item);
             }
         }
 
