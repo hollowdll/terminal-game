@@ -45,7 +45,6 @@ pub fn menu_dungeon_floor(
 
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
-    let mut start_column = 2;
     let mut character = match &mut player.character {
         Some(character) => character,
         None => {
@@ -77,6 +76,11 @@ pub fn menu_dungeon_floor(
     if let Some(_) = current_room.adjacents.left {
         menu_items.push("Go Left");
     }
+    match current_room.kind {
+        RoomKind::Start => menu_items.push("Enter Shop"),
+        RoomKind::BossEntrance => menu_items.push("Enter Boss Room"),
+        _ => {}
+    }
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -85,9 +89,9 @@ pub fn menu_dungeon_floor(
         println!("S = Shop, B = Boss Room");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
-        start_column = match current_room.kind {
-            RoomKind::Start => display_start_room(start_column)?,
-            RoomKind::TwoWayUpDown => display_twowayupdown_room(start_column)?,
+        let start_column = match current_room.kind {
+            RoomKind::Start => display_start_room(2)?,
+            RoomKind::TwoWayUpDown => display_twowayupdown_room(2)?,
             _ => {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
