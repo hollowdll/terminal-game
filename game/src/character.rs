@@ -18,7 +18,7 @@ pub fn create_new_game_character(player: &mut Player, character_name: &str) {
     let mut player_character = PlayerCharacter::new(&character);
     let weapon = create_starter_weapon();
     player_character.give_weapon(&weapon);
-    player_character.equip_weapon(&weapon.global_id);
+    player_character.equip_weapon(&weapon.id);
     player.character = Some(player_character);
 }
 

@@ -99,7 +99,8 @@ pub struct ConsumableItem {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ArmorItem {
     pub info: ItemInfo,
-    pub global_id: String,
+    pub id: String,
+    pub level: u32,
     pub rarity: ItemRarity,
     pub health: u32,
     pub defense: u32,
@@ -109,6 +110,7 @@ pub struct ArmorItem {
 impl ArmorItem {
     pub fn new(
         info: ItemInfo,
+        level: u32,
         rarity: ItemRarity,
         health: u32,
         defense: u32,
@@ -116,7 +118,8 @@ impl ArmorItem {
     ) -> Self {
         Self {
             info,
-            global_id: Uuid::new_v4().to_string(),
+            id: Uuid::new_v4().to_string(),
+            level,
             rarity,
             health,
             defense,
@@ -128,7 +131,8 @@ impl ArmorItem {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WeaponItem {
     pub info: ItemInfo,
-    pub global_id: String,
+    pub id: String,
+    pub level: u32,
     pub rarity: ItemRarity,
     pub damage: u32,
     pub crit_hit_rate: f64,
@@ -138,6 +142,7 @@ pub struct WeaponItem {
 impl WeaponItem {
     pub fn new(
         info: ItemInfo,
+        level: u32,
         rarity: ItemRarity,
         damage: u32,
         crit_hit_rate: f64,
@@ -145,7 +150,8 @@ impl WeaponItem {
     ) -> Self {
         Self {
             info,
-            global_id: Uuid::new_v4().to_string(),
+            id: Uuid::new_v4().to_string(),
+            level,
             rarity,
             damage,
             crit_hit_rate,
@@ -157,7 +163,8 @@ impl WeaponItem {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RingItem {
     pub info: ItemInfo,
-    pub global_id: String,
+    pub id: String,
+    pub level: u32,
     pub rarity: ItemRarity,
     pub mana: u32,
     pub enchantments: Vec<Enchantment>,
@@ -166,13 +173,15 @@ pub struct RingItem {
 impl RingItem {
     pub fn new(
         info: ItemInfo,
+        level: u32,
         rarity: ItemRarity,
         mana: u32,
         enchantments: Vec<Enchantment>,
     ) -> Self {
         Self {
             info,
-            global_id: Uuid::new_v4().to_string(),
+            id: Uuid::new_v4().to_string(),
+            level,
             rarity,
             mana,
             enchantments,
@@ -267,6 +276,7 @@ pub fn get_potion_effect_percentage(rarity: ItemRarity) -> i32 {
 pub fn create_starter_weapon() -> WeaponItem {
     WeaponItem::new(
         ITEM_SWORD,
+        1,
         ItemRarity::Common,
         WEAPON_BASE_VALUES.min_damage,
         WEAPON_BASE_VALUES.min_crit_hit_rate,
@@ -439,7 +449,14 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32)
         dungeon_floor,
     );
 
-    WeaponItem::new(ITEM_SWORD, rarity, damage, crit_hit_rate, enchantments)
+    WeaponItem::new(
+        ITEM_SWORD,
+        dungeon_floor,
+        rarity,
+        damage,
+        crit_hit_rate,
+        enchantments,
+    )
 }
 
 pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -> ArmorItem {
@@ -456,7 +473,14 @@ pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -
         dungeon_floor,
     );
 
-    ArmorItem::new(ITEM_ARMOR, rarity, health, defense, enchantments)
+    ArmorItem::new(
+        ITEM_ARMOR,
+        dungeon_floor,
+        rarity,
+        health,
+        defense,
+        enchantments,
+    )
 }
 
 pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> RingItem {
@@ -470,5 +494,5 @@ pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> 
         dungeon_floor,
     );
 
-    RingItem::new(ITEM_RING, rarity, mana, enchantments)
+    RingItem::new(ITEM_RING, dungeon_floor, rarity, mana, enchantments)
 }

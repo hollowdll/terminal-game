@@ -50,7 +50,7 @@ impl PlayerCharacter {
         self.data
             .inventory
             .weapons
-            .insert(weapon.global_id.clone(), weapon.clone());
+            .insert(weapon.id.clone(), weapon.clone());
     }
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.
