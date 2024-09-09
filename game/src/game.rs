@@ -13,6 +13,7 @@ use crate::{
         DungeonFloor, RoomCoordinates, RoomKind,
     },
     game_data::write_save_file,
+    items::ItemCategory,
     session::{Player, PlayerCharacter},
     util::timestamp_to_datetime,
 };
@@ -204,7 +205,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                     "Stats" => {
                         menu_character_stats(&character)?;
                     }
-                    "Inventory" => {}
+                    "Inventory" => {
+                        menu_inventory(character)?;
+                    }
                     "Equipment" => {}
                     "Return to main menu" => return Ok(true),
                     _ => break,
@@ -352,5 +355,66 @@ fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
     }
     execute!(stdout, Clear(ClearType::All))?;
 
+    Ok(())
+}
+
+fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let menu_items = vec!["Consumables", "Weapons", "Armors", "Rings", "Back"];
+    let mut selected_index = 0;
+    let start_column: u16 = 1;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Inventory");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    match menu_items[selected_index] {
+        "Consumables" => {}
+        "Weapons" => {}
+        "Armors" => {}
+        "Rings" => {}
+        _ => {}
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_inventory_item_list(
+    character: &mut PlayerCharacter,
+    item_category: ItemCategory,
+) -> io::Result<()> {
     Ok(())
 }
