@@ -13,7 +13,7 @@ use crate::{
         DungeonFloor, RoomCoordinates, RoomKind,
     },
     game_data::write_save_file,
-    items::ItemCategory,
+    items::{get_consumable_full_name, ConsumableItem},
     session::{Player, PlayerCharacter},
     util::timestamp_to_datetime,
 };
@@ -24,6 +24,8 @@ pub struct GameMenuReturnOptions {
     /// If should rerender current menu.
     pub rerender: bool,
 }
+
+pub struct InventoryItem {}
 
 pub fn save_game(player: &mut Player) -> io::Result<()> {
     if let Some(player_character) = &player.character {
@@ -368,7 +370,7 @@ fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Inventory");
+        println!("Inventory (Gold: {})", character.data.currency.gold);
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
         for (i, item) in menu_items.iter().enumerate() {
@@ -392,29 +394,78 @@ fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
                         selected_index += 1;
                     }
                 }
-                KeyCode::Enter => {
-                    break;
-                }
+                KeyCode::Enter => match menu_items[selected_index] {
+                    "Consumables" => menu_inventory_consumable_list(character)?,
+                    "Weapons" => {}
+                    "Armors" => {}
+                    "Rings" => {}
+                    _ => break,
+                },
                 _ => {}
             }
         }
-    }
-
-    match menu_items[selected_index] {
-        "Consumables" => {}
-        "Weapons" => {}
-        "Armors" => {}
-        "Rings" => {}
-        _ => {}
     }
     execute!(stdout, Clear(ClearType::All))?;
 
     Ok(())
 }
 
-fn menu_inventory_item_list(
-    character: &mut PlayerCharacter,
-    item_category: ItemCategory,
-) -> io::Result<()> {
+fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let mut menu_items: Vec<ConsumableItem> = Vec::new();
+    let mut selected_index = 0;
+    let start_column: u16 = 2;
+
+    for (_, item) in &character.data.inventory.consumables {
+        menu_items.push(item.clone());
+    }
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back, U = Use, D = Delete");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Consumables");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!(
+                    "> {} x{}",
+                    get_consumable_full_name(&item.info.name, &item.rarity),
+                    item.amount_in_inventory
+                );
+            } else {
+                println!(
+                    "  {} x{}",
+                    get_consumable_full_name(&item.info.name, &item.rarity),
+                    item.amount_in_inventory
+                );
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if !menu_items.is_empty() && selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Esc => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
     Ok(())
 }

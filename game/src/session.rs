@@ -1,5 +1,4 @@
 use crate::{
-    config::GameConfig,
     game_data::{CharacterData, GameData},
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon,
@@ -130,6 +129,10 @@ impl PlayerCharacter {
 
     pub fn give_test_items(&mut self) {
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Common), 5);
+        self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Uncommon), 4);
+        self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Rare), 3);
+        self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Epic), 2);
+        self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Legendary), 1);
         self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
         self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
         self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
