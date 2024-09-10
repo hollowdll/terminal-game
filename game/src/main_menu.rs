@@ -46,12 +46,18 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     let menu_items = vec![OPTION_LOAD_GAME, OPTION_NEW_GAME, OPTION_QUIT_GAME];
     let mut selected_index = 0;
-    let start_column: u16 = 7;
+    let mut start_column: u16 = 7;
     let mut rerender = false;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         let _ = print_ascii_title(&stdout);
+
+        if cfg.dev_mode {
+            println!("Running in development mode");
+            execute!(stdout, cursor::MoveTo(0, 8))?;
+            start_column = 8;
+        }
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
