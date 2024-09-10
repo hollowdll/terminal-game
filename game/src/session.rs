@@ -1,6 +1,6 @@
 use crate::{
     game_data::{CharacterData, GameData},
-    items::WeaponItem,
+    items::{get_consumable_full_name, ArmorItem, ConsumableItem, RingItem, WeaponItem},
 };
 
 pub struct Player {
@@ -46,11 +46,46 @@ impl PlayerCharacter {
         self.data.currency.gold += amount;
     }
 
-    pub fn give_weapon(&mut self, weapon: &WeaponItem) {
+    pub fn give_consumable(&mut self, item: &ConsumableItem, amount: u32) {
+        if let Some(item) = self
+            .data
+            .inventory
+            .consumables
+            .get_mut(&get_consumable_full_name(&item.info.name, &item.rarity))
+        {
+            item.amount_in_inventory += amount;
+        } else {
+            self.data.inventory.consumables.insert(
+                get_consumable_full_name(&item.info.name, &item.rarity),
+                ConsumableItem {
+                    info: item.info.clone(),
+                    effect: item.effect.clone(),
+                    rarity: item.rarity.clone(),
+                    amount_in_inventory: amount,
+                },
+            );
+        }
+    }
+
+    pub fn give_weapon(&mut self, item: &WeaponItem) {
         self.data
             .inventory
             .weapons
-            .insert(weapon.id.clone(), weapon.clone());
+            .insert(item.id.clone(), item.clone());
+    }
+
+    pub fn give_armor(&mut self, item: &ArmorItem) {
+        self.data
+            .inventory
+            .armors
+            .insert(item.id.clone(), item.clone());
+    }
+
+    pub fn give_ring(&mut self, item: &RingItem) {
+        self.data
+            .inventory
+            .rings
+            .insert(item.id.clone(), item.clone());
     }
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.

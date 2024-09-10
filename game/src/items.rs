@@ -96,6 +96,17 @@ pub struct ConsumableItem {
     pub amount_in_inventory: u32,
 }
 
+impl ConsumableItem {
+    pub fn new_health_potion(rarity: ItemRarity) -> Self {
+        Self {
+            info: ITEM_HEALTH_POTION,
+            effect: get_health_potion_effect(&rarity),
+            rarity,
+            amount_in_inventory: 0,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ArmorItem {
     pub info: ItemInfo,
@@ -239,7 +250,7 @@ pub enum Enchantment {
     Unknown,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ItemRarity {
     Common,
     Uncommon,
@@ -262,15 +273,26 @@ pub enum ItemCategory {
 /// For example, returns 50 if the percentage is 50%.
 /// 50 can be divided by 100 to get the decimal for calculations: 50/100 = 0.5.
 /// E.g. for health potions, the amount of restored health is then 0.5 * MAX_HEALTH.
-pub fn get_potion_effect_percentage(rarity: ItemRarity) -> i32 {
+pub fn get_potion_effect_percentage(rarity: &ItemRarity) -> i32 {
     match rarity {
         ItemRarity::Common => 20,
-        ItemRarity::Uncommon => 35,
-        ItemRarity::Rare => 50,
-        ItemRarity::Epic => 75,
+        ItemRarity::Uncommon => 40,
+        ItemRarity::Rare => 60,
+        ItemRarity::Epic => 80,
         ItemRarity::Legendary => 100,
         _ => 0,
     }
+}
+
+pub fn get_health_potion_effect(rarity: &ItemRarity) -> String {
+    format!(
+        "Restores {}% of your maximum health points.",
+        get_potion_effect_percentage(rarity)
+    )
+}
+
+pub fn get_consumable_full_name(name: &str, rarity: &ItemRarity) -> String {
+    format!("{:?} {}", rarity, name)
 }
 
 pub fn create_starter_weapon() -> WeaponItem {
