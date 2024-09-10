@@ -263,7 +263,7 @@ fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) ->
 
     match menu_items[selected_index] {
         "Yes" => {
-            delete_game_character(player, character_name);
+            delete_game_character(character_name, player);
             save_game(player)?;
             character_deleted = true;
         }
@@ -423,7 +423,7 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
 
     match menu_items[selected_index] {
         "Yes" => {
-            create_new_game_character(player, &name);
+            create_new_game_character(&name, player, cfg);
             save_game(player)?;
             character_created = true;
         }

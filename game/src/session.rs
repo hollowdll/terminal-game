@@ -1,6 +1,11 @@
 use crate::{
+    config::GameConfig,
     game_data::{CharacterData, GameData},
-    items::{get_consumable_full_name, ArmorItem, ConsumableItem, RingItem, WeaponItem},
+    items::{
+        generate_random_armor, generate_random_ring, generate_random_weapon,
+        get_consumable_full_name, ArmorItem, ConsumableItem, ItemRarity, RingItem, WeaponItem,
+        ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+    },
 };
 
 pub struct Player {
@@ -121,6 +126,16 @@ impl PlayerCharacter {
         self.data.stats.combat_stats.damage += 3;
 
         return self.data.stats.general_stats.character_level;
+    }
+
+    pub fn give_test_items(&mut self) {
+        self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Common), 5);
+        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
+        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
+        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
+        self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
+        self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
+        self.give_weapon(&generate_random_weapon(WEAPON_BASE_VALUES, 1));
     }
 }
 
