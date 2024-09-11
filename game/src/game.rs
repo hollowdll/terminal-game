@@ -14,7 +14,8 @@ use crate::{
     },
     game_data::write_save_file,
     items::{
-        get_consumable_full_name, ConsumableItem, Enchantment, ItemCategory, ItemInfo, WeaponItem,
+        get_consumable_full_name, ArmorItem, ConsumableItem, Enchantment, ItemCategory, ItemInfo,
+        RingItem, WeaponItem,
     },
     session::{Player, PlayerCharacter},
     util::timestamp_to_datetime,
@@ -397,8 +398,8 @@ fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Consumables" => menu_inventory_consumable_list(character)?,
                     "Weapons" => menu_inventory_weapon_list(character)?,
-                    "Armors" => {}
-                    "Rings" => {}
+                    "Armors" => menu_inventory_armor_list(character)?,
+                    "Rings" => menu_inventory_ring_list(character)?,
                     _ => break,
                 },
                 _ => {}
@@ -460,6 +461,11 @@ fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Result
                 }
                 KeyCode::Esc => {
                     break;
+                }
+                KeyCode::Enter => {
+                    if !menu_items.is_empty() {
+                        menu_consumable_info(&menu_items[selected_index])?;
+                    }
                 }
                 KeyCode::Char('D') | KeyCode::Char('d') => {
                     if !menu_items.is_empty() {
@@ -593,20 +599,9 @@ fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result<()>
                 }
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
-                        menu_weapon_info(character, &menu_items[selected_index])?;
+                        menu_weapon_info(&menu_items[selected_index])?;
                     }
                 }
-                /*
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() {
-                        let deleted_all =
-                            menu_delete_consumable(character, &mut menu_items, selected_index)?;
-                        if deleted_all {
-                            selected_index = 0;
-                        }
-                    }
-                }
-                */
                 _ => {}
             }
         }
@@ -616,13 +611,171 @@ fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result<()>
     Ok(())
 }
 
-fn menu_weapon_info(_character: &mut PlayerCharacter, item: &WeaponItem) -> io::Result<()> {
+fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let mut menu_items = Vec::new();
+    let mut selected_index = 0;
+    let start_column: u16 = 2;
+
+    for (_, item) in &character.data.inventory.armors {
+        menu_items.push(item.clone());
+    }
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Armors");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!(
+                    "> {:?} {} (Level {})",
+                    item.rarity, item.info.name, item.level
+                );
+            } else {
+                println!(
+                    "  {:?} {} (Level {})",
+                    item.rarity, item.info.name, item.level
+                );
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if !menu_items.is_empty() && selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Esc => {
+                    break;
+                }
+                KeyCode::Enter => {
+                    if !menu_items.is_empty() {
+                        menu_armor_info(&menu_items[selected_index])?;
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let mut menu_items = Vec::new();
+    let mut selected_index = 0;
+    let start_column: u16 = 2;
+
+    for (_, item) in &character.data.inventory.rings {
+        menu_items.push(item.clone());
+    }
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Rings");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!(
+                    "> {:?} {} (Level {})",
+                    item.rarity, item.info.name, item.level
+                );
+            } else {
+                println!(
+                    "  {:?} {} (Level {})",
+                    item.rarity, item.info.name, item.level
+                );
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if !menu_items.is_empty() && selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Esc => {
+                    break;
+                }
+                KeyCode::Enter => {
+                    if !menu_items.is_empty() {
+                        menu_ring_info(&menu_items[selected_index])?;
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_consumable_info(item: &ConsumableItem) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, E = Equip Item, D = Delete Item");
+        println!("Esc = Back");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Item Info");
+        let start_column = display_item_basic_info(&item.info, 2)?;
+
+        println!("  Rarity: {:?}", item.rarity);
+        execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
+        println!("  Effect: {}", item.effect);
+        execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
+        println!("  Amount in inventory: {}", item.amount_in_inventory);
+        execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Esc => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_weapon_info(item: &WeaponItem) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
@@ -641,17 +794,72 @@ fn menu_weapon_info(_character: &mut PlayerCharacter, item: &WeaponItem) -> io::
                 KeyCode::Esc => {
                     break;
                 }
-                /*
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() {
-                        let deleted_all =
-                            menu_delete_consumable(character, &mut menu_items, selected_index)?;
-                        if deleted_all {
-                            selected_index = 0;
-                        }
-                    }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_armor_info(item: &ArmorItem) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Item Info");
+        let start_column = display_item_basic_info(&item.info, 2)?;
+
+        println!("  Level: {}", item.level);
+        execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
+        println!("  Rarity: {:?}", item.rarity);
+        execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
+        println!("  Health: {}", item.health);
+        execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
+        println!("  Defense: {}", item.defense);
+        let _ = display_item_enchantments(&item.enchantments, start_column + 4);
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Esc => {
+                    break;
                 }
-                */
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_ring_info(item: &RingItem) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Item Info");
+        let start_column = display_item_basic_info(&item.info, 2)?;
+
+        println!("  Level: {}", item.level);
+        execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
+        println!("  Rarity: {:?}", item.rarity);
+        execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
+        println!("  Mana: {}", item.mana);
+        let _ = display_item_enchantments(&item.enchantments, start_column + 3);
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Esc => {
+                    break;
+                }
                 _ => {}
             }
         }

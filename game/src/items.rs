@@ -240,6 +240,14 @@ pub struct EnchantmentBaseValues {
     pub max_mana: u32,
 }
 
+pub enum CharacterItem {
+    Consumable(ConsumableItem),
+    Weapon(WeaponItem),
+    Armor(ArmorItem),
+    RingItem(RingItem),
+    Unknown,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Enchantment {
     Damage(u32),
