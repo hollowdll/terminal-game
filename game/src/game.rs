@@ -461,6 +461,15 @@ fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Result
                 KeyCode::Esc => {
                     break;
                 }
+                KeyCode::Char('D') | KeyCode::Char('d') => {
+                    if !menu_items.is_empty() {
+                        let deleted_all =
+                            menu_delete_consumable(character, &mut menu_items, selected_index)?;
+                        if deleted_all {
+                            selected_index = 0;
+                        }
+                    }
+                }
                 _ => {}
             }
         }
@@ -468,4 +477,67 @@ fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Result
     execute!(stdout, Clear(ClearType::All))?;
 
     Ok(())
+}
+
+/// Returns true if the item was removed completely (amount in inventory 0 after deletion).
+fn menu_delete_consumable(
+    character: &mut PlayerCharacter,
+    menu_items: &mut Vec<ConsumableItem>,
+    selected_index: usize,
+) -> io::Result<bool> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let selected_item = &mut menu_items[selected_index];
+    let mut selected_amount: u32 = 1;
+    let full_name = &get_consumable_full_name(&selected_item.info.name, &selected_item.rarity);
+    let mut deleted_all = false;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back, Enter = Delete, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Delete item {}", full_name);
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!("Specify the amount to delete:");
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!("< x{} >", selected_amount);
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Left => {
+                    if selected_amount > 1 {
+                        selected_amount -= 1;
+                    }
+                }
+                KeyCode::Right => {
+                    if selected_item.amount_in_inventory > selected_amount {
+                        selected_amount += 1;
+                    }
+                }
+                KeyCode::Esc => {
+                    break;
+                }
+                KeyCode::Enter => {
+                    if selected_amount == selected_item.amount_in_inventory {
+                        character.data.inventory.consumables.remove(full_name);
+                        menu_items.remove(selected_index);
+                        deleted_all = true;
+                    } else if selected_amount < selected_item.amount_in_inventory {
+                        if let Some(item) = character.data.inventory.consumables.get_mut(full_name)
+                        {
+                            item.amount_in_inventory -= selected_amount;
+                            selected_item.amount_in_inventory -= selected_amount;
+                        }
+                    }
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(deleted_all)
 }
