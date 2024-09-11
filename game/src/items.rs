@@ -260,7 +260,7 @@ pub enum ItemRarity {
     Unknown,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ItemCategory {
     Consumable,
     Weapon,
