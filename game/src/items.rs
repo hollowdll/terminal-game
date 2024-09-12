@@ -240,11 +240,11 @@ pub struct EnchantmentBaseValues {
     pub max_mana: u32,
 }
 
-pub enum CharacterItem {
-    Consumable(ConsumableItem),
-    Weapon(WeaponItem),
-    Armor(ArmorItem),
-    RingItem(RingItem),
+pub enum CharacterItem<'a> {
+    Consumable(&'a ConsumableItem),
+    Weapon(&'a WeaponItem),
+    Armor(&'a ArmorItem),
+    Ring(&'a RingItem),
     Unknown,
 }
 
@@ -299,8 +299,33 @@ pub fn get_health_potion_effect(rarity: &ItemRarity) -> String {
     )
 }
 
-pub fn get_consumable_full_name(name: &str, rarity: &ItemRarity) -> String {
-    format!("{:?} {}", rarity, name)
+/// Returns a string representation of an item.
+/// The string is used to display the item in menus.
+pub fn get_item_display_name<'a>(item: CharacterItem<'a>) -> String {
+    match item {
+        CharacterItem::Consumable(consumable) => {
+            format!("{:?} {}", consumable.rarity, consumable.info.name)
+        }
+        CharacterItem::Weapon(weapon) => {
+            format!(
+                "{:?} {} (Level {})",
+                weapon.rarity, weapon.info.name, weapon.level
+            )
+        }
+        CharacterItem::Armor(armor) => {
+            format!(
+                "{:?} {} (Level {})",
+                armor.rarity, armor.info.name, armor.level
+            )
+        }
+        CharacterItem::Ring(ring) => {
+            format!(
+                "{:?} {} (Level {})",
+                ring.rarity, ring.info.name, ring.level
+            )
+        }
+        _ => format!("?Unknown?"),
+    }
 }
 
 pub fn create_starter_weapon() -> WeaponItem {

@@ -1,8 +1,8 @@
 use crate::{
     game_data::{CharacterData, GameData},
     items::{
-        generate_random_armor, generate_random_ring, generate_random_weapon,
-        get_consumable_full_name, ArmorItem, ConsumableItem, ItemRarity, RingItem, WeaponItem,
+        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
+        ArmorItem, CharacterItem, ConsumableItem, ItemRarity, RingItem, WeaponItem,
         ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
 };
@@ -55,12 +55,12 @@ impl PlayerCharacter {
             .data
             .inventory
             .consumables
-            .get_mut(&get_consumable_full_name(&item.info.name, &item.rarity))
+            .get_mut(&get_item_display_name(CharacterItem::Consumable(&item)))
         {
             item.amount_in_inventory += amount;
         } else {
             self.data.inventory.consumables.insert(
-                get_consumable_full_name(&item.info.name, &item.rarity),
+                get_item_display_name(CharacterItem::Consumable(&item)),
                 ConsumableItem {
                     info: item.info.clone(),
                     effect: item.effect.clone(),

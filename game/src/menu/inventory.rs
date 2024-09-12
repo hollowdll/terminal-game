@@ -8,8 +8,8 @@ use std::io;
 
 use crate::{
     items::{
-        get_consumable_full_name, ArmorItem, ConsumableItem, Enchantment, ItemInfo, RingItem,
-        WeaponItem,
+        get_item_display_name, ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemInfo,
+        RingItem, WeaponItem,
     },
     session::PlayerCharacter,
 };
@@ -88,13 +88,13 @@ pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Re
             if i == selected_index {
                 println!(
                     "> {} x{}",
-                    get_consumable_full_name(&item.info.name, &item.rarity),
+                    get_item_display_name(CharacterItem::Consumable(&item)),
                     item.amount_in_inventory
                 );
             } else {
                 println!(
                     "  {} x{}",
-                    get_consumable_full_name(&item.info.name, &item.rarity),
+                    get_item_display_name(CharacterItem::Consumable(&item)),
                     item.amount_in_inventory
                 );
             }
@@ -149,14 +149,14 @@ pub fn menu_delete_consumable(
 
     let selected_item = &mut menu_items[selected_index];
     let mut selected_amount: u32 = 1;
-    let full_name = &get_consumable_full_name(&selected_item.info.name, &selected_item.rarity);
+    let display_name = &get_item_display_name(CharacterItem::Consumable(&selected_item));
     let mut deleted_all = false;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Esc = Back, Enter = Delete, Arrow Left = Decrease amount, Arrow Right = Increase amount");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!("Delete item {}", full_name);
+        println!("Delete item {}", display_name);
         execute!(stdout, cursor::MoveTo(0, 2))?;
         println!("Specify the amount to delete:");
         execute!(stdout, cursor::MoveTo(0, 3))?;
@@ -180,11 +180,12 @@ pub fn menu_delete_consumable(
                 }
                 KeyCode::Enter => {
                     if selected_amount == selected_item.amount_in_inventory {
-                        character.data.inventory.consumables.remove(full_name);
+                        character.data.inventory.consumables.remove(display_name);
                         menu_items.remove(selected_index);
                         deleted_all = true;
                     } else if selected_amount < selected_item.amount_in_inventory {
-                        if let Some(item) = character.data.inventory.consumables.get_mut(full_name)
+                        if let Some(item) =
+                            character.data.inventory.consumables.get_mut(display_name)
                         {
                             item.amount_in_inventory -= selected_amount;
                             selected_item.amount_in_inventory -= selected_amount;
@@ -223,15 +224,9 @@ pub fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
-                println!(
-                    "> {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("> {}", &get_item_display_name(CharacterItem::Weapon(&item)));
             } else {
-                println!(
-                    "  {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("  {}", &get_item_display_name(CharacterItem::Weapon(&item)));
             }
         }
 
@@ -286,15 +281,9 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
-                println!(
-                    "> {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("> {}", &get_item_display_name(CharacterItem::Armor(&item)));
             } else {
-                println!(
-                    "  {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("  {}", &get_item_display_name(CharacterItem::Armor(&item)));
             }
         }
 
@@ -349,15 +338,9 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
-                println!(
-                    "> {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("> {}", &get_item_display_name(CharacterItem::Ring(&item)));
             } else {
-                println!(
-                    "  {:?} {} (Level {})",
-                    item.rarity, item.info.name, item.level
-                );
+                println!("  {}", &get_item_display_name(CharacterItem::Ring(&item)));
             }
         }
 

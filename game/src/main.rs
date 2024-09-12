@@ -8,7 +8,6 @@ use crossterm::{
 };
 use game::{
     config::GameConfig,
-    dungeon,
     game_data::{create_savefile_if_not_exists, load_save_file},
     menu::main_menu::main_menu,
     session::Player,
