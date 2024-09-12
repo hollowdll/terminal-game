@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
+use crate::session::PlayerCharacter;
+
 pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
     common: 0.35,
     uncommon: 0.30,
@@ -168,6 +170,15 @@ impl WeaponItem {
             crit_hit_rate,
             enchantments,
         }
+    }
+
+    pub fn is_equipped(&self, character: &PlayerCharacter) -> bool {
+        if let Some(weapon) = &character.data.equipment.weapon {
+            if weapon.id.eq(&self.id) {
+                return true;
+            }
+        }
+        false
     }
 }
 

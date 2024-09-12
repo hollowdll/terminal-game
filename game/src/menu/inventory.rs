@@ -231,10 +231,19 @@ pub fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            let display_name = &get_item_display_name(CharacterItem::Weapon(&item));
             if i == selected_index {
-                println!("> {}", &get_item_display_name(CharacterItem::Weapon(&item)));
+                if item.is_equipped(&character) {
+                    println!("> {} [Equipped]", display_name);
+                } else {
+                    println!("> {}", display_name);
+                }
             } else {
-                println!("  {}", &get_item_display_name(CharacterItem::Weapon(&item)));
+                if item.is_equipped(&character) {
+                    println!("  {} [Equipped]", display_name);
+                } else {
+                    println!("  {}", display_name);
+                }
             }
         }
 
@@ -271,6 +280,14 @@ pub fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result
                             }
                         }
                         execute!(stdout, Clear(ClearType::All))?;
+                    }
+                }
+                KeyCode::Char('E') | KeyCode::Char('e') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        if character.equip_weapon(&selected_item.id) {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
                     }
                 }
                 _ => {}
