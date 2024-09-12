@@ -9,8 +9,8 @@ use std::io::{self, Write};
 use crate::{
     character::{create_new_game_character, delete_game_character, max_game_characters_reached},
     config::GameConfig,
-    dungeon::{generate_random_dungeon_floor, RoomCoordinates},
-    game::{menu_dungeon_floor, save_game},
+    game::save_game,
+    menu::dungeon::menu_start_dungeon_floor,
     session::{Player, PlayerCharacter},
     util::extract_first_word,
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
@@ -482,76 +482,4 @@ pub fn menu_tutorial() -> io::Result<()> {
     }
 
     Ok(())
-}
-
-/// Returns true if should go back to main menu.
-fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
-    let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
-    let menu_items = vec!["Start Dungeon Floor", "Return to main menu"];
-    let mut selected_index = 0;
-    let start_column: u16 = 1;
-    let go_back = true;
-    let character = match &player.character {
-        Some(character) => character,
-        None => {
-            return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "No selected character",
-            ))
-        }
-    };
-
-    loop {
-        execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!(
-            "Character: {} (Level {}, Dungeon Floor {})",
-            character.data.metadata.name,
-            character.data.stats.general_stats.character_level,
-            character.data.stats.general_stats.current_dungeon_floor
-        );
-        execute!(stdout, cursor::MoveTo(0, 1))?;
-
-        for (i, item) in menu_items.iter().enumerate() {
-            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
-            if i == selected_index {
-                println!("> {}", item);
-            } else {
-                println!("  {}", item);
-            }
-        }
-
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
-            }
-        }
-    }
-
-    match menu_items[selected_index] {
-        "Start Dungeon Floor" => {
-            let mut dungeon_floor = generate_random_dungeon_floor(
-                character.data.stats.general_stats.current_dungeon_floor,
-            );
-            menu_dungeon_floor(&mut dungeon_floor, player, &RoomCoordinates::new(0, 0))?;
-        }
-        "Return to main menu" => {}
-        _ => {}
-    }
-
-    Ok(go_back)
 }

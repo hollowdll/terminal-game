@@ -10,7 +10,7 @@ use game::{
     config::GameConfig,
     dungeon,
     game_data::{create_savefile_if_not_exists, load_save_file},
-    main_menu::main_menu,
+    menu::main_menu::main_menu,
     session::Player,
 };
 use std::io;
@@ -52,9 +52,6 @@ fn run() -> io::Result<()> {
 
     execute!(stdout, LeaveAlternateScreen, Show)?;
     disable_raw_mode()?;
-
-    let dungeon = dungeon::generate_random_dungeon_floor(1);
-    dungeon.pretty_print();
 
     Ok(())
 }
