@@ -83,6 +83,10 @@ pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Re
         println!("Consumables");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
+        if menu_items.is_empty() {
+            println!("  No consumables in inventory");
+        }
+
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
@@ -180,14 +184,14 @@ pub fn menu_delete_consumable(
                 }
                 KeyCode::Enter => {
                     if selected_amount == selected_item.amount_in_inventory {
-                        character.data.inventory.consumables.remove(display_name);
-                        menu_items.remove(selected_index);
-                        deleted_all = true;
+                        if character.delete_consumable(display_name) {
+                            menu_items.remove(selected_index);
+                            deleted_all = true;
+                        }
                     } else if selected_amount < selected_item.amount_in_inventory {
-                        if let Some(item) =
-                            character.data.inventory.consumables.get_mut(display_name)
+                        if character
+                            .decrease_consumable_inventory_amount(display_name, selected_amount)
                         {
-                            item.amount_in_inventory -= selected_amount;
                             selected_item.amount_in_inventory -= selected_amount;
                         }
                     }
@@ -221,6 +225,10 @@ pub fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result
         println!("Weapons");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
+        if menu_items.is_empty() {
+            println!("  No weapons in inventory");
+        }
+
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
@@ -248,6 +256,21 @@ pub fn menu_inventory_weapon_list(character: &mut PlayerCharacter) -> io::Result
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
                         menu_weapon_info(&menu_items[selected_index])?;
+                    }
+                }
+                KeyCode::Char('D') | KeyCode::Char('d') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        let delete = menu_confirm_item_deletion(&get_item_display_name(
+                            CharacterItem::Weapon(selected_item),
+                        ))?;
+                        if delete {
+                            if character.delete_weapon(&selected_item.id) {
+                                menu_items.remove(selected_index);
+                                selected_index = 0;
+                            }
+                        }
+                        execute!(stdout, Clear(ClearType::All))?;
                     }
                 }
                 _ => {}
@@ -557,4 +580,57 @@ pub fn display_item_enchantments(
     }
 
     Ok(current_column)
+}
+
+fn menu_confirm_item_deletion(item_name: &str) -> io::Result<bool> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let menu_items = vec!["No", "Yes"];
+    let mut selected_index = 0;
+    let start_column: u16 = 1;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!(
+            "Delete item {}? It cannot be restored once deleted.",
+            item_name
+        );
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+
+        for (i, item) in menu_items.iter().enumerate() {
+            execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            if i == selected_index {
+                println!("> {}", item);
+            } else {
+                println!("  {}", item);
+            }
+        }
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Up => {
+                    if selected_index > 0 {
+                        selected_index -= 1;
+                    }
+                }
+                KeyCode::Down => {
+                    if selected_index < menu_items.len() - 1 {
+                        selected_index += 1;
+                    }
+                }
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+
+    match menu_items[selected_index] {
+        "Yes" => return Ok(true),
+        _ => {}
+    }
+
+    Ok(false)
 }

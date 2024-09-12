@@ -98,9 +98,17 @@ impl PlayerCharacter {
         match self.data.inventory.weapons.get(weapon_id) {
             Some(weapon) => {
                 self.data.equipment.weapon = Some(weapon.clone());
+                // TODO increase stats
                 return true;
             }
             None => return false,
+        }
+    }
+
+    pub fn unequip_weapon(&mut self) {
+        if let Some(_weapon) = &self.data.equipment.weapon {
+            // TODO decrease stats
+            self.data.equipment.weapon = None;
         }
     }
 
@@ -139,6 +147,42 @@ impl PlayerCharacter {
         self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
         self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
         self.give_weapon(&generate_random_weapon(WEAPON_BASE_VALUES, 1));
+    }
+
+    pub fn delete_consumable(&mut self, display_name: &str) -> bool {
+        if let Some(_) = self.data.inventory.consumables.remove(display_name) {
+            return true;
+        }
+        false
+    }
+
+    /// Returns true if the item exists in inventory.
+    pub fn decrease_consumable_inventory_amount(
+        &mut self,
+        display_name: &str,
+        amount: u32,
+    ) -> bool {
+        if let Some(item) = self.data.inventory.consumables.get_mut(display_name) {
+            if amount > item.amount_in_inventory {
+                item.amount_in_inventory = 0;
+            } else {
+                item.amount_in_inventory -= amount;
+            }
+            return true;
+        }
+        false
+    }
+
+    pub fn delete_weapon(&mut self, id: &str) -> bool {
+        if let Some(_) = self.data.inventory.weapons.remove(id) {
+            if let Some(weapon) = &self.data.equipment.weapon {
+                if weapon.id.eq(id) {
+                    self.unequip_weapon();
+                }
+            }
+            return true;
+        }
+        false
     }
 }
 
