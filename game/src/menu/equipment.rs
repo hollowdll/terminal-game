@@ -91,6 +91,14 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
                     }
                     _ => {}
                 },
+                KeyCode::Char('U') | KeyCode::Char('u') => match selected_index {
+                    0 => {
+                        if character.unequip_weapon() {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }

@@ -105,11 +105,13 @@ impl PlayerCharacter {
         }
     }
 
-    pub fn unequip_weapon(&mut self) {
+    pub fn unequip_weapon(&mut self) -> bool {
         if let Some(_weapon) = &self.data.equipment.weapon {
             // TODO decrease stats
             self.data.equipment.weapon = None;
+            return true;
         }
+        false
     }
 
     pub fn gain_exp(&mut self, exp: u32) {
