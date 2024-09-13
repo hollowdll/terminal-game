@@ -117,7 +117,7 @@ impl PlayerCharacter {
                 self.temp_stat_boosts.decrease_damage(weapon.damage);
                 self.temp_stat_boosts
                     .decrease_crit_hit_rate(weapon.crit_hit_rate);
-                self.data.equipment.weapon = None;
+                self.equipped_items.weapon = None;
                 return true;
             }
         }
@@ -195,11 +195,11 @@ impl PlayerCharacter {
         false
     }
 
-    pub fn get_full_damage(&self) -> u32 {
+    pub fn get_total_damage(&self) -> u32 {
         self.data.stats.combat_stats.damage + self.temp_stat_boosts.damage
     }
 
-    pub fn get_full_crit_hit_rate(&self) -> f64 {
+    pub fn get_total_crit_hit_rate(&self) -> f64 {
         self.data.stats.combat_stats.critical_hit_rate + self.temp_stat_boosts.critical_hit_rate
     }
 }
