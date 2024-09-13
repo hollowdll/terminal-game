@@ -7,7 +7,7 @@ use crossterm::{
 use std::io;
 
 use crate::{
-    menu::{inventory::menu_inventory, stats::menu_character_stats},
+    menu::{equipment::menu_equipment, inventory::menu_inventory, stats::menu_character_stats},
     session::PlayerCharacter,
 };
 
@@ -59,7 +59,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                     "Inventory" => {
                         menu_inventory(character)?;
                     }
-                    "Equipment" => {}
+                    "Equipment" => {
+                        menu_equipment(character)?;
+                    }
                     "Return to main menu" => return Ok(true),
                     _ => break,
                 },
