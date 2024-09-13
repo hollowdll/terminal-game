@@ -27,6 +27,16 @@ pub fn create_new_game_character(character_name: &str, player: &mut Player, cfg:
     player.character = Some(player_character);
 }
 
+pub fn load_game_character(character_name: &str, player: &mut Player) {
+    if let Some(character_data) = player.data.characters.get(character_name) {
+        let mut character = PlayerCharacter::new(character_data);
+        if let Some(weapon_id) = &character_data.equipment.weapon {
+            character.equip_weapon(weapon_id);
+        }
+        player.character = Some(character);
+    }
+}
+
 pub fn delete_game_character(character_name: &str, player: &mut Player) -> bool {
     if let Some(_) = player.data.characters.remove(character_name) {
         if let Some(plr_char) = &player.character {

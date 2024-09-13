@@ -7,11 +7,14 @@ use crossterm::{
 use std::io::{self, Write};
 
 use crate::{
-    character::{create_new_game_character, delete_game_character, max_game_characters_reached},
+    character::{
+        create_new_game_character, delete_game_character, load_game_character,
+        max_game_characters_reached,
+    },
     config::GameConfig,
     game::save_game,
     menu::dungeon::menu_start_dungeon_floor,
-    session::{Player, PlayerCharacter},
+    session::Player,
     util::extract_first_word,
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
@@ -205,9 +208,7 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
         "Back" => {}
         _ => {
             let character_name = extract_first_word(menu_items[selected_index].as_str());
-            if let Some(character) = player.data.characters.get(character_name) {
-                player.character = Some(PlayerCharacter::new(character));
-            }
+            load_game_character(character_name, player);
             return Ok(false);
         }
     }

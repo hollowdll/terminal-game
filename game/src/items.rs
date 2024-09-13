@@ -173,7 +173,7 @@ impl WeaponItem {
     }
 
     pub fn is_equipped(&self, character: &PlayerCharacter) -> bool {
-        if let Some(id) = &character.data.equipment.weapon {
+        if let Some(id) = &character.equipped_items.weapon {
             if let Some(weapon) = character.data.inventory.weapons.get(id) {
                 if weapon.id.eq(&self.id) {
                     return true;

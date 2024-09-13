@@ -25,6 +25,7 @@ pub struct PlayerCharacter {
     pub data: CharacterData,
     pub temp_stats: TemporaryStats,
     pub temp_stat_boosts: TemporaryStatBoosts,
+    pub equipped_items: EquippedItems,
 }
 
 impl PlayerCharacter {
@@ -42,6 +43,11 @@ impl PlayerCharacter {
                 damage: 0,
                 critical_damage_multiplier: 0.0,
                 critical_hit_rate: 0.0,
+            },
+            equipped_items: EquippedItems {
+                weapon: None,
+                armor: None,
+                ring: None,
             },
         }
     }
@@ -94,8 +100,9 @@ impl PlayerCharacter {
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.
     pub fn equip_weapon(&mut self, id: &str) -> bool {
+        self.unequip_weapon();
         if let Some(weapon) = self.data.inventory.weapons.get(id) {
-            self.data.equipment.weapon = Some(id.to_string());
+            self.equipped_items.weapon = Some(id.to_string());
             self.temp_stat_boosts.increase_damage(weapon.damage);
             self.temp_stat_boosts
                 .increase_crit_hit_rate(weapon.crit_hit_rate);
@@ -105,7 +112,7 @@ impl PlayerCharacter {
     }
 
     pub fn unequip_weapon(&mut self) -> bool {
-        if let Some(id) = &self.data.equipment.weapon {
+        if let Some(id) = &self.equipped_items.weapon {
             if let Some(weapon) = self.data.inventory.weapons.get(id) {
                 self.temp_stat_boosts.decrease_damage(weapon.damage);
                 self.temp_stat_boosts
@@ -179,13 +186,9 @@ impl PlayerCharacter {
     }
 
     pub fn delete_weapon(&mut self, id: &str) -> bool {
-        if let Some(_) = self.data.inventory.weapons.remove(id) {
-            if let Some(id) = &self.data.equipment.weapon {
-                if let Some(weapon) = self.data.inventory.weapons.get(id) {
-                    if weapon.id.eq(id) {
-                        self.unequip_weapon();
-                    }
-                }
+        if let Some(deleted_weapon) = self.data.inventory.weapons.remove(id) {
+            if deleted_weapon.is_equipped(&self) {
+                self.unequip_weapon();
             }
             return true;
         }
@@ -204,6 +207,18 @@ impl PlayerCharacter {
 pub struct TemporaryStats {
     pub health: u32,
     pub mana: u32,
+}
+
+/// Session only equipped items. Not saved to game data.
+/// Game data tracks which items are equipped so the game can
+/// correctly equip the correct items when loading a player character.
+pub struct EquippedItems {
+    /// ID of the item.
+    pub weapon: Option<String>,
+    /// ID of the item.
+    pub armor: Option<String>,
+    /// ID of the item.
+    pub ring: Option<String>,
 }
 
 pub struct TemporaryStatBoosts {
