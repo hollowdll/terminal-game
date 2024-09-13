@@ -93,9 +93,9 @@ impl PlayerCharacter {
     }
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.
-    pub fn equip_weapon(&mut self, weapon_id: &str) -> bool {
-        if let Some(weapon) = self.data.inventory.weapons.get(weapon_id) {
-            self.data.equipment.weapon = Some(weapon.clone());
+    pub fn equip_weapon(&mut self, id: &str) -> bool {
+        if let Some(weapon) = self.data.inventory.weapons.get(id) {
+            self.data.equipment.weapon = Some(id.to_string());
             self.temp_stat_boosts.increase_damage(weapon.damage);
             self.temp_stat_boosts
                 .increase_crit_hit_rate(weapon.crit_hit_rate);
@@ -105,12 +105,14 @@ impl PlayerCharacter {
     }
 
     pub fn unequip_weapon(&mut self) -> bool {
-        if let Some(weapon) = &self.data.equipment.weapon {
-            self.temp_stat_boosts.decrease_damage(weapon.damage);
-            self.temp_stat_boosts
-                .decrease_crit_hit_rate(weapon.crit_hit_rate);
-            self.data.equipment.weapon = None;
-            return true;
+        if let Some(id) = &self.data.equipment.weapon {
+            if let Some(weapon) = self.data.inventory.weapons.get(id) {
+                self.temp_stat_boosts.decrease_damage(weapon.damage);
+                self.temp_stat_boosts
+                    .decrease_crit_hit_rate(weapon.crit_hit_rate);
+                self.data.equipment.weapon = None;
+                return true;
+            }
         }
         false
     }
@@ -178,9 +180,11 @@ impl PlayerCharacter {
 
     pub fn delete_weapon(&mut self, id: &str) -> bool {
         if let Some(_) = self.data.inventory.weapons.remove(id) {
-            if let Some(weapon) = &self.data.equipment.weapon {
-                if weapon.id.eq(id) {
-                    self.unequip_weapon();
+            if let Some(id) = &self.data.equipment.weapon {
+                if let Some(weapon) = self.data.inventory.weapons.get(id) {
+                    if weapon.id.eq(id) {
+                        self.unequip_weapon();
+                    }
                 }
             }
             return true;

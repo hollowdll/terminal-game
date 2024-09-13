@@ -141,9 +141,12 @@ pub struct CharacterInventory {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterEquipment {
-    pub weapon: Option<WeaponItem>,
-    pub armor: Option<ArmorItem>,
-    pub ring: Option<RingItem>,
+    /// ID of the item.
+    pub weapon: Option<String>,
+    /// ID of the item.
+    pub armor: Option<String>,
+    /// ID of the item.
+    pub ring: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

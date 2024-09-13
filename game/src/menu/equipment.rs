@@ -27,15 +27,24 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
         let weapon_text = match &character.data.equipment.weapon {
-            Some(weapon) => &get_item_display_name(CharacterItem::Weapon(weapon)),
+            Some(id) => match character.data.inventory.weapons.get(id) {
+                Some(weapon) => &get_item_display_name(CharacterItem::Weapon(weapon)),
+                None => "?Unknown?",
+            },
             None => "Not equipped",
         };
         let armor_text = match &character.data.equipment.armor {
-            Some(armor) => &get_item_display_name(CharacterItem::Armor(armor)),
+            Some(id) => match character.data.inventory.armors.get(id) {
+                Some(armor) => &get_item_display_name(CharacterItem::Armor(armor)),
+                None => "?Unknown?",
+            },
             None => "Not equipped",
         };
         let ring_text = match &character.data.equipment.ring {
-            Some(ring) => &get_item_display_name(CharacterItem::Ring(ring)),
+            Some(id) => match character.data.inventory.rings.get(id) {
+                Some(ring) => &get_item_display_name(CharacterItem::Ring(ring)),
+                None => "?Unknown?",
+            },
             None => "Not equipped",
         };
 
@@ -75,18 +84,24 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
                 }
                 KeyCode::Enter => match selected_index {
                     0 => {
-                        if let Some(weapon) = &character.data.equipment.weapon {
-                            menu_weapon_info(weapon)?;
+                        if let Some(id) = &character.data.equipment.weapon {
+                            if let Some(weapon) = character.data.inventory.weapons.get(id) {
+                                menu_weapon_info(weapon)?;
+                            }
                         }
                     }
                     1 => {
-                        if let Some(armor) = &character.data.equipment.armor {
-                            menu_armor_info(armor)?;
+                        if let Some(id) = &character.data.equipment.armor {
+                            if let Some(armor) = character.data.inventory.armors.get(id) {
+                                menu_armor_info(armor)?;
+                            }
                         }
                     }
                     2 => {
-                        if let Some(ring) = &character.data.equipment.ring {
-                            menu_ring_info(ring)?;
+                        if let Some(id) = &character.data.equipment.ring {
+                            if let Some(ring) = character.data.inventory.rings.get(id) {
+                                menu_ring_info(ring)?;
+                            }
                         }
                     }
                     _ => {}
