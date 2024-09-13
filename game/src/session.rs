@@ -93,21 +93,22 @@ impl PlayerCharacter {
     }
 
     /// The returned bool is true if the weapon is in the inventory and it was equipped.
-    /// If the item doesn't exist in the inventory, the returned bool is false.
     pub fn equip_weapon(&mut self, weapon_id: &str) -> bool {
-        match self.data.inventory.weapons.get(weapon_id) {
-            Some(weapon) => {
-                self.data.equipment.weapon = Some(weapon.clone());
-                // TODO increase stats
-                return true;
-            }
-            None => return false,
+        if let Some(weapon) = self.data.inventory.weapons.get(weapon_id) {
+            self.data.equipment.weapon = Some(weapon.clone());
+            self.temp_stat_boosts.increase_damage(weapon.damage);
+            self.temp_stat_boosts
+                .increase_crit_hit_rate(weapon.crit_hit_rate);
+            return true;
         }
+        false
     }
 
     pub fn unequip_weapon(&mut self) -> bool {
-        if let Some(_weapon) = &self.data.equipment.weapon {
-            // TODO decrease stats
+        if let Some(weapon) = &self.data.equipment.weapon {
+            self.temp_stat_boosts.decrease_damage(weapon.damage);
+            self.temp_stat_boosts
+                .decrease_crit_hit_rate(weapon.crit_hit_rate);
             self.data.equipment.weapon = None;
             return true;
         }
@@ -186,6 +187,14 @@ impl PlayerCharacter {
         }
         false
     }
+
+    pub fn get_full_damage(&self) -> u32 {
+        self.data.stats.combat_stats.damage + self.temp_stat_boosts.damage
+    }
+
+    pub fn get_full_crit_hit_rate(&self) -> f64 {
+        self.data.stats.combat_stats.critical_hit_rate + self.temp_stat_boosts.critical_hit_rate
+    }
 }
 
 pub struct TemporaryStats {
@@ -200,4 +209,28 @@ pub struct TemporaryStatBoosts {
     pub damage: u32,
     pub critical_damage_multiplier: f64,
     pub critical_hit_rate: f64,
+}
+
+impl TemporaryStatBoosts {
+    pub fn increase_damage(&mut self, amount: u32) {
+        self.damage += amount;
+    }
+
+    pub fn decrease_damage(&mut self, amount: u32) {
+        if amount > self.damage {
+            return self.damage = 0;
+        }
+        self.damage -= amount;
+    }
+
+    pub fn increase_crit_hit_rate(&mut self, amount: f64) {
+        self.critical_hit_rate += amount;
+    }
+
+    pub fn decrease_crit_hit_rate(&mut self, amount: f64) {
+        if amount > self.critical_hit_rate {
+            return self.critical_hit_rate = 0.0;
+        }
+        self.critical_hit_rate -= amount;
+    }
 }

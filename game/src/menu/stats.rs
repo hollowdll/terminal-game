@@ -97,7 +97,7 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 17))?;
         println!("    Defense: {}", character.data.stats.combat_stats.defense);
         execute!(stdout, cursor::MoveTo(0, 18))?;
-        println!("    Damage: {}", character.data.stats.combat_stats.damage);
+        println!("    Damage: {}", character.get_full_damage());
         execute!(stdout, cursor::MoveTo(0, 19))?;
         println!(
             "    Critical Damage Multiplier: {}",
@@ -106,7 +106,7 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 20))?;
         println!(
             "    Critical Hit Rate: {}",
-            character.data.stats.combat_stats.critical_hit_rate
+            character.get_full_crit_hit_rate()
         );
         execute!(stdout, cursor::MoveTo(0, 21))?;
 
