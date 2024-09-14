@@ -98,7 +98,7 @@ impl PlayerCharacter {
             .insert(item.id.clone(), item.clone());
     }
 
-    /// The returned bool is true if the weapon is in the inventory and it was equipped.
+    /// Returns true if the item was equipped.
     pub fn equip_weapon(&mut self, id: &str) -> bool {
         self.unequip_weapon();
         if let Some(weapon) = self.data.inventory.weapons.get(id) {
@@ -113,6 +113,34 @@ impl PlayerCharacter {
         false
     }
 
+    /// Returns true if the item was equipped.
+    pub fn equip_armor(&mut self, id: &str) -> bool {
+        self.unequip_armor();
+        if let Some(armor) = self.data.inventory.armors.get(id) {
+            self.equipped_items.armor = Some(id.to_string());
+            self.temp_stat_boosts.increase_max_health(armor.health);
+            self.temp_stat_boosts.increase_defense(armor.defense);
+            self.temp_stat_boosts
+                .give_enchantment_values(&armor.enchantments);
+            return true;
+        }
+        false
+    }
+
+    /// Returns true if the item was equipped.
+    pub fn equip_ring(&mut self, id: &str) -> bool {
+        self.unequip_ring();
+        if let Some(ring) = self.data.inventory.rings.get(id) {
+            self.equipped_items.ring = Some(id.to_string());
+            self.temp_stat_boosts.increase_max_mana(ring.mana);
+            self.temp_stat_boosts
+                .give_enchantment_values(&ring.enchantments);
+            return true;
+        }
+        false
+    }
+
+    /// Returns true if the item was unequipped.
     pub fn unequip_weapon(&mut self) -> bool {
         if let Some(id) = &self.equipped_items.weapon {
             if let Some(weapon) = self.data.inventory.weapons.get(id) {
@@ -122,6 +150,35 @@ impl PlayerCharacter {
                 self.temp_stat_boosts
                     .remove_enchantment_values(&weapon.enchantments);
                 self.equipped_items.weapon = None;
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Returns true if the item was unequipped.
+    pub fn unequip_armor(&mut self) -> bool {
+        if let Some(id) = &self.equipped_items.armor {
+            if let Some(armor) = self.data.inventory.armors.get(id) {
+                self.temp_stat_boosts.decrease_max_health(armor.health);
+                self.temp_stat_boosts.decrease_defense(armor.defense);
+                self.temp_stat_boosts
+                    .remove_enchantment_values(&armor.enchantments);
+                self.equipped_items.armor = None;
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Returns true if the item was unequipped.
+    pub fn unequip_ring(&mut self) -> bool {
+        if let Some(id) = &self.equipped_items.ring {
+            if let Some(ring) = self.data.inventory.rings.get(id) {
+                self.temp_stat_boosts.decrease_max_mana(ring.mana);
+                self.temp_stat_boosts
+                    .remove_enchantment_values(&ring.enchantments);
+                self.equipped_items.ring = None;
                 return true;
             }
         }
@@ -257,11 +314,47 @@ impl TemporaryStatBoosts {
         self.critical_hit_rate -= amount;
     }
 
+    pub fn increase_max_health(&mut self, amount: u32) {
+        self.max_health += amount;
+    }
+
+    pub fn decrease_max_health(&mut self, amount: u32) {
+        if amount > self.max_health {
+            return self.max_health = 0;
+        }
+        self.max_health -= amount;
+    }
+
+    pub fn increase_defense(&mut self, amount: u32) {
+        self.defense += amount;
+    }
+
+    pub fn decrease_defense(&mut self, amount: u32) {
+        if amount > self.defense {
+            return self.defense = 0;
+        }
+        self.defense -= amount;
+    }
+
+    pub fn increase_max_mana(&mut self, amount: u32) {
+        self.max_mana += amount;
+    }
+
+    pub fn decrease_max_mana(&mut self, amount: u32) {
+        if amount > self.max_mana {
+            return self.max_mana = 0;
+        }
+        self.max_mana -= amount;
+    }
+
     pub fn give_enchantment_values(&mut self, enchantments: &Vec<Enchantment>) {
         for enchantment in enchantments {
             match enchantment {
                 Enchantment::Damage(val) => self.increase_damage(*val),
                 Enchantment::CritHitRate(val) => self.increase_crit_hit_rate(*val),
+                Enchantment::Health(val) => self.increase_max_health(*val),
+                Enchantment::Defense(val) => self.increase_defense(*val),
+                Enchantment::Mana(val) => self.increase_max_mana(*val),
                 _ => {}
             }
         }
@@ -272,6 +365,9 @@ impl TemporaryStatBoosts {
             match enchantment {
                 Enchantment::Damage(val) => self.decrease_damage(*val),
                 Enchantment::CritHitRate(val) => self.decrease_crit_hit_rate(*val),
+                Enchantment::Health(val) => self.decrease_max_health(*val),
+                Enchantment::Defense(val) => self.decrease_defense(*val),
+                Enchantment::Mana(val) => self.decrease_max_mana(*val),
                 _ => {}
             }
         }
