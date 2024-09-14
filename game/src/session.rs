@@ -249,30 +249,36 @@ impl PlayerCharacter {
     }
 
     pub fn delete_weapon(&mut self, id: &str) -> bool {
-        if let Some(deleted_item) = self.data.inventory.weapons.remove(id) {
-            if deleted_item.is_equipped(&self) {
+        if let Some(weapon) = self.data.inventory.weapons.get(id) {
+            if weapon.is_equipped(&self) {
                 self.unequip_weapon();
             }
+        }
+        if let Some(_) = self.data.inventory.weapons.remove(id) {
             return true;
         }
         false
     }
 
     pub fn delete_armor(&mut self, id: &str) -> bool {
-        if let Some(deleted_item) = self.data.inventory.armors.remove(id) {
-            if deleted_item.is_equipped(&self) {
+        if let Some(armor) = self.data.inventory.armors.get(id) {
+            if armor.is_equipped(&self) {
                 self.unequip_armor();
             }
+        }
+        if let Some(_) = self.data.inventory.armors.remove(id) {
             return true;
         }
         false
     }
 
     pub fn delete_ring(&mut self, id: &str) -> bool {
-        if let Some(deleted_item) = self.data.inventory.rings.remove(id) {
-            if deleted_item.is_equipped(&self) {
+        if let Some(ring) = self.data.inventory.rings.get(id) {
+            if ring.is_equipped(&self) {
                 self.unequip_ring();
             }
+        }
+        if let Some(_) = self.data.inventory.rings.remove(id) {
             return true;
         }
         false
