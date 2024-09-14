@@ -112,6 +112,16 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
+                    1 => {
+                        if character.unequip_armor() {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    2 => {
+                        if character.unequip_ring() {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
                     _ => {}
                 },
                 _ => {}

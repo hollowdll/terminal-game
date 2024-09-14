@@ -318,12 +318,25 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
         println!("Armors");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
+        if menu_items.is_empty() {
+            println!("  No armors in inventory");
+        }
+
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            let display_name = &get_item_display_name(CharacterItem::Armor(&item));
             if i == selected_index {
-                println!("> {}", &get_item_display_name(CharacterItem::Armor(&item)));
+                if item.is_equipped(&character) {
+                    println!("> {} [Equipped]", display_name);
+                } else {
+                    println!("> {}", display_name);
+                }
             } else {
-                println!("  {}", &get_item_display_name(CharacterItem::Armor(&item)));
+                if item.is_equipped(&character) {
+                    println!("  {} [Equipped]", display_name);
+                } else {
+                    println!("  {}", display_name);
+                }
             }
         }
 
@@ -345,6 +358,14 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
                         menu_armor_info(&menu_items[selected_index])?;
+                    }
+                }
+                KeyCode::Char('E') | KeyCode::Char('e') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        if character.equip_armor(&selected_item.id) {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
                     }
                 }
                 _ => {}
@@ -375,12 +396,25 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
         println!("Rings");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
+        if menu_items.is_empty() {
+            println!("  No rings in inventory");
+        }
+
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            let display_name = &get_item_display_name(CharacterItem::Ring(&item));
             if i == selected_index {
-                println!("> {}", &get_item_display_name(CharacterItem::Ring(&item)));
+                if item.is_equipped(&character) {
+                    println!("> {} [Equipped]", display_name);
+                } else {
+                    println!("> {}", display_name);
+                }
             } else {
-                println!("  {}", &get_item_display_name(CharacterItem::Ring(&item)));
+                if item.is_equipped(&character) {
+                    println!("  {} [Equipped]", display_name);
+                } else {
+                    println!("  {}", display_name);
+                }
             }
         }
 
@@ -402,6 +436,14 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
                         menu_ring_info(&menu_items[selected_index])?;
+                    }
+                }
+                KeyCode::Char('E') | KeyCode::Char('e') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        if character.equip_ring(&selected_item.id) {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
                     }
                 }
                 _ => {}

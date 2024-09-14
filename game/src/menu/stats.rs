@@ -79,27 +79,21 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
 
         println!("  Combat:");
         execute!(stdout, cursor::MoveTo(0, 14))?;
-        println!(
-            "    Max Health: {}",
-            character.data.stats.combat_stats.max_health
-        );
+        println!("    Max Health: {}", character.get_total_health());
         execute!(stdout, cursor::MoveTo(0, 15))?;
         println!("    Health: {}", character.temp_stats.health);
         execute!(stdout, cursor::MoveTo(0, 16))?;
-        println!(
-            "    Max Mana: {}",
-            character.data.stats.combat_stats.max_mana
-        );
+        println!("    Max Mana: {}", character.get_total_mana());
         execute!(stdout, cursor::MoveTo(0, 17))?;
         println!("    Mana: {}", character.temp_stats.mana);
         execute!(stdout, cursor::MoveTo(0, 18))?;
-        println!("    Defense: {}", character.data.stats.combat_stats.defense);
+        println!("    Defense: {}", character.get_total_defense());
         execute!(stdout, cursor::MoveTo(0, 19))?;
         println!("    Damage: {}", character.get_total_damage());
         execute!(stdout, cursor::MoveTo(0, 20))?;
         println!(
             "    Critical Damage Multiplier: {:.2}",
-            character.data.stats.combat_stats.critical_damage_multiplier
+            character.get_total_crit_damage_multiplier()
         );
         execute!(stdout, cursor::MoveTo(0, 21))?;
         println!(

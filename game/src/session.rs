@@ -265,6 +265,23 @@ impl PlayerCharacter {
     pub fn get_total_crit_hit_rate(&self) -> f64 {
         self.data.stats.combat_stats.critical_hit_rate + self.temp_stat_boosts.critical_hit_rate
     }
+
+    pub fn get_total_crit_damage_multiplier(&self) -> f64 {
+        self.data.stats.combat_stats.critical_damage_multiplier
+            + self.temp_stat_boosts.critical_damage_multiplier
+    }
+
+    pub fn get_total_health(&self) -> u32 {
+        self.data.stats.combat_stats.max_health + self.temp_stat_boosts.max_health
+    }
+
+    pub fn get_total_defense(&self) -> u32 {
+        self.data.stats.combat_stats.defense + self.temp_stat_boosts.defense
+    }
+
+    pub fn get_total_mana(&self) -> u32 {
+        self.data.stats.combat_stats.max_mana + self.temp_stat_boosts.max_mana
+    }
 }
 
 pub struct TemporaryStats {

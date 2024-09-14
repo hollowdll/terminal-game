@@ -142,6 +142,17 @@ impl ArmorItem {
             enchantments,
         }
     }
+
+    pub fn is_equipped(&self, character: &PlayerCharacter) -> bool {
+        if let Some(id) = &character.equipped_items.armor {
+            if let Some(armor) = character.data.inventory.armors.get(id) {
+                if armor.id.eq(&self.id) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -221,6 +232,17 @@ impl RingItem {
             stats,
             enchantments,
         }
+    }
+
+    pub fn is_equipped(&self, character: &PlayerCharacter) -> bool {
+        if let Some(id) = &character.equipped_items.ring {
+            if let Some(ring) = character.data.inventory.rings.get(id) {
+                if ring.id.eq(&self.id) {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
