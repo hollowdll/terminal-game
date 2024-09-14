@@ -1,10 +1,15 @@
 use crate::{
     dungeon::{
         generate_random_dungeon_floor,
-        room::{display_start_room, display_twowayupdown_room},
+        room::{
+            display_boss_entrance_room, display_start_room, display_two_way_down_left_room,
+            display_two_way_down_right_room, display_two_way_left_right_room,
+            display_two_way_up_down_room, display_two_way_up_left_room,
+            display_two_way_up_right_room,
+        },
         DungeonFloor, RoomCoordinates, RoomKind,
     },
-    menu::character::menu_character,
+    menu::{character::menu_character, main_menu},
     session::Player,
 };
 use crossterm::{
@@ -22,6 +27,13 @@ pub struct GameMenuReturnOptions {
     pub rerender: bool,
 }
 
+pub struct DungeonFloorMenuOptions {
+    pub return_to_main_menu: bool,
+    pub dungeon_completed: bool,
+    pub game_over: bool,
+    pub next_room_coords: Option<RoomCoordinates>,
+}
+
 /// Returns true if should go back to main menu.
 pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
@@ -30,18 +42,17 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let menu_items = vec!["Start Dungeon Floor", "Return to main menu"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
-    let go_back = true;
-    let character = match &player.character {
-        Some(character) => character,
-        None => {
-            return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "No selected character",
-            ))
-        }
-    };
 
     loop {
+        let character = match &player.character {
+            Some(character) => character,
+            None => {
+                return Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "No selected character",
+                ))
+            }
+        };
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!(
             "Character: {} (Level {}, Dungeon Floor {})",
@@ -72,26 +83,32 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                         selected_index += 1;
                     }
                 }
-                KeyCode::Enter => {
-                    break;
-                }
+                KeyCode::Enter => match menu_items[selected_index] {
+                    "Start Dungeon Floor" => {
+                        let mut dungeon_floor = generate_random_dungeon_floor(
+                            character.data.stats.general_stats.current_dungeon_floor,
+                        );
+                        let mut next_room_coords = RoomCoordinates::new(0, 0);
+                        loop {
+                            let opts =
+                                menu_dungeon_floor(&mut dungeon_floor, player, &next_room_coords)?;
+                            if opts.return_to_main_menu {
+                                return Ok(true);
+                            }
+                            if let Some(coords) = opts.next_room_coords {
+                                next_room_coords = coords;
+                            }
+                        }
+                    }
+                    "Return to main menu" => break,
+                    _ => {}
+                },
                 _ => {}
             }
         }
     }
 
-    match menu_items[selected_index] {
-        "Start Dungeon Floor" => {
-            let mut dungeon_floor = generate_random_dungeon_floor(
-                character.data.stats.general_stats.current_dungeon_floor,
-            );
-            menu_dungeon_floor(&mut dungeon_floor, player, &RoomCoordinates::new(0, 0))?;
-        }
-        "Return to main menu" => {}
-        _ => {}
-    }
-
-    Ok(go_back)
+    Ok(true)
 }
 
 /// Returns true if should go back to main menu.
@@ -99,7 +116,7 @@ pub fn menu_dungeon_floor(
     dungeon_floor: &mut DungeonFloor,
     player: &mut Player,
     current_room_coords: &RoomCoordinates,
-) -> io::Result<GameMenuReturnOptions> {
+) -> io::Result<DungeonFloorMenuOptions> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
@@ -141,8 +158,12 @@ pub fn menu_dungeon_floor(
         RoomKind::BossEntrance => menu_items.push("Enter Boss Room"),
         _ => {}
     }
+    if current_room.treasure {
+        menu_items.push("Open Treasure Chest");
+    }
 
     loop {
+        let mut start_column = 2;
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
@@ -152,9 +173,15 @@ pub fn menu_dungeon_floor(
         );
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
-        let start_column = match current_room.kind {
-            RoomKind::Start => display_start_room(2)?,
-            RoomKind::TwoWayUpDown => display_twowayupdown_room(2)?,
+        start_column = match current_room.kind {
+            RoomKind::Start => display_start_room(start_column)?,
+            RoomKind::BossEntrance => display_boss_entrance_room(start_column)?,
+            RoomKind::TwoWayUpDown => display_two_way_up_down_room(start_column)?,
+            RoomKind::TwoWayLeftRight => display_two_way_left_right_room(start_column)?,
+            RoomKind::TwoWayUpLeft => display_two_way_up_left_room(start_column)?,
+            RoomKind::TwoWayUpRight => display_two_way_up_right_room(start_column)?,
+            RoomKind::TwoWayDownLeft => display_two_way_down_left_room(start_column)?,
+            RoomKind::TwoWayDownRight => display_two_way_down_right_room(start_column)?,
             _ => {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
@@ -184,15 +211,52 @@ pub fn menu_dungeon_floor(
                         selected_index += 1;
                     }
                 }
-                KeyCode::Enter => {
-                    break;
-                }
+                KeyCode::Enter => match menu_items[selected_index] {
+                    "Go Up" => {
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: false,
+                            game_over: false,
+                            next_room_coords: current_room.adjacents.up.clone(),
+                        })
+                    }
+                    "Go Down" => {
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: false,
+                            game_over: false,
+                            next_room_coords: current_room.adjacents.down.clone(),
+                        })
+                    }
+                    "Go Right" => {
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: false,
+                            game_over: false,
+                            next_room_coords: current_room.adjacents.right.clone(),
+                        })
+                    }
+                    "Go Left" => {
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: false,
+                            game_over: false,
+                            next_room_coords: current_room.adjacents.left.clone(),
+                        })
+                    }
+                    "Enter Shop" => {}
+                    "Enter Boss Room" => {}
+                    "Open Treasure Chest" => {}
+                    _ => break,
+                },
                 KeyCode::Esc => {
                     if let Ok(return_to_main_menu) = menu_character(&mut character) {
                         if return_to_main_menu {
-                            return Ok(GameMenuReturnOptions {
-                                main_menu: true,
-                                rerender: false,
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: true,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: None,
                             });
                         } else {
                             execute!(stdout, Clear(ClearType::All))?;
@@ -204,16 +268,10 @@ pub fn menu_dungeon_floor(
         }
     }
 
-    match menu_items[selected_index] {
-        "Go Up" => {}
-        "Go Down" => {}
-        "Go Right" => {}
-        "Go Left" => {}
-        _ => {}
-    }
-
-    Ok(GameMenuReturnOptions {
-        main_menu: false,
-        rerender: false,
+    Ok(DungeonFloorMenuOptions {
+        return_to_main_menu: true,
+        dungeon_completed: false,
+        game_over: false,
+        next_room_coords: None,
     })
 }
