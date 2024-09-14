@@ -460,9 +460,9 @@ pub fn menu_weapon_info(item: &WeaponItem) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
         println!("  Rarity: {:?}", item.rarity);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
-        println!("  Damage: {}", item.damage);
+        println!("  Damage: {}", item.stats.damage);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
-        println!("  Critical Hit Rate: {:.2}", item.crit_hit_rate);
+        println!("  Critical Hit Rate: {:.2}", item.stats.crit_hit_rate);
         let _ = display_item_enchantments(&item.enchantments, start_column + 4);
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
@@ -494,9 +494,9 @@ pub fn menu_armor_info(item: &ArmorItem) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
         println!("  Rarity: {:?}", item.rarity);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
-        println!("  Health: {}", item.health);
+        println!("  Health: {}", item.stats.health);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
-        println!("  Defense: {}", item.defense);
+        println!("  Defense: {}", item.stats.defense);
         let _ = display_item_enchantments(&item.enchantments, start_column + 4);
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
@@ -528,7 +528,7 @@ pub fn menu_ring_info(item: &RingItem) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
         println!("  Rarity: {:?}", item.rarity);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
-        println!("  Mana: {}", item.mana);
+        println!("  Mana: {}", item.stats.mana);
         let _ = display_item_enchantments(&item.enchantments, start_column + 3);
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {

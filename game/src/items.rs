@@ -110,13 +110,18 @@ impl ConsumableItem {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+pub struct ArmorItemStats {
+    pub health: u32,
+    pub defense: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ArmorItem {
     pub info: ItemInfo,
     pub id: String,
     pub level: u32,
     pub rarity: ItemRarity,
-    pub health: u32,
-    pub defense: u32,
+    pub stats: ArmorItemStats,
     pub enchantments: Vec<Enchantment>,
 }
 
@@ -125,8 +130,7 @@ impl ArmorItem {
         info: ItemInfo,
         level: u32,
         rarity: ItemRarity,
-        health: u32,
-        defense: u32,
+        stats: ArmorItemStats,
         enchantments: Vec<Enchantment>,
     ) -> Self {
         Self {
@@ -134,11 +138,16 @@ impl ArmorItem {
             id: Uuid::new_v4().to_string(),
             level,
             rarity,
-            health,
-            defense,
+            stats,
             enchantments,
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct WeaponItemStats {
+    pub damage: u32,
+    pub crit_hit_rate: f64,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -147,8 +156,7 @@ pub struct WeaponItem {
     pub id: String,
     pub level: u32,
     pub rarity: ItemRarity,
-    pub damage: u32,
-    pub crit_hit_rate: f64,
+    pub stats: WeaponItemStats,
     pub enchantments: Vec<Enchantment>,
 }
 
@@ -157,8 +165,7 @@ impl WeaponItem {
         info: ItemInfo,
         level: u32,
         rarity: ItemRarity,
-        damage: u32,
-        crit_hit_rate: f64,
+        stats: WeaponItemStats,
         enchantments: Vec<Enchantment>,
     ) -> Self {
         Self {
@@ -166,8 +173,7 @@ impl WeaponItem {
             id: Uuid::new_v4().to_string(),
             level,
             rarity,
-            damage,
-            crit_hit_rate,
+            stats,
             enchantments,
         }
     }
@@ -185,12 +191,17 @@ impl WeaponItem {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+pub struct RingItemStats {
+    pub mana: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RingItem {
     pub info: ItemInfo,
     pub id: String,
     pub level: u32,
     pub rarity: ItemRarity,
-    pub mana: u32,
+    pub stats: RingItemStats,
     pub enchantments: Vec<Enchantment>,
 }
 
@@ -199,7 +210,7 @@ impl RingItem {
         info: ItemInfo,
         level: u32,
         rarity: ItemRarity,
-        mana: u32,
+        stats: RingItemStats,
         enchantments: Vec<Enchantment>,
     ) -> Self {
         Self {
@@ -207,7 +218,7 @@ impl RingItem {
             id: Uuid::new_v4().to_string(),
             level,
             rarity,
-            mana,
+            stats,
             enchantments,
         }
     }
@@ -346,8 +357,10 @@ pub fn create_starter_weapon() -> WeaponItem {
         ITEM_SWORD,
         1,
         ItemRarity::Common,
-        WEAPON_BASE_VALUES.min_damage,
-        WEAPON_BASE_VALUES.min_crit_hit_rate,
+        WeaponItemStats {
+            damage: WEAPON_BASE_VALUES.min_damage,
+            crit_hit_rate: WEAPON_BASE_VALUES.min_crit_hit_rate,
+        },
         Vec::new(),
     )
 }
@@ -521,8 +534,10 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32)
         ITEM_SWORD,
         dungeon_floor,
         rarity,
-        damage,
-        crit_hit_rate,
+        WeaponItemStats {
+            damage,
+            crit_hit_rate,
+        },
         enchantments,
     )
 }
@@ -545,8 +560,7 @@ pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -
         ITEM_ARMOR,
         dungeon_floor,
         rarity,
-        health,
-        defense,
+        ArmorItemStats { health, defense },
         enchantments,
     )
 }
@@ -562,5 +576,11 @@ pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> 
         dungeon_floor,
     );
 
-    RingItem::new(ITEM_RING, dungeon_floor, rarity, mana, enchantments)
+    RingItem::new(
+        ITEM_RING,
+        dungeon_floor,
+        rarity,
+        RingItemStats { mana },
+        enchantments,
+    )
 }

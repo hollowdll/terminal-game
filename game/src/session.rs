@@ -103,9 +103,9 @@ impl PlayerCharacter {
         self.unequip_weapon();
         if let Some(weapon) = self.data.inventory.weapons.get(id) {
             self.equipped_items.weapon = Some(id.to_string());
-            self.temp_stat_boosts.increase_damage(weapon.damage);
+            self.temp_stat_boosts.increase_damage(weapon.stats.damage);
             self.temp_stat_boosts
-                .increase_crit_hit_rate(weapon.crit_hit_rate);
+                .increase_crit_hit_rate(weapon.stats.crit_hit_rate);
             self.temp_stat_boosts
                 .give_enchantment_values(&weapon.enchantments);
             return true;
@@ -118,8 +118,9 @@ impl PlayerCharacter {
         self.unequip_armor();
         if let Some(armor) = self.data.inventory.armors.get(id) {
             self.equipped_items.armor = Some(id.to_string());
-            self.temp_stat_boosts.increase_max_health(armor.health);
-            self.temp_stat_boosts.increase_defense(armor.defense);
+            self.temp_stat_boosts
+                .increase_max_health(armor.stats.health);
+            self.temp_stat_boosts.increase_defense(armor.stats.defense);
             self.temp_stat_boosts
                 .give_enchantment_values(&armor.enchantments);
             return true;
@@ -132,7 +133,7 @@ impl PlayerCharacter {
         self.unequip_ring();
         if let Some(ring) = self.data.inventory.rings.get(id) {
             self.equipped_items.ring = Some(id.to_string());
-            self.temp_stat_boosts.increase_max_mana(ring.mana);
+            self.temp_stat_boosts.increase_max_mana(ring.stats.mana);
             self.temp_stat_boosts
                 .give_enchantment_values(&ring.enchantments);
             return true;
@@ -144,9 +145,9 @@ impl PlayerCharacter {
     pub fn unequip_weapon(&mut self) -> bool {
         if let Some(id) = &self.equipped_items.weapon {
             if let Some(weapon) = self.data.inventory.weapons.get(id) {
-                self.temp_stat_boosts.decrease_damage(weapon.damage);
+                self.temp_stat_boosts.decrease_damage(weapon.stats.damage);
                 self.temp_stat_boosts
-                    .decrease_crit_hit_rate(weapon.crit_hit_rate);
+                    .decrease_crit_hit_rate(weapon.stats.crit_hit_rate);
                 self.temp_stat_boosts
                     .remove_enchantment_values(&weapon.enchantments);
                 self.equipped_items.weapon = None;
@@ -160,8 +161,9 @@ impl PlayerCharacter {
     pub fn unequip_armor(&mut self) -> bool {
         if let Some(id) = &self.equipped_items.armor {
             if let Some(armor) = self.data.inventory.armors.get(id) {
-                self.temp_stat_boosts.decrease_max_health(armor.health);
-                self.temp_stat_boosts.decrease_defense(armor.defense);
+                self.temp_stat_boosts
+                    .decrease_max_health(armor.stats.health);
+                self.temp_stat_boosts.decrease_defense(armor.stats.defense);
                 self.temp_stat_boosts
                     .remove_enchantment_values(&armor.enchantments);
                 self.equipped_items.armor = None;
@@ -175,7 +177,7 @@ impl PlayerCharacter {
     pub fn unequip_ring(&mut self) -> bool {
         if let Some(id) = &self.equipped_items.ring {
             if let Some(ring) = self.data.inventory.rings.get(id) {
-                self.temp_stat_boosts.decrease_max_mana(ring.mana);
+                self.temp_stat_boosts.decrease_max_mana(ring.stats.mana);
                 self.temp_stat_boosts
                     .remove_enchantment_values(&ring.enchantments);
                 self.equipped_items.ring = None;
