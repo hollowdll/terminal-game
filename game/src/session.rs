@@ -33,8 +33,8 @@ impl PlayerCharacter {
         Self {
             data: data.clone(),
             temp_stats: TemporaryStats {
-                health: data.stats.combat_stats.max_health,
-                mana: data.stats.combat_stats.max_mana,
+                current_health: data.stats.combat_stats.max_health,
+                current_mana: data.stats.combat_stats.max_mana,
             },
             temp_stat_boosts: TemporaryStatBoosts {
                 max_health: 0,
@@ -249,9 +249,29 @@ impl PlayerCharacter {
     }
 
     pub fn delete_weapon(&mut self, id: &str) -> bool {
-        if let Some(deleted_weapon) = self.data.inventory.weapons.remove(id) {
-            if deleted_weapon.is_equipped(&self) {
+        if let Some(deleted_item) = self.data.inventory.weapons.remove(id) {
+            if deleted_item.is_equipped(&self) {
                 self.unequip_weapon();
+            }
+            return true;
+        }
+        false
+    }
+
+    pub fn delete_armor(&mut self, id: &str) -> bool {
+        if let Some(deleted_item) = self.data.inventory.armors.remove(id) {
+            if deleted_item.is_equipped(&self) {
+                self.unequip_armor();
+            }
+            return true;
+        }
+        false
+    }
+
+    pub fn delete_ring(&mut self, id: &str) -> bool {
+        if let Some(deleted_item) = self.data.inventory.rings.remove(id) {
+            if deleted_item.is_equipped(&self) {
+                self.unequip_ring();
             }
             return true;
         }
@@ -285,8 +305,8 @@ impl PlayerCharacter {
 }
 
 pub struct TemporaryStats {
-    pub health: u32,
-    pub mana: u32,
+    pub current_health: u32,
+    pub current_mana: u32,
 }
 
 /// Session only equipped items. Not saved to game data.

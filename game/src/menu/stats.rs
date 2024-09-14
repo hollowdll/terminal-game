@@ -79,31 +79,27 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
 
         println!("  Combat:");
         execute!(stdout, cursor::MoveTo(0, 14))?;
-        println!("    Max Health: {}", character.get_total_health());
+        println!("    Health: {}", character.get_total_health());
         execute!(stdout, cursor::MoveTo(0, 15))?;
-        println!("    Health: {}", character.temp_stats.health);
+        println!("    Mana: {}", character.get_total_mana());
         execute!(stdout, cursor::MoveTo(0, 16))?;
-        println!("    Max Mana: {}", character.get_total_mana());
-        execute!(stdout, cursor::MoveTo(0, 17))?;
-        println!("    Mana: {}", character.temp_stats.mana);
-        execute!(stdout, cursor::MoveTo(0, 18))?;
         println!("    Defense: {}", character.get_total_defense());
-        execute!(stdout, cursor::MoveTo(0, 19))?;
+        execute!(stdout, cursor::MoveTo(0, 17))?;
         println!("    Damage: {}", character.get_total_damage());
-        execute!(stdout, cursor::MoveTo(0, 20))?;
+        execute!(stdout, cursor::MoveTo(0, 18))?;
         println!(
             "    Critical Damage Multiplier: {:.2}",
             character.get_total_crit_damage_multiplier()
         );
-        execute!(stdout, cursor::MoveTo(0, 21))?;
+        execute!(stdout, cursor::MoveTo(0, 19))?;
         println!(
             "    Critical Hit Rate: {:.2}",
             character.get_total_crit_hit_rate()
         );
-        execute!(stdout, cursor::MoveTo(0, 22))?;
+        execute!(stdout, cursor::MoveTo(0, 20))?;
 
         println!("");
-        execute!(stdout, cursor::MoveTo(0, 23))?;
+        execute!(stdout, cursor::MoveTo(0, 21))?;
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {

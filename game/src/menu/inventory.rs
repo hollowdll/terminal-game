@@ -360,6 +360,21 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
                         menu_armor_info(&menu_items[selected_index])?;
                     }
                 }
+                KeyCode::Char('D') | KeyCode::Char('d') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        let delete = menu_confirm_item_deletion(&get_item_display_name(
+                            CharacterItem::Armor(selected_item),
+                        ))?;
+                        if delete {
+                            if character.delete_armor(&selected_item.id) {
+                                menu_items.remove(selected_index);
+                                selected_index = 0;
+                            }
+                        }
+                        execute!(stdout, Clear(ClearType::All))?;
+                    }
+                }
                 KeyCode::Char('E') | KeyCode::Char('e') => {
                     if !menu_items.is_empty() {
                         let selected_item = &menu_items[selected_index];
@@ -436,6 +451,21 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
                         menu_ring_info(&menu_items[selected_index])?;
+                    }
+                }
+                KeyCode::Char('D') | KeyCode::Char('d') => {
+                    if !menu_items.is_empty() {
+                        let selected_item = &menu_items[selected_index];
+                        let delete = menu_confirm_item_deletion(&get_item_display_name(
+                            CharacterItem::Ring(selected_item),
+                        ))?;
+                        if delete {
+                            if character.delete_ring(&selected_item.id) {
+                                menu_items.remove(selected_index);
+                                selected_index = 0;
+                            }
+                        }
+                        execute!(stdout, Clear(ClearType::All))?;
                     }
                 }
                 KeyCode::Char('E') | KeyCode::Char('e') => {
