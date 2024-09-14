@@ -2,7 +2,7 @@ use crate::{
     game_data::{CharacterData, GameData},
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        ArmorItem, CharacterItem, ConsumableItem, ItemRarity, RingItem, WeaponItem,
+        ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemRarity, RingItem, WeaponItem,
         ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
 };
@@ -106,6 +106,8 @@ impl PlayerCharacter {
             self.temp_stat_boosts.increase_damage(weapon.damage);
             self.temp_stat_boosts
                 .increase_crit_hit_rate(weapon.crit_hit_rate);
+            self.temp_stat_boosts
+                .give_enchantment_values(&weapon.enchantments);
             return true;
         }
         false
@@ -117,6 +119,8 @@ impl PlayerCharacter {
                 self.temp_stat_boosts.decrease_damage(weapon.damage);
                 self.temp_stat_boosts
                     .decrease_crit_hit_rate(weapon.crit_hit_rate);
+                self.temp_stat_boosts
+                    .remove_enchantment_values(&weapon.enchantments);
                 self.equipped_items.weapon = None;
                 return true;
             }
@@ -251,5 +255,25 @@ impl TemporaryStatBoosts {
             return self.critical_hit_rate = 0.0;
         }
         self.critical_hit_rate -= amount;
+    }
+
+    pub fn give_enchantment_values(&mut self, enchantments: &Vec<Enchantment>) {
+        for enchantment in enchantments {
+            match enchantment {
+                Enchantment::Damage(val) => self.increase_damage(*val),
+                Enchantment::CritHitRate(val) => self.increase_crit_hit_rate(*val),
+                _ => {}
+            }
+        }
+    }
+
+    fn remove_enchantment_values(&mut self, enchantments: &Vec<Enchantment>) {
+        for enchantment in enchantments {
+            match enchantment {
+                Enchantment::Damage(val) => self.decrease_damage(*val),
+                Enchantment::CritHitRate(val) => self.decrease_crit_hit_rate(*val),
+                _ => {}
+            }
+        }
     }
 }
