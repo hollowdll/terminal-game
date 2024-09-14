@@ -9,7 +9,7 @@ use crate::{
         },
         DungeonFloor, RoomCoordinates, RoomKind,
     },
-    menu::{character::menu_character, main_menu},
+    menu::character::menu_character,
     session::Player,
 };
 use crossterm::{

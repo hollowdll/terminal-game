@@ -201,7 +201,12 @@ fn generate_random_rooms(
                 room_coordinates = RoomCoordinates::new(current.coords.x - 1, current.coords.y);
             }
             RoomKind::TwoWayLeftRight => {
-                let possible_rooms = vec![RoomKind::TwoWayUpLeft, RoomKind::TwoWayUpRight];
+                let mut possible_rooms = vec![RoomKind::TwoWayLeftRight];
+                match current_direction {
+                    Direction::Right => possible_rooms.push(RoomKind::TwoWayUpLeft),
+                    Direction::Left => possible_rooms.push(RoomKind::TwoWayUpRight),
+                    _ => {}
+                }
                 let rand_num = rng.gen_range(0..possible_rooms.len());
                 room_kind = possible_rooms[rand_num].clone();
                 match current_direction {
