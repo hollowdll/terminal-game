@@ -9,6 +9,5 @@ pub mod game_data;
 pub mod items;
 pub mod menu;
 pub mod session;
-pub mod treasure;
 pub mod util;
 pub mod validation;

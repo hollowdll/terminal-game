@@ -151,7 +151,7 @@ pub struct CharacterEquipment {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CharacterCurrency {
-    pub gold: u64,
+    pub gold: u32,
 }
 
 /// Creates the save file if it doesn't exist and overwrites it.

@@ -52,7 +52,7 @@ impl PlayerCharacter {
         }
     }
 
-    pub fn give_gold(&mut self, amount: u64) {
+    pub fn give_gold(&mut self, amount: u32) {
         self.data.currency.gold += amount;
     }
 
