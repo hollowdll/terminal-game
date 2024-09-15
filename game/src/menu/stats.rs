@@ -93,8 +93,9 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
         );
         execute!(stdout, cursor::MoveTo(0, 19))?;
         println!(
-            "    Critical Hit Rate: {:.2}",
-            character.get_total_crit_hit_rate()
+            "    Critical Hit Rate: {:.2} ({:.2}%)",
+            character.get_total_crit_hit_rate(),
+            character.get_total_crit_hit_rate() * 100.0
         );
         execute!(stdout, cursor::MoveTo(0, 20))?;
 
