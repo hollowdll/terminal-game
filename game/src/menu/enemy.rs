@@ -7,15 +7,9 @@ use crossterm::{
 use std::io;
 
 use crate::{
-    character::{random_exp_amount, BASE_EXP_MAX, BASE_EXP_MIN},
-    currency::{random_gold_amount, BASE_GOLD_MAX, BASE_GOLD_MIN},
     drops::give_normal_enemy_drops,
-    enemy::{Enemy, EXP_MULTIPLIER_NORMAL_ENEMY, GOLD_MULTIPLIER_NORMAL_ENEMY},
-    items::{
-        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        random_equipment_item, CharacterItem, ItemCategory, ARMOR_BASE_VALUES, RING_BASE_VALUES,
-        WEAPON_BASE_VALUES,
-    },
+    enemy::{Enemy, EnemyKind},
+    menu::character::menu_level_up,
     session::PlayerCharacter,
 };
 
@@ -53,11 +47,31 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Attack", "Consumables", "Stats", "Flee"];
     let mut selected_index = 0;
     let start_column: u16 = 9;
+    let mut fight_text = "Select what to do...".to_string();
+    let mut action = false;
 
     loop {
+        let mut menu_items = vec!["Attack", "Consumables", "Stats", "Flee"];
+        if action {
+            menu_items = vec!["Continue"];
+        } else {
+            if enemy.stats.current_health == 0 {
+                let character_level = character.data.stats.general_stats.character_level;
+                match enemy.kind {
+                    EnemyKind::Normal => {
+                        menu_normal_enemy_fight_victory(enemy.level, character)?;
+                    }
+                    _ => {}
+                }
+                if character.data.stats.general_stats.character_level > character_level {
+                    menu_level_up(character.data.stats.general_stats.character_level)?;
+                }
+                return Ok(true);
+            }
+        }
+
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Enemy: {}", enemy.get_display_name());
         execute!(stdout, cursor::MoveTo(0, 1))?;
@@ -86,7 +100,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
         println!("Defense: {}", character.get_total_defense());
 
         execute!(stdout, cursor::MoveTo(0, 8))?;
-        println!("Select what to do...");
+        println!("{}", fight_text);
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -110,9 +124,19 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                     }
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
-                    "Attack" => {}
+                    "Attack" => {
+                        action = true;
+                        let damage_taken = enemy.take_damage(character.get_total_damage());
+                        fight_text = format!("Enemy took {} damage", damage_taken);
+                        execute!(stdout, Clear(ClearType::All))?;
+                    }
                     "Consumables" => {}
                     "Stats" => {}
+                    "Continue" => {
+                        action = false;
+                        fight_text = "Select what to do...".to_string();
+                        execute!(stdout, Clear(ClearType::All))?;
+                    }
                     _ => break,
                 },
                 _ => {}
