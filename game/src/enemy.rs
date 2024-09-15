@@ -5,9 +5,8 @@ pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const ENEMY_SKILL_CHANCE: f64 = 0.25;
 
 pub const NORMAL_ENEMY_NAMES: NormalEnemyNames = NormalEnemyNames {
-    skeleton_warrior: "Skeleton Warrior",
-    skeleton_archer: "Skeleton Archer",
-    skeleton_mage: "Skeleton Mage",
+    skeleton: "Skeleton",
+    goblin: "Goblin",
 };
 
 pub const BOSS_ENEMY_NAMES: BossEnemyNames = BossEnemyNames {
@@ -21,9 +20,8 @@ pub const ENEMY_SKILL_SMASH: EnemySkill = EnemySkill {
 };
 
 pub struct NormalEnemyNames {
-    pub skeleton_warrior: &'static str,
-    pub skeleton_archer: &'static str,
-    pub skeleton_mage: &'static str,
+    pub skeleton: &'static str,
+    pub goblin: &'static str,
 }
 
 pub struct BossEnemyNames {
@@ -54,7 +52,6 @@ impl Enemy {
                 damage: 7 + (5 * dungeon_floor),
             },
             stat_boosts: EnemyStatBoosts {
-                health: 0,
                 defense: 0,
                 damage: 0,
             },
@@ -74,12 +71,78 @@ impl Enemy {
                 damage: 15 + (6 * dungeon_floor),
             },
             stat_boosts: EnemyStatBoosts {
-                health: 0,
                 defense: 0,
                 damage: 0,
             },
             skill: Some(skill),
         }
+    }
+
+    pub fn get_display_name(&self) -> String {
+        match self.kind {
+            EnemyKind::Normal => format!("{}", self.name),
+            EnemyKind::Boss => format!("{} [Boss]", self.name),
+        }
+    }
+
+    pub fn get_total_damage(&self) -> u32 {
+        self.stats.damage + self.stat_boosts.damage
+    }
+
+    pub fn get_total_defense(&self) -> u32 {
+        self.stats.defense + self.stat_boosts.defense
+    }
+
+    /// Returns the amount of damage taken.
+    pub fn take_damage(&mut self, damage: u32) -> u32 {
+        let reduced_damage = self.get_reduced_damage_taken(damage);
+        if reduced_damage >= self.stats.current_health {
+            self.stats.current_health = 0;
+        } else {
+            self.stats.current_health -= reduced_damage;
+        }
+        return reduced_damage;
+    }
+
+    /// Returns the amount of damage to take after defense reduction.
+    fn get_reduced_damage_taken(&self, damage: u32) -> u32 {
+        if self.get_total_defense() >= damage {
+            return 0;
+        }
+        damage - self.get_total_defense()
+    }
+
+    /// Returns the amount of restored health.
+    pub fn restore_health(&mut self, amount: u32) -> u32 {
+        if self.stats.current_health + amount >= self.stats.max_health {
+            let current_health = self.stats.current_health;
+            self.stats.current_health = self.stats.max_health;
+            return self.stats.max_health - current_health;
+        }
+        self.stats.current_health += amount;
+        amount
+    }
+
+    pub fn increase_damage(&mut self, amount: u32) {
+        self.stat_boosts.damage += amount;
+    }
+
+    pub fn decrease_damage(&mut self, amount: u32) {
+        if amount > self.stat_boosts.damage {
+            return self.stat_boosts.damage = 0;
+        }
+        self.stat_boosts.damage -= amount
+    }
+
+    pub fn increase_defense(&mut self, amount: u32) {
+        self.stat_boosts.defense += amount;
+    }
+
+    pub fn decrease_defense(&mut self, amount: u32) {
+        if amount > self.stat_boosts.defense {
+            return self.stat_boosts.defense = 0;
+        }
+        self.stat_boosts.defense -= amount
     }
 }
 
@@ -93,7 +156,6 @@ pub struct EnemyStats {
 
 #[derive(Debug, Clone)]
 pub struct EnemyStatBoosts {
-    pub health: u32,
     pub defense: u32,
     pub damage: u32,
 }
