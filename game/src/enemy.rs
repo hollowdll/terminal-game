@@ -35,7 +35,9 @@ pub struct BossEnemyNames {
 pub struct Enemy {
     pub name: &'static str,
     pub kind: EnemyKind,
+    pub level: u32,
     pub stats: EnemyStats,
+    pub stat_boosts: EnemyStatBoosts,
     pub skill: Option<EnemySkill>,
 }
 
@@ -44,11 +46,17 @@ impl Enemy {
         Self {
             name,
             kind: EnemyKind::Normal,
+            level: dungeon_floor,
             stats: EnemyStats {
                 max_health: 50 + (25 * dungeon_floor),
-                health: 50 + (25 * dungeon_floor),
+                current_health: 50 + (25 * dungeon_floor),
                 defense: 0,
                 damage: 7 + (5 * dungeon_floor),
+            },
+            stat_boosts: EnemyStatBoosts {
+                health: 0,
+                defense: 0,
+                damage: 0,
             },
             skill: None,
         }
@@ -58,11 +66,17 @@ impl Enemy {
         Self {
             name,
             kind: EnemyKind::Boss,
+            level: dungeon_floor,
             stats: EnemyStats {
                 max_health: 150 + (50 * dungeon_floor),
-                health: 150 + (50 * dungeon_floor),
+                current_health: 150 + (50 * dungeon_floor),
                 defense: 1 + (1 * dungeon_floor),
                 damage: 15 + (6 * dungeon_floor),
+            },
+            stat_boosts: EnemyStatBoosts {
+                health: 0,
+                defense: 0,
+                damage: 0,
             },
             skill: Some(skill),
         }
@@ -72,19 +86,26 @@ impl Enemy {
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
     pub max_health: u32,
+    pub current_health: u32,
+    pub defense: u32,
+    pub damage: u32,
+}
+
+#[derive(Debug, Clone)]
+pub struct EnemyStatBoosts {
     pub health: u32,
     pub defense: u32,
     pub damage: u32,
 }
 
 #[derive(Debug, Clone)]
-pub enum EnemyKind {
-    Boss,
-    Normal,
-}
-
-#[derive(Debug, Clone)]
 pub struct EnemySkill {
     pub name: &'static str,
     pub effect: &'static str,
+}
+
+#[derive(Debug, Clone)]
+pub enum EnemyKind {
+    Boss,
+    Normal,
 }

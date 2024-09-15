@@ -26,6 +26,8 @@ use crossterm::{
 };
 use std::io;
 
+use super::enemy::menu_enemy_encounter;
+
 pub struct GameMenuReturnOptions {
     /// If should return to main menu.
     pub main_menu: bool,
@@ -146,6 +148,13 @@ pub fn menu_dungeon_floor(
             ))
         }
     };
+
+    if let Some(enemy) = &mut current_room.enemy {
+        let victory = menu_enemy_encounter(enemy, character)?;
+        if victory {
+            current_room.enemy = None;
+        }
+    }
 
     if let Some(_) = current_room.adjacents.up {
         menu_items.push("Go Up");
