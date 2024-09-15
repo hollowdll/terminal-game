@@ -308,6 +308,37 @@ impl PlayerCharacter {
     pub fn get_total_mana(&self) -> u32 {
         self.data.stats.combat_stats.max_mana + self.temp_stat_boosts.max_mana
     }
+
+    /// Returns the amount of damage taken.
+    pub fn take_damage(&mut self, damage: u32) -> u32 {
+        let reduced_damage = self.get_reduced_damage_taken(damage);
+        if reduced_damage >= self.temp_stats.current_health {
+            self.temp_stats.current_health = 0;
+        } else {
+            self.temp_stats.current_health -= reduced_damage;
+        }
+        return reduced_damage;
+    }
+
+    /// Returns the amount of damage to take after defense reduction.
+    fn get_reduced_damage_taken(&self, damage: u32) -> u32 {
+        if self.get_total_defense() >= damage {
+            return 0;
+        }
+        damage - self.get_total_defense()
+    }
+
+    /// Returns the amount of restored health.
+    pub fn restore_health(&mut self, amount: u32) -> u32 {
+        let max_health = self.get_total_health();
+        if self.temp_stats.current_health + amount >= max_health {
+            let current_health = self.temp_stats.current_health;
+            self.temp_stats.current_health = max_health;
+            return max_health - current_health;
+        }
+        self.temp_stats.current_health += amount;
+        amount
+    }
 }
 
 pub struct TemporaryStats {
