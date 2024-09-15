@@ -159,8 +159,87 @@ fn menu_normal_enemy_fight_victory(
     Ok(())
 }
 
-pub fn menu_enemy_fight_player_died() -> io::Result<()> {
+pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Result<()> {
     let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    let current_level = character.data.stats.general_stats.character_level;
+    let current_floor = character.data.stats.general_stats.current_dungeon_floor;
+    if current_level
+        > character
+            .data
+            .stats
+            .general_stats
+            .highest_character_level_achieved
+    {
+        character
+            .data
+            .stats
+            .general_stats
+            .highest_character_level_achieved = current_level
+    }
+    if current_floor
+        > character
+            .data
+            .stats
+            .general_stats
+            .highest_dungeon_floor_achieved
+    {
+        character
+            .data
+            .stats
+            .general_stats
+            .highest_dungeon_floor_achieved = current_floor;
+    }
+    character.data.stats.general_stats.deaths += 1;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("You Died!");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Character: {}", character.data.metadata.name);
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!(
+            "Level: {}",
+            character.data.stats.general_stats.character_level
+        );
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!(
+            "Highest Level Reached (Record): {}",
+            character
+                .data
+                .stats
+                .general_stats
+                .highest_character_level_achieved
+        );
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!(
+            "Dungeon Floor: {}",
+            character.data.stats.general_stats.current_dungeon_floor
+        );
+        execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!(
+            "Highest Dungeon Floor Reached (Record): {}",
+            character
+                .data
+                .stats
+                .general_stats
+                .highest_dungeon_floor_achieved
+        );
+        execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!("Deaths: {}", character.data.stats.general_stats.deaths);
+        execute!(stdout, cursor::MoveTo(0, 8))?;
+        println!("> Continue");
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
     execute!(stdout, Clear(ClearType::All))?;
 
     Ok(())
