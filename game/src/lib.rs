@@ -1,6 +1,7 @@
 pub mod character;
 pub mod config;
 pub mod currency;
+pub mod drops;
 pub mod dungeon;
 pub mod enemy;
 pub mod error;

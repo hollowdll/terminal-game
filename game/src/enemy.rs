@@ -80,8 +80,8 @@ impl Enemy {
 
     pub fn get_display_name(&self) -> String {
         match self.kind {
-            EnemyKind::Normal => format!("{}", self.name),
-            EnemyKind::Boss => format!("{} [Boss]", self.name),
+            EnemyKind::Normal => format!("{} (Level {})", self.name, self.level),
+            EnemyKind::Boss => format!("{} [Boss] (Level {})", self.name, self.level),
         }
     }
 
