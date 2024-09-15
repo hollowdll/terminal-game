@@ -130,3 +130,31 @@ fn menu_confirm_return_to_main_menu() -> io::Result<bool> {
 
     Ok(false)
 }
+
+pub fn menu_level_up(new_level: u32) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("You Leveled Up!");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("New Level: {}", new_level);
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!("Some stats have been increased");
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!("> Continue");
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}

@@ -9,6 +9,7 @@ use std::io;
 use crate::{
     character::{random_exp_amount, BASE_EXP_MAX, BASE_EXP_MIN},
     currency::{random_gold_amount, BASE_GOLD_MAX, BASE_GOLD_MIN},
+    drops::give_normal_enemy_drops,
     enemy::{Enemy, EXP_MULTIPLIER_NORMAL_ENEMY, GOLD_MULTIPLIER_NORMAL_ENEMY},
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
@@ -122,45 +123,13 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     Ok(false)
 }
 
-fn menu_enemy_fight_victory(enemy_level: u32, character: &mut PlayerCharacter) -> io::Result<()> {
+fn menu_normal_enemy_fight_victory(
+    enemy_level: u32,
+    character: &mut PlayerCharacter,
+) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
-    let gold = random_gold_amount(
-        BASE_GOLD_MIN,
-        BASE_GOLD_MAX,
-        GOLD_MULTIPLIER_NORMAL_ENEMY,
-        enemy_level,
-    );
-    character.give_gold(gold);
-    let exp = random_exp_amount(
-        BASE_EXP_MIN,
-        BASE_EXP_MAX,
-        EXP_MULTIPLIER_NORMAL_ENEMY,
-        enemy_level,
-    );
-    character.gain_exp(exp);
-
-    let equipment_item_category = random_equipment_item();
-    let mut item_display_name = "?Unknown?".to_string();
-    match equipment_item_category {
-        ItemCategory::Weapon => {
-            let weapon = generate_random_weapon(WEAPON_BASE_VALUES, enemy_level);
-            character.give_weapon(&weapon);
-            item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
-        }
-        ItemCategory::Armor => {
-            let armor = generate_random_armor(ARMOR_BASE_VALUES, enemy_level);
-            character.give_armor(&armor);
-            item_display_name = get_item_display_name(CharacterItem::Armor(&armor));
-        }
-        ItemCategory::Ring => {
-            let ring = generate_random_ring(RING_BASE_VALUES, enemy_level);
-            character.give_ring(&ring);
-            item_display_name = get_item_display_name(CharacterItem::Ring(&ring));
-        }
-        _ => {}
-    }
+    let drops = give_normal_enemy_drops(character, enemy_level);
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -168,10 +137,12 @@ fn menu_enemy_fight_victory(enemy_level: u32, character: &mut PlayerCharacter) -
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Drops:");
         execute!(stdout, cursor::MoveTo(0, 2))?;
-        println!("  Gold: {}", gold);
+        println!("  Gold: {}", drops.gold);
         execute!(stdout, cursor::MoveTo(0, 3))?;
-        println!("  Item: {}", item_display_name);
-        execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!("  EXP: {}", drops.exp);
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!("  Item: {}", drops.equipment_item_name);
+        execute!(stdout, cursor::MoveTo(0, 6))?;
         println!("> Continue");
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
@@ -183,6 +154,13 @@ fn menu_enemy_fight_victory(enemy_level: u32, character: &mut PlayerCharacter) -
             }
         }
     }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+pub fn menu_enemy_fight_player_died() -> io::Result<()> {
+    let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
     Ok(())

@@ -13,6 +13,8 @@ pub const FLOOR_LENGTH_SCALE: u32 = 9;
 pub struct DungeonFloor {
     pub floor: u32,
     pub rooms: HashMap<RoomCoordinates, Room>,
+    // TODO
+    // pub boss: Enemy,
 }
 
 impl DungeonFloor {

@@ -1,5 +1,5 @@
 use crate::{
-    currency::{random_gold_amount, BASE_GOLD_MAX, BASE_GOLD_MIN, GOLD_MULTIPLIER_TREASURE_CHEST},
+    drops::give_treasure_chest_drops,
     dungeon::{
         generate_random_dungeon_floor,
         room::{
@@ -9,11 +9,6 @@ use crate::{
             display_two_way_up_right_room,
         },
         DungeonFloor, Room, RoomCoordinates, RoomKind,
-    },
-    items::{
-        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        random_equipment_item, CharacterItem, ItemCategory, ARMOR_BASE_VALUES, RING_BASE_VALUES,
-        WEAPON_BASE_VALUES,
     },
     menu::character::menu_character,
     session::{Player, PlayerCharacter},
@@ -302,35 +297,7 @@ pub fn menu_open_treasure_chest(
 ) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
-    let gold = random_gold_amount(
-        BASE_GOLD_MIN,
-        BASE_GOLD_MAX,
-        GOLD_MULTIPLIER_TREASURE_CHEST,
-        dungeon_floor,
-    );
-    character.give_gold(gold);
-
-    let equipment_item_category = random_equipment_item();
-    let mut item_display_name = "?Unknown?".to_string();
-    match equipment_item_category {
-        ItemCategory::Weapon => {
-            let weapon = generate_random_weapon(WEAPON_BASE_VALUES, dungeon_floor);
-            character.give_weapon(&weapon);
-            item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
-        }
-        ItemCategory::Armor => {
-            let armor = generate_random_armor(ARMOR_BASE_VALUES, dungeon_floor);
-            character.give_armor(&armor);
-            item_display_name = get_item_display_name(CharacterItem::Armor(&armor));
-        }
-        ItemCategory::Ring => {
-            let ring = generate_random_ring(RING_BASE_VALUES, dungeon_floor);
-            character.give_ring(&ring);
-            item_display_name = get_item_display_name(CharacterItem::Ring(&ring));
-        }
-        _ => {}
-    }
+    let drops = give_treasure_chest_drops(character, dungeon_floor);
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -338,9 +305,9 @@ pub fn menu_open_treasure_chest(
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Drops:");
         execute!(stdout, cursor::MoveTo(0, 2))?;
-        println!("  Gold: {}", gold);
+        println!("  Gold: {}", drops.gold);
         execute!(stdout, cursor::MoveTo(0, 3))?;
-        println!("  Item: {}", item_display_name);
+        println!("  Item: {}", drops.equipment_item_name);
         execute!(stdout, cursor::MoveTo(0, 5))?;
         println!("> Continue");
 
