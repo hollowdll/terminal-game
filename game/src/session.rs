@@ -289,7 +289,12 @@ impl PlayerCharacter {
     }
 
     pub fn get_total_crit_hit_rate(&self) -> f64 {
-        self.data.stats.combat_stats.critical_hit_rate + self.temp_stat_boosts.critical_hit_rate
+        let total = self.data.stats.combat_stats.critical_hit_rate
+            + self.temp_stat_boosts.critical_hit_rate;
+        if total > 1.0 {
+            return 1.0;
+        }
+        total
     }
 
     pub fn get_total_crit_damage_multiplier(&self) -> f64 {
@@ -307,6 +312,10 @@ impl PlayerCharacter {
 
     pub fn get_total_mana(&self) -> u32 {
         self.data.stats.combat_stats.max_mana + self.temp_stat_boosts.max_mana
+    }
+
+    pub fn get_crit_hit_damage(&self) -> u32 {
+        self.get_total_damage() * self.get_total_crit_damage_multiplier() as u32
     }
 
     /// Returns the amount of damage taken.

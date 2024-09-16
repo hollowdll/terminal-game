@@ -5,6 +5,7 @@ pub mod drops;
 pub mod dungeon;
 pub mod enemy;
 pub mod error;
+pub mod fight;
 pub mod game;
 pub mod game_data;
 pub mod items;
