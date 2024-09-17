@@ -126,8 +126,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Attack" => {
                         action = true;
-                        let damage_taken = enemy.take_damage(character.get_total_damage());
-                        fight_text = format!("Enemy took {} damage", damage_taken);
+                        fight_text = character.attack_enemy(enemy);
                         execute!(stdout, Clear(ClearType::All))?;
                     }
                     "Consumables" => {}

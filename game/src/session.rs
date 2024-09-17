@@ -1,4 +1,6 @@
 use crate::{
+    enemy::Enemy,
+    fight::is_critical_hit,
     game_data::{CharacterData, GameData},
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
@@ -347,6 +349,16 @@ impl PlayerCharacter {
         }
         self.temp_stats.current_health += amount;
         amount
+    }
+
+    /// Returns enemy fight text.
+    pub fn attack_enemy(&self, enemy: &mut Enemy) -> String {
+        let mut damage = self.get_total_damage();
+        if is_critical_hit(self.get_total_crit_hit_rate()) {
+            damage = self.get_crit_hit_damage();
+        }
+        let damage_taken = enemy.take_damage(damage);
+        return format!("Enemy took {} damage", damage_taken);
     }
 }
 
