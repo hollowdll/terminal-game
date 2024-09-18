@@ -112,23 +112,25 @@ impl ConsumableItem {
     /// Returns text telling what the item did.
     pub fn use_item(&self, character: &mut PlayerCharacter) -> String {
         let display_name = get_item_display_name(CharacterItem::Consumable(&self));
+        let mut text = "".to_string();
         match self.info.name.as_ref() {
             ITEM_HEALTH_POTION_NAME => {
                 let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
                 let restored_health = character
                     .restore_health((heal_percentage * character.get_total_health() as f64) as u32);
-                if self.amount_in_inventory > 1 {
-                    character.decrease_consumable_inventory_amount(&display_name, 1);
-                } else {
-                    character.delete_consumable(&display_name);
-                }
-                return format!(
+                text = format!(
                     "Player used {}! Restored {} health points",
                     &display_name, restored_health
                 );
             }
-            _ => "Asd".to_string(),
+            _ => {}
         }
+        if self.amount_in_inventory > 1 {
+            character.decrease_consumable_inventory_amount(&display_name, 1);
+        } else {
+            character.delete_consumable(&display_name);
+        }
+        text
     }
 }
 

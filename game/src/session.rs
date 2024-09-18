@@ -227,6 +227,7 @@ impl PlayerCharacter {
         self.give_weapon(&generate_random_weapon(WEAPON_BASE_VALUES, 1));
     }
 
+    /// Returns true if deleted.
     pub fn delete_consumable(&mut self, display_name: &str) -> bool {
         if let Some(_) = self.data.inventory.consumables.remove(display_name) {
             return true;
