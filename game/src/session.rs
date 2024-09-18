@@ -191,6 +191,7 @@ impl PlayerCharacter {
 
     pub fn gain_exp(&mut self, exp: u32) {
         self.data.stats.general_stats.current_exp += exp;
+        self.data.stats.general_stats.total_exp += exp;
 
         while self.data.stats.general_stats.current_exp
             >= self.data.stats.general_stats.required_exp
