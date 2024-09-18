@@ -6,20 +6,10 @@ pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const ENEMY_SKILL_CHANCE: f64 = 0.25;
 
-pub const NORMAL_ENEMY_NAMES: NormalEnemyNames = NormalEnemyNames {
-    skeleton: "Skeleton",
-    goblin: "Goblin",
-};
-
-pub const BOSS_ENEMY_NAMES: BossEnemyNames = BossEnemyNames {
-    ogre_king: "Ogre King",
-    fire_dragon: "Fire Dragon",
-};
-
-pub const ENEMY_SKILL_SMASH: EnemySkill = EnemySkill {
-    name: "Smash",
-    effect: "Deals 30% of the player's maximun health as damage to the player.",
-};
+pub const NORMAL_ENEMY_NAMES: [&str; 3] = ["Skeleton", "Goblin", "Ogre"];
+pub const BOSS_ENEMY_NAME_OGRE_KING: &str = "Ogre King";
+pub const BOSS_ENEMY_NAME_FIRE_DRAGON: &str = "Fire Dragon";
+pub const BOSS_ENEMY_NAMES: [&str; 2] = [BOSS_ENEMY_NAME_OGRE_KING, BOSS_ENEMY_NAME_FIRE_DRAGON];
 
 pub struct NormalEnemyNames {
     pub skeleton: &'static str,
@@ -29,6 +19,13 @@ pub struct NormalEnemyNames {
 pub struct BossEnemyNames {
     pub ogre_king: &'static str,
     pub fire_dragon: &'static str,
+}
+
+#[derive(Debug, Clone)]
+pub enum EnemySkill {
+    Smash,
+    FireBreath,
+    Unknown,
 }
 
 #[derive(Debug, Clone)]
@@ -61,7 +58,12 @@ impl Enemy {
         }
     }
 
-    pub fn new_boss(dungeon_floor: u32, name: &'static str, skill: EnemySkill) -> Self {
+    pub fn new_boss(dungeon_floor: u32, name: &'static str) -> Self {
+        let skill = match name {
+            BOSS_ENEMY_NAME_OGRE_KING => EnemySkill::Smash,
+            BOSS_ENEMY_NAME_FIRE_DRAGON => EnemySkill::FireBreath,
+            _ => EnemySkill::Unknown,
+        };
         Self {
             name,
             kind: EnemyKind::Boss,
@@ -170,12 +172,6 @@ pub struct EnemyStats {
 pub struct EnemyStatBoosts {
     pub defense: u32,
     pub damage: u32,
-}
-
-#[derive(Debug, Clone)]
-pub struct EnemySkill {
-    pub name: &'static str,
-    pub effect: &'static str,
 }
 
 #[derive(Debug, Clone)]
