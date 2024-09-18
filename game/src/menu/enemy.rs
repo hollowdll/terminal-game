@@ -36,10 +36,10 @@ pub fn menu_enemy_encounter(
             }
         }
     }
-    menu_enemy_fight(enemy, character)?;
+    let victory = menu_enemy_fight(enemy, character)?;
     execute!(stdout, Clear(ClearType::All))?;
 
-    Ok(true)
+    Ok(victory)
 }
 
 /// Returns true if the player wins the fight.
@@ -51,25 +51,15 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     let start_column: u16 = 9;
     let mut fight_text = "Select what to do...".to_string();
     let mut action = false;
+    let mut player_turn = true;
+
+    // fully heal player at the start of fights
+    character.restore_health(character.get_total_health());
 
     loop {
         let mut menu_items = vec!["Attack", "Consumables", "Stats", "Flee"];
         if action {
             menu_items = vec!["Continue"];
-        } else {
-            if enemy.stats.current_health == 0 {
-                let character_level = character.data.stats.general_stats.character_level;
-                match enemy.kind {
-                    EnemyKind::Normal => {
-                        menu_normal_enemy_fight_victory(enemy.level, character)?;
-                    }
-                    _ => {}
-                }
-                if character.data.stats.general_stats.character_level > character_level {
-                    menu_level_up(character.data.stats.general_stats.character_level)?;
-                }
-                return Ok(true);
-            }
         }
 
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -132,8 +122,29 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                     "Consumables" => {}
                     "Stats" => {}
                     "Continue" => {
-                        action = false;
-                        fight_text = "Select what to do...".to_string();
+                        if enemy.is_dead() {
+                            let character_level =
+                                character.data.stats.general_stats.character_level;
+                            match enemy.kind {
+                                EnemyKind::Normal => {
+                                    menu_normal_enemy_fight_victory(enemy.level, character)?;
+                                }
+                                _ => {}
+                            }
+                            if character.data.stats.general_stats.character_level > character_level
+                            {
+                                menu_level_up(character.data.stats.general_stats.character_level)?;
+                            }
+                            return Ok(true);
+                        }
+                        if player_turn {
+                            player_turn = false;
+                            fight_text = enemy.attack_player(character);
+                        } else {
+                            action = false;
+                            player_turn = true;
+                            fight_text = "Select what to do...".to_string();
+                        }
                         execute!(stdout, Clear(ClearType::All))?;
                     }
                     _ => break,
