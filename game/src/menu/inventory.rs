@@ -54,7 +54,9 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
                     break;
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
-                    "Consumables" => menu_inventory_consumable_list(character)?,
+                    "Consumables" => {
+                        let _ = menu_inventory_consumable_list(character, false)?;
+                    }
                     "Weapons" => menu_inventory_weapon_list(character)?,
                     "Armors" => menu_inventory_armor_list(character)?,
                     "Rings" => menu_inventory_ring_list(character)?,
@@ -69,13 +71,18 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
     Ok(())
 }
 
-pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Result<()> {
+/// Returns text telling what the item did if it was used.
+pub fn menu_inventory_consumable_list(
+    character: &mut PlayerCharacter,
+    in_fight: bool,
+) -> io::Result<String> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
+    let mut use_effect_text = "".to_string();
 
     for (_, item) in &character.data.inventory.consumables {
         menu_items.push(item.clone());
@@ -83,7 +90,11 @@ pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Re
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Item Info, U = Use Item, D = Delete Item");
+        if in_fight {
+            println!("Esc = Back, Enter = Item Info, U = Use Item");
+        } else {
+            println!("Esc = Back, Enter = Item Info, D = Delete Item");
+        }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Consumables");
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -129,8 +140,15 @@ pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Re
                         menu_consumable_info(&menu_items[selected_index])?;
                     }
                 }
+                KeyCode::Char('U') | KeyCode::Char('u') => {
+                    if in_fight {
+                        let selected_item = &menu_items[selected_index];
+                        use_effect_text = selected_item.use_item(character);
+                        break;
+                    }
+                }
                 KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() {
+                    if !in_fight && !menu_items.is_empty() {
                         let deleted_all =
                             menu_delete_consumable(character, &mut menu_items, selected_index)?;
                         if deleted_all {
@@ -144,7 +162,7 @@ pub fn menu_inventory_consumable_list(character: &mut PlayerCharacter) -> io::Re
     }
     execute!(stdout, Clear(ClearType::All))?;
 
-    Ok(())
+    Ok(use_effect_text)
 }
 
 /// Returns true if the item was removed completely (amount in inventory 0 after deletion).

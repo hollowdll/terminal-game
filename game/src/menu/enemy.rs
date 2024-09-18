@@ -9,7 +9,7 @@ use std::io;
 use crate::{
     drops::give_normal_enemy_drops,
     enemy::{Enemy, EnemyKind},
-    menu::character::menu_level_up,
+    menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
 };
 
@@ -123,9 +123,18 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                     "Attack" => {
                         action = true;
                         fight_text = character.attack_enemy(enemy);
+                        selected_index = 0;
                         execute!(stdout, Clear(ClearType::All))?;
                     }
-                    "Consumables" => {}
+                    "Consumables" => {
+                        let text = menu_inventory_consumable_list(character, true)?;
+                        if !text.is_empty() {
+                            action = true;
+                            fight_text = text;
+                            selected_index = 0;
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
                     "Stats" => menu_enemy_fight_character_stats(character)?,
                     "Continue" => {
                         if enemy.is_dead() {

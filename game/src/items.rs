@@ -45,8 +45,9 @@ pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues
 // Disposable items //
 //-----------------//
 
+pub const ITEM_HEALTH_POTION_NAME: &str = "Health Potion";
 pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
-    name: Cow::Borrowed("Health Potion"),
+    name: Cow::Borrowed(ITEM_HEALTH_POTION_NAME),
     description: Cow::Borrowed("A magical potion that restores health points."),
     category: ItemCategory::Consumable,
 };
@@ -105,6 +106,23 @@ impl ConsumableItem {
             effect: get_health_potion_effect(&rarity),
             rarity,
             amount_in_inventory: 0,
+        }
+    }
+
+    /// Returns text telling what the item did.
+    pub fn use_item(&self, character: &mut PlayerCharacter) -> String {
+        match self.info.name.as_ref() {
+            ITEM_HEALTH_POTION_NAME => {
+                let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
+                let restored_health = character
+                    .restore_health((heal_percentage * character.get_total_health() as f64) as u32);
+                return format!(
+                    "Player used {}! Restored {} health points",
+                    get_item_display_name(CharacterItem::Consumable(&self)),
+                    restored_health
+                );
+            }
+            _ => "Asd".to_string(),
         }
     }
 }
