@@ -16,20 +16,16 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec![
-        "Stats",
-        "Inventory",
-        "Equipment",
-        "Return to main menu",
-        "Back",
-    ];
+    let menu_items = vec!["Stats", "Inventory", "Equipment", "Return to main menu"];
     let mut selected_index = 0;
-    let start_column: u16 = 1;
+    let start_column: u16 = 2;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Menu");
+        println!("Esc = Close Menu");
         execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Menu");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -51,6 +47,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                     if selected_index < menu_items.len() - 1 {
                         selected_index += 1;
                     }
+                }
+                KeyCode::Esc => {
+                    break;
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Stats" => {

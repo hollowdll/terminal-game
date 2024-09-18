@@ -18,14 +18,16 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Consumables", "Weapons", "Armors", "Rings", "Back"];
+    let menu_items = vec!["Consumables", "Weapons", "Armors", "Rings"];
     let mut selected_index = 0;
-    let start_column: u16 = 1;
+    let start_column: u16 = 2;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Inventory (Gold: {})", character.data.currency.gold);
+        println!("Esc = Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Inventory (Gold: {})", character.data.currency.gold);
+        execute!(stdout, cursor::MoveTo(0, 2))?;
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -47,6 +49,9 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
                     if selected_index < menu_items.len() - 1 {
                         selected_index += 1;
                     }
+                }
+                KeyCode::Esc => {
+                    break;
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Consumables" => menu_inventory_consumable_list(character)?,
