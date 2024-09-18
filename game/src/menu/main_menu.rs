@@ -51,6 +51,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut selected_index = 0;
     let mut start_column: u16 = 7;
     let mut rerender = false;
+    let version = env!("CARGO_PKG_VERSION");
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -70,6 +71,9 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
                 println!("  {}", item);
             }
         }
+
+        execute!(stdout, cursor::MoveTo(0, start_column + 4))?;
+        println!("v{}", version);
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {
