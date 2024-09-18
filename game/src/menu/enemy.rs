@@ -48,7 +48,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     execute!(stdout, Clear(ClearType::All))?;
 
     let mut selected_index = 0;
-    let start_column: u16 = 9;
+    let start_column: u16 = 10;
     let mut fight_text = "Select what to do...".to_string();
     let mut action = false;
     let mut player_turn = true;
@@ -87,9 +87,15 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
             character.get_total_health()
         );
         execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!(
+            "Mana: {}/{}",
+            character.temp_stats.current_mana,
+            character.get_total_mana()
+        );
+        execute!(stdout, cursor::MoveTo(0, 7))?;
         println!("Defense: {}", character.get_total_defense());
 
-        execute!(stdout, cursor::MoveTo(0, 8))?;
+        execute!(stdout, cursor::MoveTo(0, 9))?;
         println!("{}", fight_text);
 
         for (i, item) in menu_items.iter().enumerate() {
@@ -120,7 +126,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                         execute!(stdout, Clear(ClearType::All))?;
                     }
                     "Consumables" => {}
-                    "Stats" => {}
+                    "Stats" => menu_enemy_fight_character_stats(character)?,
                     "Continue" => {
                         if enemy.is_dead() {
                             let character_level =
@@ -268,6 +274,57 @@ pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Resu
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {
                 KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_enemy_fight_character_stats(character: &PlayerCharacter) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Combat Stats");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!(
+            "  Health: {}/{}",
+            character.temp_stats.current_health,
+            character.get_total_health()
+        );
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!(
+            "  Mana: {}/{}",
+            character.temp_stats.current_mana,
+            character.get_total_mana()
+        );
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!("  Defense: {}", character.get_total_defense());
+        execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!("  Damage: {}", character.get_total_damage());
+        execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!(
+            "  Critical Damage Multiplier: {:.2}",
+            character.get_total_crit_damage_multiplier()
+        );
+        execute!(stdout, cursor::MoveTo(0, 7))?;
+        println!(
+            "  Critical Hit Rate: {:.2} ({:.2}%)",
+            character.get_total_crit_hit_rate(),
+            character.get_total_crit_hit_rate() * 100.0
+        );
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Esc => {
                     break;
                 }
                 _ => {}
