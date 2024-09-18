@@ -1,3 +1,5 @@
+use crate::session::PlayerCharacter;
+
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
@@ -143,6 +145,16 @@ impl Enemy {
             return self.stat_boosts.defense = 0;
         }
         self.stat_boosts.defense -= amount
+    }
+
+    pub fn is_dead(&self) -> bool {
+        self.stats.current_health == 0
+    }
+
+    /// Returns enemy fight text.
+    pub fn attack_player(&self, character: &mut PlayerCharacter) -> String {
+        let damage_taken = character.take_damage(self.get_total_damage());
+        return format!("Enemy attacked! Player took {} damage", damage_taken);
     }
 }
 

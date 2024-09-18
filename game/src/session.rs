@@ -351,14 +351,21 @@ impl PlayerCharacter {
         amount
     }
 
+    pub fn is_dead(&self) -> bool {
+        self.temp_stats.current_health == 0
+    }
+
     /// Returns enemy fight text.
     pub fn attack_enemy(&self, enemy: &mut Enemy) -> String {
-        let mut damage = self.get_total_damage();
         if is_critical_hit(self.get_total_crit_hit_rate()) {
-            damage = self.get_crit_hit_damage();
+            let damage_taken = enemy.take_damage(self.get_crit_hit_damage());
+            return format!(
+                "Player attacked! Enemy took {} damage (Critical Hit)",
+                damage_taken
+            );
         }
-        let damage_taken = enemy.take_damage(damage);
-        return format!("Enemy took {} damage", damage_taken);
+        let damage_taken = enemy.take_damage(self.get_total_damage());
+        return format!("Player attacked! Enemy took {} damage", damage_taken);
     }
 }
 
