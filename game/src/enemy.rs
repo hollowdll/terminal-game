@@ -1,10 +1,12 @@
-use crate::session::PlayerCharacter;
+use crate::{fight::is_critical_hit, session::PlayerCharacter};
 
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
-pub const ENEMY_SKILL_CHANCE: f64 = 0.25;
+pub const ENEMY_SKILL_CHANCE: f64 = 0.35;
+pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
+pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;
 
 pub const NORMAL_ENEMY_NAMES: [&str; 3] = ["Skeleton", "Goblin", "Ogre"];
 pub const BOSS_ENEMY_NAME_OGRE_KING: &str = "Ogre King";
@@ -49,6 +51,8 @@ impl Enemy {
                 current_health: 50 + (25 * dungeon_floor),
                 defense: 0,
                 damage: 7 + (5 * dungeon_floor),
+                crit_hit_rate: ENEMY_CRIT_HIT_RATE,
+                crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
             stat_boosts: EnemyStatBoosts {
                 defense: 0,
@@ -73,6 +77,8 @@ impl Enemy {
                 current_health: 150 + (50 * dungeon_floor),
                 defense: 1 + (1 * dungeon_floor),
                 damage: 15 + (6 * dungeon_floor),
+                crit_hit_rate: ENEMY_CRIT_HIT_RATE,
+                crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
             stat_boosts: EnemyStatBoosts {
                 defense: 0,
@@ -95,6 +101,14 @@ impl Enemy {
 
     pub fn get_total_defense(&self) -> u32 {
         self.stats.defense + self.stat_boosts.defense
+    }
+
+    pub fn get_total_crit_hit_rate(&self) -> f64 {
+        self.stats.crit_hit_rate
+    }
+
+    pub fn get_crit_hit_damage(&self) -> u32 {
+        (self.get_total_damage() as f64 * self.stats.crit_damage_multiplier) as u32
     }
 
     /// Returns the amount of damage taken.
@@ -155,8 +169,15 @@ impl Enemy {
 
     /// Returns enemy fight text.
     pub fn attack_player(&self, character: &mut PlayerCharacter) -> String {
+        if is_critical_hit(self.get_total_crit_hit_rate()) {
+            let damage_taken = character.take_damage(self.get_crit_hit_damage());
+            return format!(
+                "Enemy attacked! Player took {} damage (Critical Hit)",
+                damage_taken
+            );
+        }
         let damage_taken = character.take_damage(self.get_total_damage());
-        return format!("Enemy attacked! Player took {} damage", damage_taken);
+        format!("Enemy attacked! Player took {} damage", damage_taken)
     }
 }
 
@@ -166,6 +187,8 @@ pub struct EnemyStats {
     pub current_health: u32,
     pub defense: u32,
     pub damage: u32,
+    pub crit_hit_rate: f64,
+    pub crit_damage_multiplier: f64,
 }
 
 #[derive(Debug, Clone)]

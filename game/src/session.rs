@@ -319,7 +319,7 @@ impl PlayerCharacter {
     }
 
     pub fn get_crit_hit_damage(&self) -> u32 {
-        self.get_total_damage() * self.get_total_crit_damage_multiplier() as u32
+        (self.get_total_damage() as f64 * self.get_total_crit_damage_multiplier()) as u32
     }
 
     /// Returns the amount of damage taken.
