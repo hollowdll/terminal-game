@@ -92,7 +92,9 @@ impl Room {
 pub enum RoomKind {
     /// OneWayUp room, contains shop interaction.
     Start,
-    /// OneWayDown room, contains boss room interaction.
+    /// Contains door to next floor.
+    Boss,
+    /// Contains boss room interaction.
     BossEntrance,
     TwoWayUpDown,
     TwoWayLeftRight,
@@ -152,11 +154,12 @@ fn generate_random_rooms(
     let mut rng = thread_rng();
     let mut rooms_generated = 1;
     let mut boss_entrance_generated = false;
+    let mut boss_room_generated = false;
     let mut current = start_room;
     let mut current_direction = Direction::Unknown;
 
     loop {
-        if boss_entrance_generated {
+        if boss_room_generated {
             break;
         }
         let mut room_kind = RoomKind::Unknown;
@@ -169,6 +172,12 @@ fn generate_random_rooms(
                 current_direction = Direction::Up;
                 room_direction = Direction::Down;
                 room_coordinates = RoomCoordinates::new(0, 1);
+            }
+            RoomKind::BossEntrance => {
+                room_kind = RoomKind::Boss;
+                current_direction = Direction::Up;
+                room_direction = Direction::Down;
+                room_coordinates = RoomCoordinates::new(current.coords.x, current.coords.y + 1);
             }
             RoomKind::TwoWayUpDown => {
                 if rooms_generated > length_scale {
@@ -272,6 +281,9 @@ fn generate_random_rooms(
         match room_kind {
             RoomKind::BossEntrance => {
                 boss_entrance_generated = true;
+            }
+            RoomKind::Boss => {
+                boss_room_generated = true;
             }
             _ => {}
         }

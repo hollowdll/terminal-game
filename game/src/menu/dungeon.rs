@@ -3,10 +3,10 @@ use crate::{
     dungeon::{
         generate_random_dungeon_floor,
         room::{
-            display_boss_entrance_room, display_start_room, display_two_way_down_left_room,
-            display_two_way_down_right_room, display_two_way_left_right_room,
-            display_two_way_up_down_room, display_two_way_up_left_room,
-            display_two_way_up_right_room,
+            display_boss_entrance_room, display_boss_room, display_start_room,
+            display_two_way_down_left_room, display_two_way_down_right_room,
+            display_two_way_left_right_room, display_two_way_up_down_room,
+            display_two_way_up_left_room, display_two_way_up_right_room,
         },
         DungeonFloor, Room, RoomCoordinates, RoomKind,
     },
@@ -166,6 +166,7 @@ pub fn menu_dungeon_floor(
     match current_room.kind {
         RoomKind::Start => menu_items.push("Enter Shop"),
         RoomKind::BossEntrance => menu_items.push("Enter Boss Room"),
+        RoomKind::Boss => menu_items.push("Enter Next Floor"),
         _ => {}
     }
     if current_room.treasure {
@@ -185,6 +186,7 @@ pub fn menu_dungeon_floor(
 
         start_column = match current_room.kind {
             RoomKind::Start => display_start_room(start_column)?,
+            RoomKind::Boss => display_boss_room(start_column, dungeon_floor.floor + 1)?,
             RoomKind::BossEntrance => display_boss_entrance_room(start_column)?,
             RoomKind::TwoWayUpDown => display_two_way_up_down_room(start_column)?,
             RoomKind::TwoWayLeftRight => display_two_way_left_right_room(start_column)?,
@@ -263,6 +265,7 @@ pub fn menu_dungeon_floor(
                             }
                         }
                     }
+                    "Enter Next Floor" => {}
                     "Open Treasure Chest" => {
                         menu_open_treasure_chest(dungeon_floor.floor, character, current_room)?;
                         menu_items.remove(selected_index);
