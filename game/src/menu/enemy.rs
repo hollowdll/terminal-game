@@ -240,7 +240,7 @@ fn menu_boss_enemy_fight_victory(
         for item in &drops.equipment_item_names {
             println!("    {}", item);
             column += 1;
-            execute!(stdout, cursor::MoveTo(0, column + 1))?;
+            execute!(stdout, cursor::MoveTo(0, column))?;
         }
         execute!(stdout, cursor::MoveTo(0, column + 1))?;
         println!("> Continue");

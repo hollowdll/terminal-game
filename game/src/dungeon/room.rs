@@ -50,7 +50,7 @@ pub fn display_boss_entrance_room(start_column: u16) -> io::Result<u16> {
 pub fn display_boss_room(start_column: u16, next_floor: u32) -> io::Result<u16> {
     let mut stdout = io::stdout();
     execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
-    println!("+-------------+");
+    println!("+--------------+");
     execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
     println!("|    | F{} |    |", next_floor);
     execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
@@ -58,7 +58,7 @@ pub fn display_boss_room(start_column: u16, next_floor: u32) -> io::Result<u16> 
     execute!(stdout, cursor::MoveTo(0, start_column + 4))?;
     println!("|              |");
     execute!(stdout, cursor::MoveTo(0, start_column + 5))?;
-    println!("|    /    \\    |");
+    println!("|              |");
     execute!(stdout, cursor::MoveTo(0, start_column + 6))?;
     println!("+----      ----+");
     execute!(stdout, cursor::MoveTo(0, start_column + 8))?;

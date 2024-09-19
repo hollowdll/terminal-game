@@ -152,7 +152,10 @@ pub fn menu_dungeon_floor(
     }
 
     if let Some(_) = current_room.adjacents.up {
-        menu_items.push("Go Up");
+        match current_room.kind {
+            RoomKind::BossEntrance => {}
+            _ => menu_items.push("Go Up"),
+        }
     }
     if let Some(_) = current_room.adjacents.down {
         menu_items.push("Go Down");
@@ -166,7 +169,15 @@ pub fn menu_dungeon_floor(
     match current_room.kind {
         RoomKind::Start => menu_items.push("Enter Shop"),
         RoomKind::BossEntrance => menu_items.push("Enter Boss Room"),
-        RoomKind::Boss => menu_items.push("Enter Next Floor"),
+        RoomKind::Boss => {
+            menu_items.push("Enter Next Floor");
+            if let Some(boss) = &mut dungeon_floor.boss {
+                let victory = menu_enemy_encounter(boss, character)?;
+                if victory {
+                    dungeon_floor.boss = None;
+                }
+            }
+        }
         _ => {}
     }
     if current_room.treasure {
@@ -178,10 +189,13 @@ pub fn menu_dungeon_floor(
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!(
-            "Dungeon Floor {}, Room {}",
-            dungeon_floor.floor, current_room.room_num
-        );
+        match current_room.kind {
+            RoomKind::Boss => println!("Dungeon Floor {}, Boss Room", dungeon_floor.floor),
+            _ => println!(
+                "Dungeon Floor {}, Room {}",
+                dungeon_floor.floor, current_room.room_num
+            ),
+        }
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
         start_column = match current_room.kind {
@@ -258,12 +272,12 @@ pub fn menu_dungeon_floor(
                     }
                     "Enter Shop" => {}
                     "Enter Boss Room" => {
-                        if let Some(boss) = &mut dungeon_floor.boss {
-                            let victory = menu_enemy_encounter(boss, character)?;
-                            if victory {
-                                //
-                            }
-                        }
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: false,
+                            game_over: false,
+                            next_room_coords: current_room.adjacents.up.clone(),
+                        })
                     }
                     "Enter Next Floor" => {}
                     "Open Treasure Chest" => {
