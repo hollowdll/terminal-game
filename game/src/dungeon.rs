@@ -1,4 +1,4 @@
-use crate::enemy::Enemy;
+use crate::enemy::{generate_random_boss_enemy, generate_random_normal_enemy, Enemy};
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 
@@ -13,13 +13,16 @@ pub const FLOOR_LENGTH_SCALE: u32 = 9;
 pub struct DungeonFloor {
     pub floor: u32,
     pub rooms: HashMap<RoomCoordinates, Room>,
-    // TODO
-    // pub boss: Enemy,
+    pub boss: Enemy,
 }
 
 impl DungeonFloor {
     pub fn new(floor: u32, rooms: HashMap<RoomCoordinates, Room>) -> Self {
-        Self { floor, rooms }
+        Self {
+            floor,
+            rooms,
+            boss: generate_random_boss_enemy(floor),
+        }
     }
 
     pub fn pretty_print(&self) {
@@ -300,7 +303,7 @@ fn randomize_enemy_rooms(
             let rand_room = &temp_rooms[rand_num];
             match rand_room.enemy {
                 None => {
-                    let enemy = Enemy::new_normal(dungeon_floor, "?enemy_name?");
+                    let enemy = generate_random_normal_enemy(dungeon_floor);
                     if let Some(room) = rooms.get_mut(&rand_room.coords) {
                         room.enemy = Some(enemy);
                     }

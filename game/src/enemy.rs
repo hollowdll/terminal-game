@@ -1,3 +1,5 @@
+use rand::{thread_rng, Rng};
+
 use crate::{fight::is_critical_hit, session::PlayerCharacter};
 
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
@@ -8,10 +10,36 @@ pub const ENEMY_SKILL_CHANCE: f64 = 0.35;
 pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
 pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;
 
-pub const NORMAL_ENEMY_NAMES: [&str; 3] = ["Skeleton", "Goblin", "Ogre"];
+pub const NORMAL_ENEMY_NAME_SKELETON: &str = "Skeleton";
+pub const NORMAL_ENEMY_NAME_GOBLIN: &str = "Goblin";
+pub const NORMAL_ENEMY_NAME_OGRE: &str = "Ogre";
+pub const NORMAL_ENEMY_NAME_GOLEM: &str = "Golem";
+pub const NORMAL_ENEMY_NAMES: [&str; 4] = [
+    NORMAL_ENEMY_NAME_SKELETON,
+    NORMAL_ENEMY_NAME_GOBLIN,
+    NORMAL_ENEMY_NAME_OGRE,
+    NORMAL_ENEMY_NAME_GOLEM,
+];
+
 pub const BOSS_ENEMY_NAME_OGRE_KING: &str = "Ogre King";
 pub const BOSS_ENEMY_NAME_FIRE_DRAGON: &str = "Fire Dragon";
 pub const BOSS_ENEMY_NAMES: [&str; 2] = [BOSS_ENEMY_NAME_OGRE_KING, BOSS_ENEMY_NAME_FIRE_DRAGON];
+
+pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
+    health: 50,
+    defense: 0,
+    damage: 7,
+};
+pub const GREATER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
+    health: 70,
+    defense: 1,
+    damage: 10,
+};
+pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
+    health: 150,
+    defense: 2,
+    damage: 16,
+};
 
 pub struct NormalEnemyNames {
     pub skeleton: &'static str,
@@ -40,17 +68,23 @@ pub struct Enemy {
     pub skill: Option<EnemySkill>,
 }
 
+pub struct EnemyBaseStats {
+    pub health: u32,
+    pub defense: u32,
+    pub damage: u32,
+}
+
 impl Enemy {
-    pub fn new_normal(dungeon_floor: u32, name: &'static str) -> Self {
+    pub fn new_normal(dungeon_floor: u32, name: &'static str, base_stats: &EnemyBaseStats) -> Self {
         Self {
             name,
             kind: EnemyKind::Normal,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: 50 + (25 * dungeon_floor),
-                current_health: 50 + (25 * dungeon_floor),
-                defense: 0,
-                damage: 7 + (5 * dungeon_floor),
+                max_health: base_stats.health + (25 * dungeon_floor),
+                current_health: base_stats.health + (25 * dungeon_floor),
+                defense: base_stats.defense,
+                damage: base_stats.damage + (5 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -62,7 +96,7 @@ impl Enemy {
         }
     }
 
-    pub fn new_boss(dungeon_floor: u32, name: &'static str) -> Self {
+    pub fn new_boss(dungeon_floor: u32, name: &'static str, base_stats: &EnemyBaseStats) -> Self {
         let skill = match name {
             BOSS_ENEMY_NAME_OGRE_KING => EnemySkill::Smash,
             BOSS_ENEMY_NAME_FIRE_DRAGON => EnemySkill::FireBreath,
@@ -73,10 +107,10 @@ impl Enemy {
             kind: EnemyKind::Boss,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: 150 + (50 * dungeon_floor),
-                current_health: 150 + (50 * dungeon_floor),
-                defense: 1 + (1 * dungeon_floor),
-                damage: 15 + (6 * dungeon_floor),
+                max_health: base_stats.health + (50 * dungeon_floor),
+                current_health: base_stats.health + (50 * dungeon_floor),
+                defense: base_stats.defense + (1 * dungeon_floor),
+                damage: base_stats.damage + (6 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -201,4 +235,25 @@ pub struct EnemyStatBoosts {
 pub enum EnemyKind {
     Boss,
     Normal,
+}
+
+pub fn generate_random_normal_enemy(dungeon_floor: u32) -> Enemy {
+    let mut rng = thread_rng();
+    let index = rng.gen_range(0..NORMAL_ENEMY_NAMES.len());
+    let name = NORMAL_ENEMY_NAMES[index];
+    let base_stats = match name {
+        NORMAL_ENEMY_NAME_SKELETON => &LESSER_ENEMY_BASE_STATS,
+        NORMAL_ENEMY_NAME_GOBLIN => &LESSER_ENEMY_BASE_STATS,
+        NORMAL_ENEMY_NAME_OGRE => &GREATER_ENEMY_BASE_STATS,
+        NORMAL_ENEMY_NAME_GOLEM => &GREATER_ENEMY_BASE_STATS,
+        _ => &LESSER_ENEMY_BASE_STATS,
+    };
+    Enemy::new_normal(dungeon_floor, name, base_stats)
+}
+
+pub fn generate_random_boss_enemy(dungeon_floor: u32) -> Enemy {
+    let mut rng = thread_rng();
+    let index = rng.gen_range(0..BOSS_ENEMY_NAMES.len());
+    let name = BOSS_ENEMY_NAMES[index];
+    Enemy::new_boss(dungeon_floor, name, &BOSS_ENEMY_BASE_STATS)
 }
