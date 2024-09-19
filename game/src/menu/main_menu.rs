@@ -129,7 +129,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     Ok(rerender)
 }
 
-/// Returns true if menu option "Back" was selected.
+/// Returns true if should go back in menu.
 fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
@@ -151,7 +151,6 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
             val.stats.general_stats.current_dungeon_floor
         ))
     }
-    menu_items.push("Back".to_string());
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -160,7 +159,7 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
             execute!(stdout, cursor::MoveTo(0, 1))?;
         } else {
             start_column = 2;
-            println!("Options (D = Delete character)");
+            println!("Esc = Back, D = Delete character");
             execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("Select a character");
             execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -178,42 +177,37 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {
                 KeyCode::Up => {
-                    if selected_index > 0 {
+                    if !menu_items.is_empty() && selected_index > 0 {
                         selected_index -= 1;
                     }
                 }
                 KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
+                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
                         selected_index += 1;
                     }
                 }
+                KeyCode::Esc => break,
                 KeyCode::Enter => {
-                    break;
+                    if !menu_items.is_empty() {
+                        let character_name =
+                            extract_first_word(menu_items[selected_index].as_str());
+                        load_game_character(character_name, player);
+                        return Ok(false);
+                    }
                 }
                 KeyCode::Char('d') | KeyCode::Char('D') => {
-                    match menu_items[selected_index].as_str() {
-                        "Back" => {}
-                        _ => {
-                            let name = extract_first_word(menu_items[selected_index].as_str());
-                            let deleted = menu_confirm_character_deletion(player, name)?;
-                            if deleted {
-                                menu_items.remove(selected_index);
-                            }
-                            execute!(stdout, Clear(ClearType::All))?;
+                    if !menu_items.is_empty() {
+                        let name = extract_first_word(menu_items[selected_index].as_str());
+                        let deleted = menu_confirm_character_deletion(player, name)?;
+                        if deleted {
+                            menu_items.remove(selected_index);
+                            selected_index = 0;
                         }
+                        execute!(stdout, Clear(ClearType::All))?;
                     }
                 }
                 _ => {}
             }
-        }
-    }
-
-    match menu_items[selected_index].as_str() {
-        "Back" => {}
-        _ => {
-            let character_name = extract_first_word(menu_items[selected_index].as_str());
-            load_game_character(character_name, player);
-            return Ok(false);
         }
     }
 
