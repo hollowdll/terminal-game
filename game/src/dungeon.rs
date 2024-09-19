@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub mod room;
 
-pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 2;
+pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 3;
 pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 6;
 /// Increasing this makes dungeon floors have more rooms.
 pub const FLOOR_LENGTH_SCALE: u32 = 9;
@@ -13,7 +13,7 @@ pub const FLOOR_LENGTH_SCALE: u32 = 9;
 pub struct DungeonFloor {
     pub floor: u32,
     pub rooms: HashMap<RoomCoordinates, Room>,
-    pub boss: Enemy,
+    pub boss: Option<Enemy>,
 }
 
 impl DungeonFloor {
@@ -21,7 +21,7 @@ impl DungeonFloor {
         Self {
             floor,
             rooms,
-            boss: generate_random_boss_enemy(floor),
+            boss: Some(generate_random_boss_enemy(floor)),
         }
     }
 

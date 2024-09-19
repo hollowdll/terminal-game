@@ -7,7 +7,7 @@ use crossterm::{
 use std::io;
 
 use crate::{
-    drops::give_normal_enemy_drops,
+    drops::{give_boss_enemy_drops, give_normal_enemy_drops},
     enemy::{Enemy, EnemyKind},
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
@@ -23,7 +23,7 @@ pub fn menu_enemy_encounter(
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Encountered enemy {}", enemy.name);
+        println!("Encountered enemy {}", enemy.get_display_name());
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("> Fight");
 
@@ -144,7 +144,9 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                                 EnemyKind::Normal => {
                                     menu_normal_enemy_fight_victory(enemy.level, character)?;
                                 }
-                                _ => {}
+                                EnemyKind::Boss => {
+                                    menu_boss_enemy_fight_victory(enemy.level, character)?;
+                                }
                             }
                             if character.data.stats.general_stats.character_level > character_level
                             {
@@ -192,6 +194,55 @@ fn menu_normal_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!("  Item: {}", drops.equipment_item_name);
         execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!("> Continue");
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Enter => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn menu_boss_enemy_fight_victory(
+    enemy_level: u32,
+    character: &mut PlayerCharacter,
+) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+    let drops = give_boss_enemy_drops(character, enemy_level);
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("You defeated the enemy!");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Drops:");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!("  Gold: {}", drops.gold);
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!("  EXP: {}", drops.exp);
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        println!("  Items:");
+        execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!(
+            "    {} x{}",
+            drops.consumable_item_name, drops.consumable_item_amount
+        );
+        execute!(stdout, cursor::MoveTo(0, 6))?;
+
+        let mut column = 6;
+        for item in &drops.equipment_item_names {
+            println!("    {}", item);
+            column += 1;
+            execute!(stdout, cursor::MoveTo(0, column + 1))?;
+        }
+        execute!(stdout, cursor::MoveTo(0, column + 1))?;
         println!("> Continue");
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {

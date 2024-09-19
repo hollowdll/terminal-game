@@ -255,7 +255,14 @@ pub fn menu_dungeon_floor(
                         })
                     }
                     "Enter Shop" => {}
-                    "Enter Boss Room" => {}
+                    "Enter Boss Room" => {
+                        if let Some(boss) = &mut dungeon_floor.boss {
+                            let victory = menu_enemy_encounter(boss, character)?;
+                            if victory {
+                                //
+                            }
+                        }
+                    }
                     "Open Treasure Chest" => {
                         menu_open_treasure_chest(dungeon_floor.floor, character, current_room)?;
                         menu_items.remove(selected_index);
