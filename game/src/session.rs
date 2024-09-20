@@ -3,7 +3,10 @@ use std::io;
 use crate::{
     enemy::Enemy,
     fight::is_critical_hit,
-    game_data::{CharacterData, GameData},
+    game_data::{
+        CharacterData, GameData, STARTING_CRITICAL_DAMAGE_MULTIPLIER, STARTING_CRITICAL_HIT_RATE,
+        STARTING_DAMAGE, STARTING_DEFENSE, STARTING_HEALTH, STARTING_MANA, STARTING_REQUIRED_EXP,
+    },
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
         ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemRarity, RingItem, WeaponItem,
@@ -238,6 +241,10 @@ impl PlayerCharacter {
         return self.data.stats.general_stats.character_level;
     }
 
+    pub fn increase_deaths(&mut self) {
+        self.data.stats.general_stats.deaths += 1;
+    }
+
     pub fn give_test_items(&mut self) {
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Common), 5);
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Uncommon), 4);
@@ -401,6 +408,33 @@ impl PlayerCharacter {
             self.data.stats.general_stats.highest_dungeon_floor_achieved = next_floor;
         }
     }
+
+    pub fn reset_character_on_death(&mut self) {
+        self.unequip_weapon();
+        self.unequip_armor();
+        self.unequip_ring();
+        self.equipped_items.weapon = None;
+        self.equipped_items.armor = None;
+        self.equipped_items.ring = None;
+        self.data.inventory.clear_consumables();
+        self.data.inventory.clear_weapons();
+        self.data.inventory.clear_armors();
+        self.data.inventory.clear_rings();
+        self.data.currency.gold = 0;
+        self.data.stats.general_stats.character_level = 1;
+        self.data.stats.general_stats.current_dungeon_floor = 1;
+        self.data.stats.general_stats.current_exp = STARTING_REQUIRED_EXP;
+        self.data.stats.combat_stats.max_health = STARTING_HEALTH;
+        self.data.stats.combat_stats.max_mana = STARTING_MANA;
+        self.data.stats.combat_stats.defense = STARTING_DEFENSE;
+        self.data.stats.combat_stats.damage = STARTING_DAMAGE;
+        self.data.stats.combat_stats.critical_damage_multiplier =
+            STARTING_CRITICAL_DAMAGE_MULTIPLIER;
+        self.data.stats.combat_stats.critical_hit_rate = STARTING_CRITICAL_HIT_RATE;
+        self.temp_stats.current_health = STARTING_HEALTH;
+        self.temp_stats.current_mana = STARTING_MANA;
+        self.temp_stat_boosts.reset();
+    }
 }
 
 #[derive(Clone)]
@@ -433,6 +467,15 @@ pub struct TemporaryStatBoosts {
 }
 
 impl TemporaryStatBoosts {
+    pub fn reset(&mut self) {
+        self.max_health = 0;
+        self.max_mana = 0;
+        self.defense = 0;
+        self.damage = 0;
+        self.critical_damage_multiplier = 0.0;
+        self.critical_hit_rate = 0.0;
+    }
+
     pub fn increase_damage(&mut self, amount: u32) {
         self.damage += amount;
     }

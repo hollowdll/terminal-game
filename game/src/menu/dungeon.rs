@@ -91,6 +91,12 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             if opts.return_to_main_menu {
                                 return Ok(true);
                             }
+                            if opts.game_over {
+                                player.get_character_mut()?.reset_character_on_death();
+                                save_game(player)?;
+                                execute!(stdout, Clear(ClearType::All))?;
+                                break;
+                            }
                             if opts.dungeon_completed {
                                 save_game(player)?;
                                 execute!(stdout, Clear(ClearType::All))?;
@@ -137,6 +143,13 @@ pub fn menu_dungeon_floor(
         let victory = menu_enemy_encounter(enemy, player.get_character_mut()?)?;
         if victory {
             current_room.enemy = None;
+        } else {
+            return Ok(DungeonFloorMenuOptions {
+                return_to_main_menu: false,
+                dungeon_completed: false,
+                game_over: true,
+                next_room_coords: None,
+            });
         }
     }
 
@@ -167,6 +180,13 @@ pub fn menu_dungeon_floor(
                     let character = player.get_character_mut()?;
                     character.dungeon_floor_completed(dungeon_floor.floor + 1);
                     save_game(player)?;
+                } else {
+                    return Ok(DungeonFloorMenuOptions {
+                        return_to_main_menu: false,
+                        dungeon_completed: false,
+                        game_over: true,
+                        next_room_coords: None,
+                    });
                 }
             }
         }

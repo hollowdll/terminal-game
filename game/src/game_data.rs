@@ -11,6 +11,14 @@ use std::{collections::HashMap, io};
 const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
 const SUBDIR_NAME: &str = "terminal-rpg-game";
 
+pub const STARTING_REQUIRED_EXP: u32 = 100;
+pub const STARTING_HEALTH: u32 = 100;
+pub const STARTING_MANA: u32 = 100;
+pub const STARTING_DEFENSE: u32 = 0;
+pub const STARTING_DAMAGE: u32 = 1;
+pub const STARTING_CRITICAL_DAMAGE_MULTIPLIER: f64 = 2.0;
+pub const STARTING_CRITICAL_HIT_RATE: f64 = 0.0;
+
 /// Main game data.
 #[derive(Serialize, Deserialize)]
 pub struct GameData {
@@ -60,19 +68,19 @@ impl CharacterData {
                     character_level: 1,
                     total_exp: 0,
                     current_exp: 0,
-                    required_exp: 100,
+                    required_exp: STARTING_REQUIRED_EXP,
                     current_dungeon_floor: 1,
                     highest_dungeon_floor_achieved: 1,
                     highest_character_level_achieved: 1,
                     deaths: 0,
                 },
                 combat_stats: CombatStats {
-                    max_health: 100,
-                    max_mana: 100,
-                    defense: 0,
-                    damage: 1,
-                    critical_damage_multiplier: 2.0,
-                    critical_hit_rate: 0.0,
+                    max_health: STARTING_HEALTH,
+                    max_mana: STARTING_MANA,
+                    defense: STARTING_DEFENSE,
+                    damage: STARTING_DAMAGE,
+                    critical_damage_multiplier: STARTING_CRITICAL_DAMAGE_MULTIPLIER,
+                    critical_hit_rate: STARTING_CRITICAL_HIT_RATE,
                 },
             },
             currency: CharacterCurrency { gold: 0 },
@@ -137,6 +145,24 @@ pub struct CharacterInventory {
     pub weapons: HashMap<String, WeaponItem>,
     /// HashMap key: item global id.
     pub rings: HashMap<String, RingItem>,
+}
+
+impl CharacterInventory {
+    pub fn clear_consumables(&mut self) {
+        self.consumables.clear();
+    }
+
+    pub fn clear_weapons(&mut self) {
+        self.weapons.clear();
+    }
+
+    pub fn clear_armors(&mut self) {
+        self.armors.clear();
+    }
+
+    pub fn clear_rings(&mut self) {
+        self.rings.clear();
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]

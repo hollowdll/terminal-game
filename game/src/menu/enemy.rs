@@ -158,6 +158,11 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             player_turn = false;
                             fight_text = enemy.attack_player(character);
                         } else {
+                            if character.is_dead() {
+                                character.increase_deaths();
+                                menu_enemy_fight_player_died(character)?;
+                                return Ok(false);
+                            }
                             action = false;
                             player_turn = true;
                             fight_text = "Select what to do...".to_string();
