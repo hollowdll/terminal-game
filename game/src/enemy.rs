@@ -82,7 +82,7 @@ impl Enemy {
             level: dungeon_floor,
             stats: EnemyStats {
                 max_health: base_stats.health + (35 * dungeon_floor),
-                current_health: base_stats.health + (40 * dungeon_floor),
+                current_health: base_stats.health + (35 * dungeon_floor),
                 defense: base_stats.defense + (1 * dungeon_floor),
                 damage: base_stats.damage + (6 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,

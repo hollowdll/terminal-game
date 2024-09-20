@@ -310,7 +310,7 @@ pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Resu
         );
         execute!(stdout, cursor::MoveTo(0, 3))?;
         println!(
-            "Highest Level Reached (Record): {}",
+            "Highest Level Reached: {}",
             character
                 .data
                 .stats
@@ -324,7 +324,7 @@ pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Resu
         );
         execute!(stdout, cursor::MoveTo(0, 5))?;
         println!(
-            "Highest Dungeon Floor Reached (Record): {}",
+            "Highest Dungeon Floor Reached: {}",
             character
                 .data
                 .stats

@@ -8,9 +8,9 @@ use crate::{
         STARTING_DAMAGE, STARTING_DEFENSE, STARTING_HEALTH, STARTING_MANA, STARTING_REQUIRED_EXP,
     },
     items::{
-        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemRarity, RingItem, WeaponItem,
-        ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        create_starter_weapon, generate_random_armor, generate_random_ring, generate_random_weapon,
+        get_item_display_name, ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemRarity,
+        RingItem, WeaponItem, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
 };
 
@@ -229,16 +229,30 @@ impl PlayerCharacter {
     }
 
     pub fn level_up(&mut self) -> u32 {
-        self.data.stats.general_stats.character_level += 1;
+        let next_level = self.data.stats.general_stats.character_level + 1;
+        self.data.stats.general_stats.character_level = next_level;
         self.data.stats.general_stats.current_exp -= self.data.stats.general_stats.required_exp;
         self.data.stats.general_stats.required_exp =
             (self.data.stats.general_stats.required_exp as f32 * 1.2).round() as u32;
+
+        if next_level
+            > self
+                .data
+                .stats
+                .general_stats
+                .highest_character_level_achieved
+        {
+            self.data
+                .stats
+                .general_stats
+                .highest_character_level_achieved = next_level
+        }
 
         // increase max health and damage on level up
         self.data.stats.combat_stats.max_health += 5;
         self.data.stats.combat_stats.damage += 2;
 
-        return self.data.stats.general_stats.character_level;
+        next_level
     }
 
     pub fn increase_deaths(&mut self) {
@@ -423,7 +437,9 @@ impl PlayerCharacter {
         self.data.currency.gold = 0;
         self.data.stats.general_stats.character_level = 1;
         self.data.stats.general_stats.current_dungeon_floor = 1;
-        self.data.stats.general_stats.current_exp = STARTING_REQUIRED_EXP;
+        self.data.stats.general_stats.current_exp = 0;
+        self.data.stats.general_stats.required_exp = STARTING_REQUIRED_EXP;
+        self.data.stats.general_stats.total_exp = 0;
         self.data.stats.combat_stats.max_health = STARTING_HEALTH;
         self.data.stats.combat_stats.max_mana = STARTING_MANA;
         self.data.stats.combat_stats.defense = STARTING_DEFENSE;
@@ -434,6 +450,10 @@ impl PlayerCharacter {
         self.temp_stats.current_health = STARTING_HEALTH;
         self.temp_stats.current_mana = STARTING_MANA;
         self.temp_stat_boosts.reset();
+
+        let weapon = create_starter_weapon();
+        self.give_weapon(&weapon);
+        self.equip_weapon(&weapon.id);
     }
 }
 
