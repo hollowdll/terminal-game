@@ -229,11 +229,11 @@ impl PlayerCharacter {
         self.data.stats.general_stats.character_level += 1;
         self.data.stats.general_stats.current_exp -= self.data.stats.general_stats.required_exp;
         self.data.stats.general_stats.required_exp =
-            (self.data.stats.general_stats.required_exp as f32 * 1.1).round() as u32;
+            (self.data.stats.general_stats.required_exp as f32 * 1.2).round() as u32;
 
         // increase max health and damage on level up
-        self.data.stats.combat_stats.max_health += 10;
-        self.data.stats.combat_stats.damage += 3;
+        self.data.stats.combat_stats.max_health += 5;
+        self.data.stats.combat_stats.damage += 2;
 
         return self.data.stats.general_stats.character_level;
     }

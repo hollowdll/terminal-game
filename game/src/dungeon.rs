@@ -304,7 +304,8 @@ fn randomize_enemy_rooms(
     let mut temp_rooms = Vec::new();
     for room in rooms.values() {
         match room.kind {
-            RoomKind::Start | RoomKind::BossEntrance => continue,
+            // don't spawn normal enemies in these rooms
+            RoomKind::Start | RoomKind::BossEntrance | RoomKind::Boss => continue,
             _ => temp_rooms.push(room.clone()),
         }
     }

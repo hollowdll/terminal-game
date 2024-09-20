@@ -551,7 +551,7 @@ pub fn random_ring_enchantment(
         }
         2 => {
             let health = rng.gen_range(base_values.min_health..=base_values.max_health)
-                + (5 * dungeon_floor);
+                + (4 * dungeon_floor);
             return Enchantment::Health(health);
         }
         3 => {
@@ -566,7 +566,7 @@ pub fn random_ring_enchantment(
 pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32) -> WeaponItem {
     let mut rng = thread_rng();
     let damage =
-        rng.gen_range(base_values.min_damage..=base_values.max_damage) + (5 * dungeon_floor);
+        rng.gen_range(base_values.min_damage..=base_values.max_damage) + (4 * dungeon_floor);
     let crit_hit_rate =
         rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
     let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
@@ -592,7 +592,7 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32)
 pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -> ArmorItem {
     let mut rng = thread_rng();
     let health =
-        rng.gen_range(base_values.min_health..=base_values.max_health) + (10 * dungeon_floor);
+        rng.gen_range(base_values.min_health..=base_values.max_health) + (8 * dungeon_floor);
     let defense =
         rng.gen_range(base_values.min_defense..=base_values.max_defense) + (2 * dungeon_floor);
     let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
