@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::{
     enemy::Enemy,
     fight::is_critical_hit,
@@ -21,8 +23,31 @@ impl Player {
             data,
         }
     }
+
+    /// Returns a reference to the player character.
+    pub fn get_character(&self) -> io::Result<&PlayerCharacter> {
+        match &self.character {
+            Some(character) => Ok(character),
+            None => Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "No selected character",
+            )),
+        }
+    }
+
+    /// Returns a mutable reference to the player character.
+    pub fn get_character_mut(&mut self) -> io::Result<&mut PlayerCharacter> {
+        match &mut self.character {
+            Some(character) => Ok(character),
+            None => Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "No selected character",
+            )),
+        }
+    }
 }
 
+#[derive(Clone)]
 pub struct PlayerCharacter {
     pub data: CharacterData,
     pub temp_stats: TemporaryStats,
@@ -369,8 +394,16 @@ impl PlayerCharacter {
         let damage_taken = enemy.take_damage(self.get_total_damage());
         return format!("Player attacked! Enemy took {} damage", damage_taken);
     }
+
+    pub fn dungeon_floor_completed(&mut self, next_floor: u32) {
+        self.data.stats.general_stats.current_dungeon_floor = next_floor;
+        if next_floor > self.data.stats.general_stats.highest_dungeon_floor_achieved {
+            self.data.stats.general_stats.highest_dungeon_floor_achieved = next_floor;
+        }
+    }
 }
 
+#[derive(Clone)]
 pub struct TemporaryStats {
     pub current_health: u32,
     pub current_mana: u32,
@@ -379,6 +412,7 @@ pub struct TemporaryStats {
 /// Session only equipped items. Not saved to game data.
 /// Game data tracks which items are equipped so the game can
 /// correctly equip the correct items when loading a player character.
+#[derive(Clone)]
 pub struct EquippedItems {
     /// ID of the item.
     pub weapon: Option<String>,
@@ -388,6 +422,7 @@ pub struct EquippedItems {
     pub ring: Option<String>,
 }
 
+#[derive(Clone)]
 pub struct TemporaryStatBoosts {
     pub max_health: u32,
     pub max_mana: u32,

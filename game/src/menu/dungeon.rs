@@ -10,6 +10,7 @@ use crate::{
         },
         DungeonFloor, Room, RoomCoordinates, RoomKind,
     },
+    game::save_game,
     menu::character::menu_character,
     session::{Player, PlayerCharacter},
 };
@@ -47,15 +48,7 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let start_column: u16 = 1;
 
     loop {
-        let character = match &player.character {
-            Some(character) => character,
-            None => {
-                return Err(io::Error::new(
-                    io::ErrorKind::NotFound,
-                    "No selected character",
-                ))
-            }
-        };
+        let character = player.get_character()?;
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!(
             "Character: {} (Level {}, Dungeon Floor {})",
@@ -98,6 +91,11 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             if opts.return_to_main_menu {
                                 return Ok(true);
                             }
+                            if opts.dungeon_completed {
+                                save_game(player)?;
+                                execute!(stdout, Clear(ClearType::All))?;
+                                break;
+                            }
                             if let Some(coords) = opts.next_room_coords {
                                 next_room_coords = coords;
                             }
@@ -122,18 +120,9 @@ pub fn menu_dungeon_floor(
 ) -> io::Result<DungeonFloorMenuOptions> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
-    let mut character = match &mut player.character {
-        Some(character) => character,
-        None => {
-            return Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                "No selected character",
-            ))
-        }
-    };
+
     let current_room = match dungeon_floor.rooms.get_mut(current_room_coords) {
         Some(room) => room,
         None => {
@@ -145,7 +134,7 @@ pub fn menu_dungeon_floor(
     };
 
     if let Some(enemy) = &mut current_room.enemy {
-        let victory = menu_enemy_encounter(enemy, character)?;
+        let victory = menu_enemy_encounter(enemy, player.get_character_mut()?)?;
         if victory {
             current_room.enemy = None;
         }
@@ -172,9 +161,12 @@ pub fn menu_dungeon_floor(
         RoomKind::Boss => {
             menu_items.push("Enter Next Floor");
             if let Some(boss) = &mut dungeon_floor.boss {
-                let victory = menu_enemy_encounter(boss, character)?;
+                let victory = menu_enemy_encounter(boss, player.get_character_mut()?)?;
                 if victory {
                     dungeon_floor.boss = None;
+                    let character = player.get_character_mut()?;
+                    character.dungeon_floor_completed(dungeon_floor.floor + 1);
+                    save_game(player)?;
                 }
             }
         }
@@ -279,16 +271,27 @@ pub fn menu_dungeon_floor(
                             next_room_coords: current_room.adjacents.up.clone(),
                         })
                     }
-                    "Enter Next Floor" => {}
+                    "Enter Next Floor" => {
+                        return Ok(DungeonFloorMenuOptions {
+                            return_to_main_menu: false,
+                            dungeon_completed: true,
+                            game_over: false,
+                            next_room_coords: None,
+                        })
+                    }
                     "Open Treasure Chest" => {
-                        menu_open_treasure_chest(dungeon_floor.floor, character, current_room)?;
+                        menu_open_treasure_chest(
+                            dungeon_floor.floor,
+                            player.get_character_mut()?,
+                            current_room,
+                        )?;
                         menu_items.remove(selected_index);
                         selected_index = 0;
                     }
                     _ => break,
                 },
                 KeyCode::Esc => {
-                    if let Ok(return_to_main_menu) = menu_character(&mut character) {
+                    if let Ok(return_to_main_menu) = menu_character(player.get_character_mut()?) {
                         if return_to_main_menu {
                             return Ok(DungeonFloorMenuOptions {
                                 return_to_main_menu: true,
