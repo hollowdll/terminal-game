@@ -11,7 +11,7 @@ use crate::{
         DungeonFloor, Room, RoomCoordinates, RoomKind,
     },
     game::save_game,
-    menu::character::menu_character,
+    menu::{character::menu_character, shop::menu_shop},
     session::{Player, PlayerCharacter},
 };
 use crossterm::{
@@ -282,7 +282,9 @@ pub fn menu_dungeon_floor(
                             next_room_coords: current_room.adjacents.left.clone(),
                         })
                     }
-                    "Enter Shop" => {}
+                    "Enter Shop" => {
+                        menu_shop(player.get_character_mut()?)?;
+                    }
                     "Enter Boss Room" => {
                         return Ok(DungeonFloorMenuOptions {
                             return_to_main_menu: false,

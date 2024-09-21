@@ -8,19 +8,20 @@ use std::io;
 
 use crate::{
     items::{
-        get_item_display_name, ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemInfo,
-        RingItem, WeaponItem,
+        get_item_display_name, get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem,
+        Enchantment, ItemInfo, RingItem, WeaponItem,
     },
     session::PlayerCharacter,
+    shop::sell_consumable,
 };
 
-pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
+pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
     let menu_items = vec!["Consumables", "Weapons", "Armors", "Rings"];
     let mut selected_index = 0;
-    let start_column: u16 = 2;
+    let mut start_column: u16 = 2;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
@@ -28,6 +29,10 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Inventory (Gold: {})", character.data.currency.gold);
         execute!(stdout, cursor::MoveTo(0, 2))?;
+        if sell_items {
+            println!("Sell Items");
+            start_column = 3;
+        }
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -55,7 +60,7 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Consumables" => {
-                        let _ = menu_inventory_consumable_list(character, false)?;
+                        let _ = menu_inventory_consumable_list(character, false, sell_items)?;
                     }
                     "Weapons" => menu_inventory_weapon_list(character)?,
                     "Armors" => menu_inventory_armor_list(character)?,
@@ -75,6 +80,7 @@ pub fn menu_inventory(character: &mut PlayerCharacter) -> io::Result<()> {
 pub fn menu_inventory_consumable_list(
     character: &mut PlayerCharacter,
     in_fight: bool,
+    sell_items: bool,
 ) -> io::Result<String> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
@@ -92,6 +98,8 @@ pub fn menu_inventory_consumable_list(
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if in_fight {
             println!("Esc = Back, Enter = Item Info, U = Use Item");
+        } else if sell_items {
+            println!("Esc = Back, Enter = Item Info, S = Sell Item");
         } else {
             println!("Esc = Back, Enter = Item Info, D = Delete Item");
         }
@@ -105,18 +113,11 @@ pub fn menu_inventory_consumable_list(
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
+            let name = get_item_display_name(CharacterItem::Consumable(&item));
             if i == selected_index {
-                println!(
-                    "> {} x{}",
-                    get_item_display_name(CharacterItem::Consumable(&item)),
-                    item.amount_in_inventory
-                );
+                println!("> {} x{}", name, item.amount_in_inventory);
             } else {
-                println!(
-                    "  {} x{}",
-                    get_item_display_name(CharacterItem::Consumable(&item)),
-                    item.amount_in_inventory
-                );
+                println!("  {} x{}", name, item.amount_in_inventory);
             }
         }
 
@@ -137,20 +138,37 @@ pub fn menu_inventory_consumable_list(
                 }
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
-                        menu_consumable_info(&menu_items[selected_index])?;
+                        menu_consumable_info(&menu_items[selected_index], sell_items)?;
                     }
                 }
                 KeyCode::Char('U') | KeyCode::Char('u') => {
-                    if in_fight {
+                    if in_fight && !menu_items.is_empty() {
                         let selected_item = &menu_items[selected_index];
                         use_effect_text = selected_item.use_item(character);
                         break;
                     }
                 }
                 KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !in_fight && !menu_items.is_empty() {
-                        let deleted_all =
-                            menu_delete_consumable(character, &mut menu_items, selected_index)?;
+                    if !in_fight && !sell_items && !menu_items.is_empty() {
+                        let deleted_all = menu_delete_consumable(
+                            character,
+                            &mut menu_items,
+                            selected_index,
+                            false,
+                        )?;
+                        if deleted_all {
+                            selected_index = 0;
+                        }
+                    }
+                }
+                KeyCode::Char('S') | KeyCode::Char('s') => {
+                    if sell_items && !menu_items.is_empty() {
+                        let deleted_all = menu_delete_consumable(
+                            character,
+                            &mut menu_items,
+                            selected_index,
+                            true,
+                        )?;
                         if deleted_all {
                             selected_index = 0;
                         }
@@ -170,6 +188,7 @@ pub fn menu_delete_consumable(
     character: &mut PlayerCharacter,
     menu_items: &mut Vec<ConsumableItem>,
     selected_index: usize,
+    sell_item: bool,
 ) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
@@ -181,11 +200,23 @@ pub fn menu_delete_consumable(
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Delete, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+        if sell_item {
+            println!("Esc = Back, Enter = Sell, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+        } else {
+            println!("Esc = Back, Enter = Delete, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+        }
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!("Delete item {}", display_name);
+        if sell_item {
+            println!("Sell item {}", display_name);
+        } else {
+            println!("Delete item {}", display_name);
+        }
         execute!(stdout, cursor::MoveTo(0, 2))?;
-        println!("Specify the amount to delete:");
+        if sell_item {
+            println!("Specify the amount to sell:");
+        } else {
+            println!("Specify the amount to delete:");
+        }
         execute!(stdout, cursor::MoveTo(0, 3))?;
         println!("< x{} >", selected_amount);
         execute!(stdout, cursor::MoveTo(0, 4))?;
@@ -207,15 +238,30 @@ pub fn menu_delete_consumable(
                 }
                 KeyCode::Enter => {
                     if selected_amount == selected_item.amount_in_inventory {
-                        if character.delete_consumable(display_name) {
-                            menu_items.remove(selected_index);
-                            deleted_all = true;
+                        if sell_item {
+                            let gold = sell_consumable(selected_item, selected_amount, character);
+                            if gold != 0 {
+                                menu_items.remove(selected_index);
+                                deleted_all = true;
+                            }
+                        } else {
+                            if character.delete_consumable(display_name) {
+                                menu_items.remove(selected_index);
+                                deleted_all = true;
+                            }
                         }
                     } else if selected_amount < selected_item.amount_in_inventory {
-                        if character
-                            .decrease_consumable_inventory_amount(display_name, selected_amount)
-                        {
-                            selected_item.amount_in_inventory -= selected_amount;
+                        if sell_item {
+                            let gold = sell_consumable(selected_item, selected_amount, character);
+                            if gold != 0 {
+                                selected_item.amount_in_inventory -= selected_amount;
+                            }
+                        } else {
+                            if character
+                                .decrease_consumable_inventory_amount(display_name, selected_amount)
+                            {
+                                selected_item.amount_in_inventory -= selected_amount;
+                            }
                         }
                     }
                     break;
@@ -508,7 +554,7 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
     Ok(())
 }
 
-pub fn menu_consumable_info(item: &ConsumableItem) -> io::Result<()> {
+pub fn menu_consumable_info(item: &ConsumableItem, sell_item: bool) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
@@ -523,8 +569,12 @@ pub fn menu_consumable_info(item: &ConsumableItem) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
         println!("  Effect: {}", item.effect);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
-        println!("  Amount in inventory: {}", item.amount_in_inventory);
+        println!("  Amount in Inventory: {}", item.amount_in_inventory);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
+
+        if sell_item {
+            println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
+        }
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {

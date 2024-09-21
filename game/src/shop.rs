@@ -93,11 +93,12 @@ pub fn sell_consumable(
     if consumable.amount_in_inventory > amount {
         if character.decrease_consumable_inventory_amount(&name, amount) {
             let gold = amount * sell_value;
+            character.give_gold(gold);
             return gold;
         }
-    }
-    if character.delete_consumable(&name) {
+    } else if character.delete_consumable(&name) {
         let gold = consumable.amount_in_inventory * sell_value;
+        character.give_gold(gold);
         return gold;
     }
     0

@@ -56,7 +56,7 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                         menu_character_stats(&character)?;
                     }
                     "Inventory" => {
-                        menu_inventory(character)?;
+                        menu_inventory(character, false)?;
                     }
                     "Equipment" => {
                         menu_equipment(character)?;

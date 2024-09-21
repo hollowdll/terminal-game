@@ -127,7 +127,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                         execute!(stdout, Clear(ClearType::All))?;
                     }
                     "Consumables" => {
-                        let text = menu_inventory_consumable_list(character, true)?;
+                        let text = menu_inventory_consumable_list(character, true, false)?;
                         if !text.is_empty() {
                             action = true;
                             fight_text = text;

@@ -6,11 +6,13 @@ use crossterm::{
 };
 use std::io;
 
-pub fn menu_shop() -> io::Result<()> {
+use crate::{menu::inventory::menu_inventory, session::PlayerCharacter};
+
+pub fn menu_shop(character: &mut PlayerCharacter) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Buy Items", "Sell Items", "Back"];
+    let menu_items = vec!["Buy Items", "Sell Items"];
     let mut selected_index = 0;
     let start_column: u16 = 2;
 
@@ -47,7 +49,7 @@ pub fn menu_shop() -> io::Result<()> {
                 }
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Buy Items" => {}
-                    "Sell Items" => {}
+                    "Sell Items" => menu_inventory(character, true)?,
                     _ => break,
                 },
                 _ => {}
