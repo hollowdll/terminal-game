@@ -655,3 +655,14 @@ pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> 
         enchantments,
     )
 }
+
+pub fn generate_random_consumable() -> ConsumableItem {
+    let mut rng = thread_rng();
+    let num = rng.gen_range(0..2);
+    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
+
+    match num {
+        0 => ConsumableItem::new_health_potion(rarity),
+        _ => ConsumableItem::new_health_potion(rarity),
+    }
+}

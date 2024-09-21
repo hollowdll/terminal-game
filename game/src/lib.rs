@@ -11,5 +11,6 @@ pub mod game_data;
 pub mod items;
 pub mod menu;
 pub mod session;
+pub mod shop;
 pub mod util;
 pub mod validation;
