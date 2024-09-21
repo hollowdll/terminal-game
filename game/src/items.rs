@@ -6,9 +6,9 @@ use uuid::Uuid;
 use crate::session::PlayerCharacter;
 
 pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
-    common: 0.35,
+    common: 0.40,
     uncommon: 0.30,
-    rare: 0.20,
+    rare: 0.15,
     epic: 0.10,
     legendary: 0.05,
 };
