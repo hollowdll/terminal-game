@@ -12,7 +12,7 @@ use crate::{
         Enchantment, ItemInfo, RingItem, WeaponItem,
     },
     session::PlayerCharacter,
-    shop::{sell_consumable, sell_weapon},
+    shop::{sell_armor, sell_consumable, sell_ring, sell_weapon},
 };
 
 pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::Result<()> {
@@ -63,8 +63,8 @@ pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::
                         let _ = menu_inventory_consumable_list(character, false, sell_items)?;
                     }
                     "Weapons" => menu_inventory_weapon_list(character, sell_items)?,
-                    "Armors" => menu_inventory_armor_list(character)?,
-                    "Rings" => menu_inventory_ring_list(character)?,
+                    "Armors" => menu_inventory_armor_list(character, sell_items)?,
+                    "Rings" => menu_inventory_ring_list(character, sell_items)?,
                     _ => break,
                 },
                 _ => {}
@@ -192,7 +192,6 @@ pub fn menu_delete_consumable(
 ) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
     let selected_item = &mut menu_items[selected_index];
     let mut selected_amount: u32 = 1;
     let display_name = &get_item_display_name(CharacterItem::Consumable(&selected_item));
@@ -281,7 +280,6 @@ pub fn menu_inventory_weapon_list(
 ) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
@@ -383,10 +381,12 @@ pub fn menu_inventory_weapon_list(
     Ok(())
 }
 
-pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<()> {
+pub fn menu_inventory_armor_list(
+    character: &mut PlayerCharacter,
+    sell_items: bool,
+) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
@@ -397,7 +397,11 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        if sell_items {
+            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+        } else {
+            println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Armors");
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -441,11 +445,11 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
                 }
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
-                        menu_armor_info(&menu_items[selected_index])?;
+                        menu_armor_info(&menu_items[selected_index], sell_items)?;
                     }
                 }
                 KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() {
+                    if !menu_items.is_empty() && !sell_items {
                         let selected_item = &menu_items[selected_index];
                         let delete = menu_confirm_item_deletion(&get_item_display_name(
                             CharacterItem::Armor(selected_item),
@@ -460,9 +464,17 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
                     }
                 }
                 KeyCode::Char('E') | KeyCode::Char('e') => {
-                    if !menu_items.is_empty() {
-                        let selected_item = &menu_items[selected_index];
-                        if character.equip_armor(&selected_item.id) {
+                    if !menu_items.is_empty() && !sell_items {
+                        if character.equip_armor(&menu_items[selected_index].id) {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                }
+                KeyCode::Char('S') | KeyCode::Char('s') => {
+                    if !menu_items.is_empty() && sell_items {
+                        if sell_armor(&menu_items[selected_index], character) != 0 {
+                            menu_items.remove(selected_index);
+                            selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
@@ -476,10 +488,12 @@ pub fn menu_inventory_armor_list(character: &mut PlayerCharacter) -> io::Result<
     Ok(())
 }
 
-pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<()> {
+pub fn menu_inventory_ring_list(
+    character: &mut PlayerCharacter,
+    sell_items: bool,
+) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
@@ -490,7 +504,11 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        if sell_items {
+            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+        } else {
+            println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+        }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Rings");
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -534,11 +552,11 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
                 }
                 KeyCode::Enter => {
                     if !menu_items.is_empty() {
-                        menu_ring_info(&menu_items[selected_index])?;
+                        menu_ring_info(&menu_items[selected_index], sell_items)?;
                     }
                 }
                 KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() {
+                    if !menu_items.is_empty() && !sell_items {
                         let selected_item = &menu_items[selected_index];
                         let delete = menu_confirm_item_deletion(&get_item_display_name(
                             CharacterItem::Ring(selected_item),
@@ -553,9 +571,18 @@ pub fn menu_inventory_ring_list(character: &mut PlayerCharacter) -> io::Result<(
                     }
                 }
                 KeyCode::Char('E') | KeyCode::Char('e') => {
-                    if !menu_items.is_empty() {
+                    if !menu_items.is_empty() && !sell_items {
                         let selected_item = &menu_items[selected_index];
                         if character.equip_ring(&selected_item.id) {
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                }
+                KeyCode::Char('S') | KeyCode::Char('s') => {
+                    if !menu_items.is_empty() && sell_items {
+                        if sell_ring(&menu_items[selected_index], character) != 0 {
+                            menu_items.remove(selected_index);
+                            selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
@@ -586,7 +613,6 @@ pub fn menu_consumable_info(item: &ConsumableItem, sell_item: bool) -> io::Resul
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
         println!("  Amount in Inventory: {}", item.amount_in_inventory);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
-
         if sell_item {
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
         }
@@ -624,7 +650,6 @@ pub fn menu_weapon_info(item: &WeaponItem, sell_item: bool) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
         println!("  Critical Hit Rate: {:.2}", item.stats.crit_hit_rate);
         let column = display_item_enchantments(&item.enchantments, start_column + 4)?;
-
         if sell_item {
             execute!(stdout, cursor::MoveTo(0, column))?;
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
@@ -644,7 +669,7 @@ pub fn menu_weapon_info(item: &WeaponItem, sell_item: bool) -> io::Result<()> {
     Ok(())
 }
 
-pub fn menu_armor_info(item: &ArmorItem) -> io::Result<()> {
+pub fn menu_armor_info(item: &ArmorItem, sell_item: bool) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
@@ -662,7 +687,11 @@ pub fn menu_armor_info(item: &ArmorItem) -> io::Result<()> {
         println!("  Health: {}", item.stats.health);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
         println!("  Defense: {}", item.stats.defense);
-        let _ = display_item_enchantments(&item.enchantments, start_column + 4);
+        let column = display_item_enchantments(&item.enchantments, start_column + 4)?;
+        if sell_item {
+            execute!(stdout, cursor::MoveTo(0, column))?;
+            println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
+        }
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {
@@ -678,7 +707,7 @@ pub fn menu_armor_info(item: &ArmorItem) -> io::Result<()> {
     Ok(())
 }
 
-pub fn menu_ring_info(item: &RingItem) -> io::Result<()> {
+pub fn menu_ring_info(item: &RingItem, sell_item: bool) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
@@ -694,7 +723,11 @@ pub fn menu_ring_info(item: &RingItem) -> io::Result<()> {
         println!("  Rarity: {:?}", item.rarity);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
         println!("  Mana: {}", item.stats.mana);
-        let _ = display_item_enchantments(&item.enchantments, start_column + 3);
+        let column = display_item_enchantments(&item.enchantments, start_column + 3)?;
+        if sell_item {
+            execute!(stdout, cursor::MoveTo(0, column))?;
+            println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
+        }
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
             match code {

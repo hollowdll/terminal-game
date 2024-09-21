@@ -93,14 +93,14 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
                     1 => {
                         if let Some(id) = &character.equipped_items.armor {
                             if let Some(armor) = character.data.inventory.armors.get(id) {
-                                menu_armor_info(armor)?;
+                                menu_armor_info(armor, false)?;
                             }
                         }
                     }
                     2 => {
                         if let Some(id) = &character.equipped_items.ring {
                             if let Some(ring) = character.data.inventory.rings.get(id) {
-                                menu_ring_info(ring)?;
+                                menu_ring_info(ring, false)?;
                             }
                         }
                     }
