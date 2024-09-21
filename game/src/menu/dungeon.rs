@@ -283,7 +283,7 @@ pub fn menu_dungeon_floor(
                         })
                     }
                     "Enter Shop" => {
-                        menu_shop(player.get_character_mut()?)?;
+                        menu_shop(&mut dungeon_floor.shop_items, player.get_character_mut()?)?;
                     }
                     "Enter Boss Room" => {
                         return Ok(DungeonFloorMenuOptions {

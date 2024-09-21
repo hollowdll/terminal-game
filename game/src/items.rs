@@ -319,6 +319,14 @@ pub enum CharacterItem<'a> {
     Unknown,
 }
 
+pub enum CharacterItemOwned {
+    Consumable(ConsumableItem),
+    Weapon(WeaponItem),
+    Armor(ArmorItem),
+    Ring(RingItem),
+    Unknown,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Enchantment {
     Damage(u32),

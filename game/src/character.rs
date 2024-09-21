@@ -22,6 +22,7 @@ pub fn create_new_game_character(character_name: &str, player: &mut Player, cfg:
 
     if cfg.dev_mode {
         player_character.give_test_items();
+        player_character.give_gold(1500);
     }
 
     player.character = Some(player_character);

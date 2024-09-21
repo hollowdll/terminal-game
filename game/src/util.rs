@@ -17,3 +17,10 @@ pub fn is_dev_mode() -> bool {
         .unwrap_or("release".to_string())
         .eq("development")
 }
+
+pub fn shift_index_back(index: usize) -> usize {
+    if index == 0 {
+        return 0;
+    }
+    index - 1
+}
