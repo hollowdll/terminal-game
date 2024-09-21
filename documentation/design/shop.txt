@@ -1,0 +1,6 @@
+Shop
+- Buy items for gold
+- Each floor's shop has 5 randomized items
+- Item cost based on rarity
+- Sell items for gold
+- Item sell value based on rarity
