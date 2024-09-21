@@ -399,6 +399,30 @@ pub fn get_item_display_name<'a>(item: CharacterItem<'a>) -> String {
     }
 }
 
+/// Returns the purchase value of an item in gold.
+pub fn get_item_purchase_value(rarity: &ItemRarity) -> u32 {
+    match rarity {
+        ItemRarity::Common => 150,
+        ItemRarity::Uncommon => 400,
+        ItemRarity::Rare => 650,
+        ItemRarity::Epic => 900,
+        ItemRarity::Legendary => 1150,
+        _ => 0,
+    }
+}
+
+/// Returns the sell value of an item in gold.
+pub fn get_item_sell_value(rarity: &ItemRarity) -> u32 {
+    match rarity {
+        ItemRarity::Common => 25,
+        ItemRarity::Uncommon => 50,
+        ItemRarity::Rare => 75,
+        ItemRarity::Epic => 100,
+        ItemRarity::Legendary => 125,
+        _ => 0,
+    }
+}
+
 pub fn create_starter_weapon() -> WeaponItem {
     WeaponItem::new(
         ITEM_SWORD,
