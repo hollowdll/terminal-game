@@ -13,6 +13,7 @@ use crate::{
     },
     session::PlayerCharacter,
     shop::{sell_armor, sell_consumable, sell_ring, sell_weapon},
+    util::shift_index_back,
 };
 
 pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::Result<()> {
@@ -157,7 +158,7 @@ pub fn menu_inventory_consumable_list(
                             false,
                         )?;
                         if deleted_all {
-                            selected_index = 0;
+                            selected_index = shift_index_back(selected_index);
                         }
                     }
                 }
@@ -170,7 +171,7 @@ pub fn menu_inventory_consumable_list(
                             true,
                         )?;
                         if deleted_all {
-                            selected_index = 0;
+                            selected_index = shift_index_back(selected_index);
                         }
                     }
                 }
@@ -350,7 +351,7 @@ pub fn menu_inventory_weapon_list(
                         if delete {
                             if character.delete_weapon(&selected_item.id) {
                                 menu_items.remove(selected_index);
-                                selected_index = 0;
+                                selected_index = shift_index_back(selected_index);
                             }
                         }
                         execute!(stdout, Clear(ClearType::All))?;
@@ -367,7 +368,7 @@ pub fn menu_inventory_weapon_list(
                     if !menu_items.is_empty() && sell_items {
                         if sell_weapon(&menu_items[selected_index], character) != 0 {
                             menu_items.remove(selected_index);
-                            selected_index = 0;
+                            selected_index = shift_index_back(selected_index);
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
@@ -457,7 +458,7 @@ pub fn menu_inventory_armor_list(
                         if delete {
                             if character.delete_armor(&selected_item.id) {
                                 menu_items.remove(selected_index);
-                                selected_index = 0;
+                                selected_index = shift_index_back(selected_index);
                             }
                         }
                         execute!(stdout, Clear(ClearType::All))?;
@@ -474,7 +475,7 @@ pub fn menu_inventory_armor_list(
                     if !menu_items.is_empty() && sell_items {
                         if sell_armor(&menu_items[selected_index], character) != 0 {
                             menu_items.remove(selected_index);
-                            selected_index = 0;
+                            selected_index = shift_index_back(selected_index);
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
@@ -564,7 +565,7 @@ pub fn menu_inventory_ring_list(
                         if delete {
                             if character.delete_ring(&selected_item.id) {
                                 menu_items.remove(selected_index);
-                                selected_index = 0;
+                                selected_index = shift_index_back(selected_index);
                             }
                         }
                         execute!(stdout, Clear(ClearType::All))?;
@@ -582,7 +583,7 @@ pub fn menu_inventory_ring_list(
                     if !menu_items.is_empty() && sell_items {
                         if sell_ring(&menu_items[selected_index], character) != 0 {
                             menu_items.remove(selected_index);
-                            selected_index = 0;
+                            selected_index = shift_index_back(selected_index);
                             execute!(stdout, Clear(ClearType::All))?;
                         }
                     }
