@@ -8,9 +8,10 @@ use std::io;
 
 use crate::{
     drops::{give_boss_enemy_drops, give_normal_enemy_drops},
-    enemy::{Enemy, EnemyKind},
+    enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
+    util::is_chance_success,
 };
 
 /// Returns true if the player wins the fight.
@@ -52,12 +53,13 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     let mut fight_text = "Select what to do...".to_string();
     let mut action = false;
     let mut player_turn = true;
+    let player_temp_stat_boosts = character.temp_stat_boosts.clone();
 
     // fully heal player at the start of fights
     character.restore_health(character.get_total_health());
 
     loop {
-        let mut menu_items = vec!["Attack", "Consumables", "Stats", "Flee"];
+        let mut menu_items = vec!["Attack", "Consumables", "Stats"];
         if action {
             menu_items = vec!["Continue"];
         }
@@ -152,15 +154,28 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             {
                                 menu_level_up(character.data.stats.general_stats.character_level)?;
                             }
+                            character.temp_stat_boosts = player_temp_stat_boosts;
                             return Ok(true);
                         }
                         if player_turn {
                             player_turn = false;
-                            fight_text = enemy.attack_player(character);
+                            match enemy.kind {
+                                EnemyKind::Boss => {
+                                    if is_chance_success(ENEMY_SKILL_CHANCE) {
+                                        fight_text = enemy.use_skill(character);
+                                    } else {
+                                        fight_text = enemy.attack_player(character);
+                                    }
+                                }
+                                _ => {
+                                    fight_text = enemy.attack_player(character);
+                                }
+                            }
                         } else {
                             if character.is_dead() {
                                 character.increase_deaths();
                                 menu_enemy_fight_player_died(character)?;
+                                character.temp_stat_boosts = player_temp_stat_boosts;
                                 return Ok(false);
                             }
                             action = false;
@@ -175,6 +190,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
             }
         }
     }
+    character.temp_stat_boosts = player_temp_stat_boosts;
 
     Ok(false)
 }

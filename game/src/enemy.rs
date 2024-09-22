@@ -1,6 +1,6 @@
 use rand::{thread_rng, Rng};
 
-use crate::{fight::is_critical_hit, session::PlayerCharacter, util::is_chance_success};
+use crate::{fight::is_critical_hit, session::PlayerCharacter};
 
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
