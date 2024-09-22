@@ -1,12 +1,12 @@
 use rand::{thread_rng, Rng};
 
-use crate::{fight::is_critical_hit, session::PlayerCharacter};
+use crate::{fight::is_critical_hit, session::PlayerCharacter, util::is_chance_success};
 
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
-pub const ENEMY_SKILL_CHANCE: f64 = 0.35;
+pub const ENEMY_SKILL_CHANCE: f64 = 0.30;
 pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
 pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;
 
@@ -212,6 +212,34 @@ impl Enemy {
         }
         let damage_taken = character.take_damage(self.get_total_damage());
         format!("Enemy attacked! Player took {} damage", damage_taken)
+    }
+
+    pub fn use_skill(&self, character: &mut PlayerCharacter) -> String {
+        if let Some(skill) = &self.skill {
+            match skill {
+                EnemySkill::Smash => {
+                    let damage = (character.get_total_health() as f64 * 0.25) as u32;
+                    let damage_taken = character.take_pure_damage(damage);
+                    return format!(
+                        "Enemy used skill Smash! Player took {} damage",
+                        damage_taken
+                    );
+                }
+                EnemySkill::FireBreath => {
+                    let damage = (character.get_total_health() as f64 * 0.15) as u32;
+                    let damage_taken = character.take_pure_damage(damage);
+                    let reduced_defense = 2 * self.level;
+                    character.temp_stat_boosts.decrease_defense(reduced_defense);
+                    return format!(
+                        "Enemy used skill Fire Breath! Player took {} damage. Player's defense was reduced by {}",
+                        damage_taken,
+                        reduced_defense
+                    );
+                }
+                _ => return "Enemy tried to use an unknown skill".to_string(),
+            }
+        }
+        "Enemy tried to use skill, but it doesn't have one".to_string()
     }
 }
 

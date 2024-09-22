@@ -1,4 +1,5 @@
 use chrono::{TimeZone, Utc};
+use rand::{thread_rng, Rng};
 use std::env;
 
 pub fn extract_first_word(s: &str) -> &str {
@@ -23,4 +24,10 @@ pub fn shift_index_back(index: usize) -> usize {
         return 0;
     }
     index - 1
+}
+
+/// Returns true if the passed rate was rolled.
+/// Rate should be between 0 and 1.
+pub fn is_chance_success(rate: f64) -> bool {
+    thread_rng().gen_range(0.0..1.0) < rate
 }

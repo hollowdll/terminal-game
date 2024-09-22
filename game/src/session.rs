@@ -376,7 +376,17 @@ impl PlayerCharacter {
         } else {
             self.temp_stats.current_health -= reduced_damage;
         }
-        return reduced_damage;
+        reduced_damage
+    }
+
+    /// Neglects the player's defense. Returns the amount of damage taken.
+    pub fn take_pure_damage(&mut self, damage: u32) -> u32 {
+        if damage >= self.temp_stats.current_health {
+            self.temp_stats.current_health = 0;
+        } else {
+            self.temp_stats.current_health -= damage;
+        }
+        damage
     }
 
     /// Returns the amount of damage to take after defense reduction.
