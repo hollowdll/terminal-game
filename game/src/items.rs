@@ -42,13 +42,20 @@ pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues
 };
 
 //-------------------//
-// Disposable items //
+// Consumable items //
 //-----------------//
 
 pub const ITEM_HEALTH_POTION_NAME: &str = "Health Potion";
 pub const ITEM_HEALTH_POTION: ItemInfo = ItemInfo {
     name: Cow::Borrowed(ITEM_HEALTH_POTION_NAME),
     description: Cow::Borrowed("A magical potion that restores health points."),
+    category: ItemCategory::Consumable,
+};
+
+pub const ITEM_MANA_POTION_NAME: &str = "Mana Potion";
+pub const ITEM_MANA_POTION: ItemInfo = ItemInfo {
+    name: Cow::Borrowed(ITEM_MANA_POTION_NAME),
+    description: Cow::Borrowed("A magical potion that restores mana points."),
     category: ItemCategory::Consumable,
 };
 
@@ -72,9 +79,9 @@ pub const ITEM_ARMOR: ItemInfo = ItemInfo {
     category: ItemCategory::Armor,
 };
 
-//--------//
-// Rings //
-//------//
+//-------------//
+// Ring items //
+//-----------//
 
 pub const ITEM_RING: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Ring"),
@@ -109,10 +116,19 @@ impl ConsumableItem {
         }
     }
 
+    pub fn new_mana_potion(rarity: ItemRarity) -> Self {
+        Self {
+            info: ITEM_MANA_POTION,
+            effect: get_mana_potion_effect(&rarity),
+            rarity,
+            amount_in_inventory: 0,
+        }
+    }
+
     /// Returns text telling what the item did.
     pub fn use_item(&self, character: &mut PlayerCharacter) -> String {
         let display_name = get_item_display_name(CharacterItem::Consumable(&self));
-        let mut text = "".to_string();
+        let mut text = "Player used an unknown item".to_string();
         match self.info.name.as_ref() {
             ITEM_HEALTH_POTION_NAME => {
                 let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
@@ -121,6 +137,15 @@ impl ConsumableItem {
                 text = format!(
                     "Player used {}! Restored {} health points",
                     &display_name, restored_health
+                );
+            }
+            ITEM_MANA_POTION_NAME => {
+                let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
+                let restored_mana = character
+                    .restore_mana((heal_percentage * character.get_total_mana() as f64) as u32);
+                text = format!(
+                    "Player used {}! Restored {} mana points",
+                    &display_name, restored_mana
                 );
             }
             _ => {}
@@ -374,6 +399,13 @@ pub fn get_potion_effect_percentage(rarity: &ItemRarity) -> i32 {
 pub fn get_health_potion_effect(rarity: &ItemRarity) -> String {
     format!(
         "Restores {}% of your maximum health points.",
+        get_potion_effect_percentage(rarity)
+    )
+}
+
+pub fn get_mana_potion_effect(rarity: &ItemRarity) -> String {
+    format!(
+        "Restores {}% of your maximum mana points.",
         get_potion_effect_percentage(rarity)
     )
 }
@@ -671,6 +703,7 @@ pub fn generate_random_consumable() -> ConsumableItem {
 
     match num {
         0 => ConsumableItem::new_health_potion(rarity),
+        1 => ConsumableItem::new_mana_potion(rarity),
         _ => ConsumableItem::new_health_potion(rarity),
     }
 }

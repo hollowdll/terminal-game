@@ -409,6 +409,18 @@ impl PlayerCharacter {
         amount
     }
 
+    /// Returns the amount of restored mana.
+    pub fn restore_mana(&mut self, amount: u32) -> u32 {
+        let max_mana = self.get_total_mana();
+        if self.temp_stats.current_mana + amount >= max_mana {
+            let current_mana = self.temp_stats.current_mana;
+            self.temp_stats.current_mana = max_mana;
+            return max_mana - current_mana;
+        }
+        self.temp_stats.current_mana += amount;
+        amount
+    }
+
     pub fn is_dead(&self) -> bool {
         self.temp_stats.current_health == 0
     }
