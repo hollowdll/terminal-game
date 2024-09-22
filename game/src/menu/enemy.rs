@@ -312,7 +312,6 @@ pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Resu
             .general_stats
             .highest_dungeon_floor_achieved = current_floor;
     }
-    character.data.stats.general_stats.deaths += 1;
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;

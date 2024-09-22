@@ -410,11 +410,11 @@ pub fn get_item_display_name<'a>(item: CharacterItem<'a>) -> String {
 /// Returns the purchase value of an item in gold.
 pub fn get_item_purchase_value(rarity: &ItemRarity) -> u32 {
     match rarity {
-        ItemRarity::Common => 150,
-        ItemRarity::Uncommon => 400,
-        ItemRarity::Rare => 650,
-        ItemRarity::Epic => 900,
-        ItemRarity::Legendary => 1150,
+        ItemRarity::Common => 100,
+        ItemRarity::Uncommon => 250,
+        ItemRarity::Rare => 400,
+        ItemRarity::Epic => 550,
+        ItemRarity::Legendary => 700,
         _ => 0,
     }
 }
@@ -422,11 +422,11 @@ pub fn get_item_purchase_value(rarity: &ItemRarity) -> u32 {
 /// Returns the sell value of an item in gold.
 pub fn get_item_sell_value(rarity: &ItemRarity) -> u32 {
     match rarity {
-        ItemRarity::Common => 25,
-        ItemRarity::Uncommon => 50,
-        ItemRarity::Rare => 75,
-        ItemRarity::Epic => 100,
-        ItemRarity::Legendary => 125,
+        ItemRarity::Common => 50,
+        ItemRarity::Uncommon => 100,
+        ItemRarity::Rare => 150,
+        ItemRarity::Epic => 200,
+        ItemRarity::Legendary => 250,
         _ => 0,
     }
 }
@@ -437,8 +437,8 @@ pub fn create_starter_weapon() -> WeaponItem {
         1,
         ItemRarity::Common,
         WeaponItemStats {
-            damage: WEAPON_BASE_VALUES.min_damage,
-            crit_hit_rate: WEAPON_BASE_VALUES.min_crit_hit_rate,
+            damage: WEAPON_BASE_VALUES.max_damage,
+            crit_hit_rate: WEAPON_BASE_VALUES.max_crit_hit_rate,
         },
         Vec::new(),
     )

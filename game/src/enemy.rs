@@ -26,19 +26,19 @@ pub const BOSS_ENEMY_NAME_FIRE_DRAGON: &str = "Fire Dragon";
 pub const BOSS_ENEMY_NAMES: [&str; 2] = [BOSS_ENEMY_NAME_OGRE_KING, BOSS_ENEMY_NAME_FIRE_DRAGON];
 
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
-    health: 50,
+    health: 40,
     defense: 0,
-    damage: 8,
+    damage: 7,
 };
 pub const GREATER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
-    health: 70,
+    health: 50,
     defense: 1,
-    damage: 11,
+    damage: 9,
 };
 pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
-    health: 200,
+    health: 150,
     defense: 2,
-    damage: 18,
+    damage: 14,
 };
 
 pub struct NormalEnemyNames {
@@ -81,10 +81,10 @@ impl Enemy {
             kind: EnemyKind::Normal,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (35 * dungeon_floor),
-                current_health: base_stats.health + (35 * dungeon_floor),
+                max_health: base_stats.health + (30 * dungeon_floor),
+                current_health: base_stats.health + (30 * dungeon_floor),
                 defense: base_stats.defense + (1 * dungeon_floor),
-                damage: base_stats.damage + (6 * dungeon_floor),
+                damage: base_stats.damage + (5 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -107,10 +107,10 @@ impl Enemy {
             kind: EnemyKind::Boss,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (65 * dungeon_floor),
-                current_health: base_stats.health + (65 * dungeon_floor),
+                max_health: base_stats.health + (50 * dungeon_floor),
+                current_health: base_stats.health + (50 * dungeon_floor),
                 defense: base_stats.defense + (2 * dungeon_floor),
-                damage: base_stats.damage + (8 * dungeon_floor),
+                damage: base_stats.damage + (6 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
