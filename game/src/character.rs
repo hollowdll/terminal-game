@@ -9,6 +9,7 @@ use rand::{thread_rng, Rng};
 pub const BASE_EXP_MIN: u32 = 100;
 pub const BASE_EXP_MAX: u32 = 125;
 
+pub const SKILL_MANA_COST: u32 = 60;
 pub const SKILL_DESCRIPTION_MAGIC_PROJECTILE: &str =
     "Deals 20% of the enemy's maximum health as damage.";
 pub const SKILL_DESCRIPTION_RECOVER: &str = "Restores 35% of the player's maximum health points.";

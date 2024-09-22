@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use uuid::Uuid;
 
-use crate::session::PlayerCharacter;
+use crate::{character::CharacterClass, session::PlayerCharacter};
 
 pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
     common: 0.40,
@@ -65,7 +65,31 @@ pub const ITEM_MANA_POTION: ItemInfo = ItemInfo {
 
 pub const ITEM_SWORD: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Sword"),
-    description: Cow::Borrowed("A sharp sword that can be used for fighting."),
+    description: Cow::Borrowed("A sword that increases offensive stats."),
+    category: ItemCategory::Weapon,
+};
+
+pub const ITEM_AXE: ItemInfo = ItemInfo {
+    name: Cow::Borrowed("Axe"),
+    description: Cow::Borrowed("An axe that increases offensive stats."),
+    category: ItemCategory::Weapon,
+};
+
+pub const ITEM_STAFF: ItemInfo = ItemInfo {
+    name: Cow::Borrowed("Staff"),
+    description: Cow::Borrowed("A staff that increases offensive stats."),
+    category: ItemCategory::Weapon,
+};
+
+pub const ITEM_DAGGER: ItemInfo = ItemInfo {
+    name: Cow::Borrowed("Dagger"),
+    description: Cow::Borrowed("A dagger that increases offensive stats."),
+    category: ItemCategory::Weapon,
+};
+
+pub const ITEM_HALBERD: ItemInfo = ItemInfo {
+    name: Cow::Borrowed("Halberd"),
+    description: Cow::Borrowed("A halberd that increases offensive stats."),
     category: ItemCategory::Weapon,
 };
 
@@ -75,7 +99,7 @@ pub const ITEM_SWORD: ItemInfo = ItemInfo {
 
 pub const ITEM_ARMOR: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Armor"),
-    description: Cow::Borrowed("A defensive armor."),
+    description: Cow::Borrowed("An armor that increases defensive stats."),
     category: ItemCategory::Armor,
 };
 
@@ -463,9 +487,16 @@ pub fn get_item_sell_value(rarity: &ItemRarity) -> u32 {
     }
 }
 
-pub fn create_starter_weapon() -> WeaponItem {
+pub fn create_starter_weapon(character_class: &CharacterClass) -> WeaponItem {
+    let item_info = match character_class {
+        CharacterClass::Mage => ITEM_STAFF,
+        CharacterClass::Cleric => ITEM_HALBERD,
+        CharacterClass::Assassin => ITEM_DAGGER,
+        CharacterClass::Warrior => ITEM_AXE,
+        CharacterClass::Knight => ITEM_SWORD,
+    };
     WeaponItem::new(
-        ITEM_SWORD,
+        item_info,
         1,
         ItemRarity::Common,
         WeaponItemStats {
@@ -610,7 +641,7 @@ pub fn random_ring_enchantment(
         }
         1 => {
             let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage)
-                + (3 * dungeon_floor);
+                + (2 * dungeon_floor);
             return Enchantment::Damage(damage);
         }
         2 => {
@@ -627,7 +658,11 @@ pub fn random_ring_enchantment(
     }
 }
 
-pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32) -> WeaponItem {
+pub fn generate_random_weapon(
+    base_values: WeaponBaseValues,
+    dungeon_floor: u32,
+    character_class: &CharacterClass,
+) -> WeaponItem {
     let mut rng = thread_rng();
     let damage =
         rng.gen_range(base_values.min_damage..=base_values.max_damage) + (4 * dungeon_floor);
@@ -640,9 +675,16 @@ pub fn generate_random_weapon(base_values: WeaponBaseValues, dungeon_floor: u32)
         &ENCHANTMENT_BASE_VALUES,
         dungeon_floor,
     );
+    let item_info = match character_class {
+        CharacterClass::Mage => ITEM_STAFF,
+        CharacterClass::Cleric => ITEM_HALBERD,
+        CharacterClass::Assassin => ITEM_DAGGER,
+        CharacterClass::Warrior => ITEM_AXE,
+        CharacterClass::Knight => ITEM_SWORD,
+    };
 
     WeaponItem::new(
-        ITEM_SWORD,
+        item_info,
         dungeon_floor,
         rarity,
         WeaponItemStats {
