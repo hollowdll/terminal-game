@@ -9,6 +9,34 @@ use rand::{thread_rng, Rng};
 pub const BASE_EXP_MIN: u32 = 100;
 pub const BASE_EXP_MAX: u32 = 125;
 
+pub const SKILL_DESCRIPTION_MAGIC_PROJECTILE: &str =
+    "Deals 20% of the enemy's maximum health as damage.";
+pub const SKILL_DESCRIPTION_RECOVER: &str = "Restores 35% of the player's maximum health points.";
+pub const SKILL_DESCRIPTION_STEALTH: &str =
+    "Increases the player's critical damage multiplier by 0.3 for the rest of the fight.";
+pub const SKILL_DESCRIPTION_BATTLE_CRY: &str =
+    "Increases the player's damage by 30% for the rest of the fight.";
+pub const SKILL_DESCRIPTION_ARMOR_UP: &str =
+    "Increases the player's defense equal to the player's level for the rest of the fight.";
+
+#[derive(Debug)]
+pub enum CharacterClass {
+    Mage,
+    Cleric,
+    Assassin,
+    Warrior,
+    Knight,
+}
+
+#[derive(Debug)]
+pub enum CharacterSkill {
+    MagicProjectile,
+    Recover,
+    Stealth,
+    BattleCry,
+    ArmorUp,
+}
+
 pub fn max_game_characters_reached(player: &Player, cfg: &GameConfig) -> bool {
     return player.data.characters.len() >= cfg.max_game_characters;
 }
