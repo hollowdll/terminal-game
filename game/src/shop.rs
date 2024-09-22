@@ -1,35 +1,20 @@
 use crate::{
     items::{
-        generate_random_armor, generate_random_consumable, generate_random_ring,
-        generate_random_weapon, get_item_display_name, get_item_purchase_value,
-        get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem, RingItem, WeaponItem,
-        ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
+        get_item_purchase_value, get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem,
+        ItemRarity, RingItem, WeaponItem, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
 };
 
 pub struct ShopItems {
-    pub consumable: Option<ConsumableItem>,
+    pub consumables: Vec<ConsumableItem>,
     pub weapon: Option<WeaponItem>,
     pub armor: Option<ArmorItem>,
     pub ring: Option<RingItem>,
 }
 
 impl ShopItems {
-    /// Returns true if player has enough gold and the item was bought.
-    pub fn buy_consumable(&mut self, character: &mut PlayerCharacter) -> bool {
-        if let Some(item) = &self.consumable {
-            let purchase_value = get_item_purchase_value(&item.rarity);
-            if character.data.currency.gold >= purchase_value {
-                character.give_consumable(&item, 1);
-                character.data.currency.gold -= purchase_value;
-                self.consumable = None;
-                return true;
-            }
-        }
-        false
-    }
-
     /// Returns true if player has enough gold and the item was bought.
     pub fn buy_weapon(&mut self, character: &mut PlayerCharacter) -> bool {
         if let Some(item) = &self.weapon {
@@ -73,13 +58,30 @@ impl ShopItems {
     }
 }
 
-pub fn randomize_shop_items(floor: u32) -> ShopItems {
+pub fn generate_shop_items(floor: u32) -> ShopItems {
     ShopItems {
-        consumable: Some(generate_random_consumable()),
+        consumables: vec![
+            ConsumableItem::new_health_potion(ItemRarity::Common),
+            ConsumableItem::new_health_potion(ItemRarity::Uncommon),
+            ConsumableItem::new_health_potion(ItemRarity::Rare),
+            ConsumableItem::new_health_potion(ItemRarity::Epic),
+            ConsumableItem::new_health_potion(ItemRarity::Legendary),
+        ],
         weapon: Some(generate_random_weapon(WEAPON_BASE_VALUES, floor)),
         armor: Some(generate_random_armor(ARMOR_BASE_VALUES, floor)),
         ring: Some(generate_random_ring(RING_BASE_VALUES, floor)),
     }
+}
+
+/// Returns true if player has enough gold and the item was bought.
+pub fn buy_consumable(item: &ConsumableItem, character: &mut PlayerCharacter) -> bool {
+    let purchase_value = get_item_purchase_value(&item.rarity);
+    if character.data.currency.gold >= purchase_value {
+        character.give_consumable(&item, 1);
+        character.data.currency.gold -= purchase_value;
+        return true;
+    }
+    false
 }
 
 /// Returns the amount of gold received.

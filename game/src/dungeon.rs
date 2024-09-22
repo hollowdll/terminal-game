@@ -1,6 +1,6 @@
 use crate::{
     enemy::{generate_random_boss_enemy, generate_random_normal_enemy, Enemy},
-    shop::{randomize_shop_items, ShopItems},
+    shop::{generate_shop_items, ShopItems},
 };
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
@@ -25,7 +25,7 @@ impl DungeonFloor {
             floor,
             rooms,
             boss: Some(generate_random_boss_enemy(floor)),
-            shop_items: randomize_shop_items(floor),
+            shop_items: generate_shop_items(floor),
         }
     }
 

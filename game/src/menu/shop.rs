@@ -12,7 +12,7 @@ use crate::{
         menu_armor_info, menu_consumable_info, menu_inventory, menu_ring_info, menu_weapon_info,
     },
     session::PlayerCharacter,
-    shop::ShopItems,
+    shop::{buy_consumable, ShopItems},
     util::shift_index_back,
 };
 
@@ -77,9 +77,6 @@ pub fn menu_shop_buy_items(
     let mut selected_index = 0;
     let start_column: u16 = 2;
 
-    if let Some(item) = &shop_items.consumable {
-        menu_items.push(CharacterItemOwned::Consumable(item.clone()));
-    }
     if let Some(item) = &shop_items.weapon {
         menu_items.push(CharacterItemOwned::Weapon(item.clone()));
     }
@@ -88,6 +85,10 @@ pub fn menu_shop_buy_items(
     }
     if let Some(item) = &shop_items.ring {
         menu_items.push(CharacterItemOwned::Ring(item.clone()));
+    }
+
+    for item in &shop_items.consumables {
+        menu_items.push(CharacterItemOwned::Consumable(item.clone()));
     }
 
     execute!(stdout, Clear(ClearType::All))?;
@@ -151,12 +152,8 @@ pub fn menu_shop_buy_items(
                 KeyCode::Char('B') | KeyCode::Char('b') => {
                     if !menu_items.is_empty() {
                         match &menu_items[selected_index] {
-                            CharacterItemOwned::Consumable(_) => {
-                                if shop_items.buy_consumable(character) {
-                                    menu_items.remove(selected_index);
-                                    selected_index = shift_index_back(selected_index);
-                                    execute!(stdout, Clear(ClearType::All))?;
-                                }
+                            CharacterItemOwned::Consumable(item) => {
+                                buy_consumable(item, character);
                             }
                             CharacterItemOwned::Weapon(_) => {
                                 if shop_items.buy_weapon(character) {
