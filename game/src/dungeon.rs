@@ -322,7 +322,8 @@ fn randomize_enemy_rooms(
                 None => {
                     let enemy = generate_random_normal_enemy(dungeon_floor);
                     if let Some(room) = rooms.get_mut(&rand_room.coords) {
-                        room.enemy = Some(enemy);
+                        room.enemy = Some(enemy.clone());
+                        temp_rooms[rand_num].enemy = Some(enemy);
                     }
                     break;
                 }
