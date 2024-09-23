@@ -46,14 +46,13 @@ fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
 /// Returned bool is true if the menu should be rerendered.
 pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
     let menu_items = vec![OPTION_LOAD_GAME, OPTION_NEW_GAME, OPTION_QUIT_GAME];
     let mut selected_index = 0;
     let mut start_column: u16 = 7;
     let mut rerender = false;
     let version = env!("CARGO_PKG_VERSION");
 
+    execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         let _ = print_ascii_title(&stdout);
@@ -133,16 +132,9 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 /// Returns true if should go back in menu.
 fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
-    let mut no_characters = false;
-
-    if player.data.characters.is_empty() {
-        no_characters = true;
-    }
 
     for (key, val) in &player.data.characters {
         menu_items.push(format!(
@@ -154,9 +146,10 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
         ))
     }
 
+    execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        if no_characters {
+        if player.data.characters.is_empty() {
             println!("Esc = Back");
             execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("No characters found");
@@ -219,13 +212,12 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
 fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
     let menu_items = vec!["No", "Yes"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
     let mut character_deleted = false;
 
+    execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!(
@@ -279,12 +271,11 @@ fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) ->
 /// Returns true if menu option "Back" was selected.
 fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
     let menu_items = vec!["Back"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
 
+    execute!(stdout, Clear(ClearType::All))?;
     if !max_game_characters_reached(player, cfg) {
         match menu_create_character(player, cfg) {
             Ok(character_created) => {
@@ -343,8 +334,6 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
 pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All), Show)?;
-
     let menu_items = vec!["Yes", "No"];
     let mut selected_index = 0;
     let start_column: u16 = 4;
@@ -353,7 +342,7 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
     let mut msg = "";
     let mut name = String::new();
 
-    execute!(stdout, cursor::MoveTo(0, 0))?;
+    execute!(stdout, cursor::MoveTo(0, 0), Clear(ClearType::All), Show)?;
     println!("Create a new character");
     execute!(stdout, cursor::MoveTo(0, 1))?;
     disable_raw_mode()?;
@@ -529,12 +518,11 @@ pub fn menu_choose_character_class() -> io::Result<CharacterClass> {
 
 pub fn menu_tutorial() -> io::Result<()> {
     let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-
     let menu_items = vec!["Continue", "Skip Tutorial"];
     let mut selected_index = 0;
     let start_column: u16 = 1;
 
+    execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("(Tutorial)");
