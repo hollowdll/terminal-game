@@ -6,9 +6,10 @@ use crate::{
         GOLD_MULTIPLIER_NORMAL_ENEMY,
     },
     items::{
-        generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        random_equipment_item, random_item_rarity, CharacterItem, ConsumableItem, ItemCategory,
-        ARMOR_BASE_VALUES, ITEM_RARITY_DROP_RATES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        generate_random_armor, generate_random_consumable, generate_random_ring,
+        generate_random_weapon, get_item_display_name, random_equipment_item, random_item_rarity,
+        CharacterItem, ConsumableItem, ItemCategory, ARMOR_BASE_VALUES, ITEM_RARITY_DROP_RATES,
+        RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
 };
@@ -105,17 +106,15 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
             _ => {}
         }
     }
-
-    let consumable_rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
-    let health_potion = ConsumableItem::new_health_potion(consumable_rarity);
-    character.give_consumable(&health_potion, 2);
+    let consumable = generate_random_consumable();
+    character.give_consumable(&consumable, 1);
 
     BossEnemyDrops {
         gold,
         exp,
         equipment_item_names: item_display_names,
-        consumable_item_name: get_item_display_name(CharacterItem::Consumable(&health_potion)),
-        consumable_item_amount: 2,
+        consumable_item_name: get_item_display_name(CharacterItem::Consumable(&consumable)),
+        consumable_item_amount: 1,
     }
 }
 

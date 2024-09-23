@@ -1,3 +1,11 @@
+use crate::{
+    character::SKILL_MANA_COST,
+    drops::{give_boss_enemy_drops, give_normal_enemy_drops},
+    enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
+    menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
+    session::PlayerCharacter,
+    util::is_chance_success,
+};
 use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent},
@@ -6,13 +14,7 @@ use crossterm::{
 };
 use std::io;
 
-use crate::{
-    drops::{give_boss_enemy_drops, give_normal_enemy_drops},
-    enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
-    menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
-    session::PlayerCharacter,
-    util::is_chance_success,
-};
+const DEFAULT_FIGHT_TEXT: &str = "Select what to do...";
 
 /// Returns true if the player wins the fight.
 pub fn menu_enemy_encounter(
@@ -50,16 +52,17 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
 
     let mut selected_index = 0;
     let start_column: u16 = 10;
-    let mut fight_text = "Select what to do...".to_string();
+    let mut fight_text = DEFAULT_FIGHT_TEXT.to_string();
     let mut action = false;
     let mut player_turn = true;
     let player_temp_stat_boosts = character.temp_stat_boosts.clone();
 
     // fully heal player at the start of fights
     character.restore_health(character.get_total_health());
+    character.restore_mana(character.get_total_mana());
 
     loop {
-        let mut menu_items = vec!["Attack", "Consumables", "Stats"];
+        let mut menu_items = vec!["Attack", "Use Skill", "Consumables", "Stats"];
         if action {
             menu_items = vec!["Continue"];
         }
@@ -129,6 +132,19 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                         selected_index = 0;
                         execute!(stdout, Clear(ClearType::All))?;
                     }
+                    "Use Skill" => {
+                        if character.has_enough_mana_for_skill() {
+                            action = true;
+                            fight_text = character.use_skill(enemy);
+                            selected_index = 0;
+                            execute!(stdout, Clear(ClearType::All))?;
+                        } else {
+                            fight_text = format!(
+                                "Not enough mana to use skill ({} required)",
+                                SKILL_MANA_COST
+                            );
+                        }
+                    }
                     "Consumables" => {
                         let text = menu_inventory_consumable_list(character, true, false)?;
                         if !text.is_empty() {
@@ -136,9 +152,14 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             fight_text = text;
                             selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
+                        } else {
+                            fight_text = DEFAULT_FIGHT_TEXT.to_string();
                         }
                     }
-                    "Stats" => menu_enemy_fight_character_stats(character)?,
+                    "Stats" => {
+                        menu_enemy_fight_character_stats(character)?;
+                        fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                    }
                     "Continue" => {
                         if enemy.is_dead() {
                             let character_level =
@@ -181,7 +202,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             }
                             action = false;
                             player_turn = true;
-                            fight_text = "Select what to do...".to_string();
+                            fight_text = DEFAULT_FIGHT_TEXT.to_string();
                         }
                         execute!(stdout, Clear(ClearType::All))?;
                     }

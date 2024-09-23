@@ -4,7 +4,7 @@ use crate::{
     character::{
         get_character_skill, CharacterClass, CharacterSkill, CLASS_ASSASSIN_STARTING_STATS,
         CLASS_CLERIC_STARTING_STATS, CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS,
-        CLASS_WARRIOR_STARTING_STATS,
+        CLASS_WARRIOR_STARTING_STATS, SKILL_MANA_COST,
     },
     enemy::Enemy,
     fight::is_critical_hit,
@@ -427,6 +427,13 @@ impl PlayerCharacter {
         amount
     }
 
+    pub fn consume_mana(&mut self, amount: u32) {
+        if amount >= self.temp_stats.current_mana {
+            self.temp_stats.current_mana = 0;
+        }
+        self.temp_stats.current_mana -= amount;
+    }
+
     pub fn is_dead(&self) -> bool {
         self.temp_stats.current_health == 0
     }
@@ -486,12 +493,17 @@ impl PlayerCharacter {
         self.equip_weapon(&weapon.id);
     }
 
+    pub fn has_enough_mana_for_skill(&self) -> bool {
+        self.temp_stats.current_mana >= SKILL_MANA_COST
+    }
+
     /// Returns enemy fight text.
     pub fn use_skill(&mut self, enemy: &mut Enemy) -> String {
+        self.consume_mana(SKILL_MANA_COST);
         let skill = get_character_skill(&self.data.metadata.class);
         match skill {
             CharacterSkill::MagicProjectile => {
-                let damage = (enemy.stats.max_health as f64 * 0.20) as u32;
+                let damage = (enemy.stats.max_health as f64 * 0.30) as u32;
                 let damage_taken = enemy.take_pure_damage(damage);
                 return format!(
                     "Player used skill {}! Enemy took {} damage",
