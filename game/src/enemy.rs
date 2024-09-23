@@ -6,7 +6,7 @@ pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
-pub const ENEMY_SKILL_CHANCE: f64 = 0.25;
+pub const ENEMY_SKILL_CHANCE: f64 = 0.35;
 pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
 pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;
 
@@ -107,9 +107,9 @@ impl Enemy {
             kind: EnemyKind::Boss,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (65 * dungeon_floor),
-                current_health: base_stats.health + (65 * dungeon_floor),
-                defense: base_stats.defense + (2 * dungeon_floor),
+                max_health: base_stats.health + (75 * dungeon_floor),
+                current_health: base_stats.health + (75 * dungeon_floor),
+                defense: base_stats.defense + (3 * dungeon_floor),
                 damage: base_stats.damage + (7 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,

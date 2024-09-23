@@ -7,9 +7,8 @@ use crate::{
     },
     items::{
         generate_random_armor, generate_random_consumable, generate_random_ring,
-        generate_random_weapon, get_item_display_name, random_equipment_item, random_item_rarity,
-        CharacterItem, ConsumableItem, ItemCategory, ARMOR_BASE_VALUES, ITEM_RARITY_DROP_RATES,
-        RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        generate_random_weapon, get_item_display_name, random_equipment_item, CharacterItem,
+        ItemCategory, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
 };

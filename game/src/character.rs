@@ -167,6 +167,12 @@ pub fn load_game_character(name: &str, player: &mut Player) {
         if let Some(weapon_id) = &character_data.equipment.weapon {
             character.equip_weapon(weapon_id);
         }
+        if let Some(armor_id) = &character_data.equipment.armor {
+            character.equip_armor(armor_id);
+        }
+        if let Some(ring_id) = &character_data.equipment.ring {
+            character.equip_ring(ring_id);
+        }
         player.character = Some(character);
     }
 }

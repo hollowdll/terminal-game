@@ -6,10 +6,10 @@ use uuid::Uuid;
 use crate::{character::CharacterClass, session::PlayerCharacter};
 
 pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
-    common: 0.40,
+    common: 0.43,
     uncommon: 0.30,
-    rare: 0.15,
-    epic: 0.10,
+    rare: 0.14,
+    epic: 0.08,
     legendary: 0.05,
 };
 pub const WEAPON_BASE_VALUES: WeaponBaseValues = WeaponBaseValues {
