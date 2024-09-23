@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{
     config::GameConfig,
     game_data::{CharacterData, CombatStats},
@@ -89,6 +91,22 @@ pub enum CharacterSkill {
     ArmorUp,
 }
 
+impl fmt::Display for CharacterSkill {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::MagicProjectile => "Magic Projectile",
+                Self::Recover => "Recover",
+                Self::Stealth => "Stealth",
+                Self::BattleCry => "Battle Cry",
+                Self::ArmorUp => "Armor Up",
+            }
+        )
+    }
+}
+
 pub fn max_game_characters_reached(player: &Player, cfg: &GameConfig) -> bool {
     return player.data.characters.len() >= cfg.max_game_characters;
 }
@@ -110,6 +128,16 @@ pub fn get_character_skill_description(skill: &CharacterSkill) -> &str {
         CharacterSkill::Stealth => SKILL_DESCRIPTION_STEALTH,
         CharacterSkill::BattleCry => SKILL_DESCRIPTION_BATTLE_CRY,
         CharacterSkill::ArmorUp => SKILL_DESCRIPTION_ARMOR_UP,
+    }
+}
+
+pub fn get_class_starting_stats(class: &CharacterClass) -> CombatStats {
+    match class {
+        CharacterClass::Mage => CLASS_MAGE_STARTING_STATS,
+        CharacterClass::Cleric => CLASS_CLERIC_STARTING_STATS,
+        CharacterClass::Assassin => CLASS_ASSASSIN_STARTING_STATS,
+        CharacterClass::Warrior => CLASS_WARRIOR_STARTING_STATS,
+        CharacterClass::Knight => CLASS_KNIGHT_STARTING_STATS,
     }
 }
 

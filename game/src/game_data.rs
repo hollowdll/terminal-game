@@ -6,10 +6,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use crate::{
-    character::{
-        CharacterClass, CLASS_ASSASSIN_STARTING_STATS, CLASS_CLERIC_STARTING_STATS,
-        CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS, CLASS_WARRIOR_STARTING_STATS,
-    },
+    character::{get_class_starting_stats, CharacterClass},
     items::{ArmorItem, ConsumableItem, RingItem, WeaponItem},
 };
 use std::{collections::HashMap, io};
@@ -64,14 +61,7 @@ pub struct CharacterData {
 
 impl CharacterData {
     pub fn new(character_name: &str, class: CharacterClass) -> Self {
-        let starting_stats = match class {
-            CharacterClass::Mage => CLASS_MAGE_STARTING_STATS,
-            CharacterClass::Cleric => CLASS_CLERIC_STARTING_STATS,
-            CharacterClass::Assassin => CLASS_ASSASSIN_STARTING_STATS,
-            CharacterClass::Warrior => CLASS_WARRIOR_STARTING_STATS,
-            CharacterClass::Knight => CLASS_KNIGHT_STARTING_STATS,
-        };
-
+        let starting_stats = get_class_starting_stats(&class);
         Self {
             metadata: CharacterMetadata {
                 name: character_name.to_owned(),
