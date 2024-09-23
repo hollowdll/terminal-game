@@ -478,11 +478,11 @@ pub fn get_item_purchase_value(rarity: &ItemRarity) -> u32 {
 /// Returns the sell value of an item in gold.
 pub fn get_item_sell_value(rarity: &ItemRarity) -> u32 {
     match rarity {
-        ItemRarity::Common => 50,
-        ItemRarity::Uncommon => 100,
-        ItemRarity::Rare => 150,
-        ItemRarity::Epic => 200,
-        ItemRarity::Legendary => 250,
+        ItemRarity::Common => 25,
+        ItemRarity::Uncommon => 50,
+        ItemRarity::Rare => 75,
+        ItemRarity::Epic => 100,
+        ItemRarity::Legendary => 125,
         _ => 0,
     }
 }
