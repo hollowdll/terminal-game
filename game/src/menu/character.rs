@@ -7,7 +7,10 @@ use crossterm::{
 use std::io;
 
 use crate::{
-    menu::{equipment::menu_equipment, inventory::menu_inventory, stats::menu_character_stats},
+    menu::{
+        equipment::menu_equipment, inventory::menu_inventory, skill::menu_skill,
+        stats::menu_character_stats,
+    },
     session::PlayerCharacter,
 };
 
@@ -16,7 +19,13 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Stats", "Inventory", "Equipment", "Return to main menu"];
+    let menu_items = vec![
+        "Stats",
+        "Inventory",
+        "Equipment",
+        "Skill",
+        "Return to main menu",
+    ];
     let mut selected_index = 0;
     let start_column: u16 = 2;
 
@@ -60,6 +69,9 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
                     }
                     "Equipment" => {
                         menu_equipment(character)?;
+                    }
+                    "Skill" => {
+                        menu_skill(character)?;
                     }
                     "Return to main menu" => {
                         let confirm = menu_confirm_return_to_main_menu()?;
