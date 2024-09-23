@@ -156,6 +156,16 @@ impl Enemy {
         return reduced_damage;
     }
 
+    /// Neglects the enemy's defense. Returns the amount of damage taken.
+    pub fn take_pure_damage(&mut self, damage: u32) -> u32 {
+        if damage >= self.stats.current_health {
+            self.stats.current_health = 0;
+        } else {
+            self.stats.current_health -= damage;
+        }
+        damage
+    }
+
     /// Returns the amount of damage to take after defense reduction.
     fn get_reduced_damage_taken(&self, damage: u32) -> u32 {
         if self.get_total_defense() >= damage {

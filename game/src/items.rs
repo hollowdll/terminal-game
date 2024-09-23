@@ -159,7 +159,7 @@ impl ConsumableItem {
                 let restored_health = character
                     .restore_health((heal_percentage * character.get_total_health() as f64) as u32);
                 text = format!(
-                    "Player used {}! Restored {} health points",
+                    "Player used {}! Player restored {} health points",
                     &display_name, restored_health
                 );
             }
@@ -168,7 +168,7 @@ impl ConsumableItem {
                 let restored_mana = character
                     .restore_mana((heal_percentage * character.get_total_mana() as f64) as u32);
                 text = format!(
-                    "Player used {}! Restored {} mana points",
+                    "Player used {}! Player restored {} mana points",
                     &display_name, restored_mana
                 );
             }

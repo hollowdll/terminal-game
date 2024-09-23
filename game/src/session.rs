@@ -2,8 +2,9 @@ use std::io;
 
 use crate::{
     character::{
-        CharacterClass, CLASS_ASSASSIN_STARTING_STATS, CLASS_CLERIC_STARTING_STATS,
-        CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS, CLASS_WARRIOR_STARTING_STATS,
+        get_character_skill, CharacterClass, CharacterSkill, CLASS_ASSASSIN_STARTING_STATS,
+        CLASS_CLERIC_STARTING_STATS, CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS,
+        CLASS_WARRIOR_STARTING_STATS,
     },
     enemy::Enemy,
     fight::is_critical_hit,
@@ -484,6 +485,53 @@ impl PlayerCharacter {
         self.give_weapon(&weapon);
         self.equip_weapon(&weapon.id);
     }
+
+    /// Returns enemy fight text.
+    pub fn use_skill(&mut self, enemy: &mut Enemy) -> String {
+        let skill = get_character_skill(&self.data.metadata.class);
+        match skill {
+            CharacterSkill::MagicProjectile => {
+                let damage = (enemy.stats.max_health as f64 * 0.20) as u32;
+                let damage_taken = enemy.take_pure_damage(damage);
+                return format!(
+                    "Player used skill {}! Enemy took {} damage",
+                    &skill, damage_taken
+                );
+            }
+            CharacterSkill::Recover => {
+                let heal_percentage = 0.45;
+                let restored_health =
+                    self.restore_health((heal_percentage * self.get_total_health() as f64) as u32);
+                return format!(
+                    "Player used skill {}! Player restored {} health points",
+                    &skill, restored_health
+                );
+            }
+            CharacterSkill::Stealth => {
+                self.temp_stat_boosts.increase_crit_damage_multiplier(0.4);
+                return format!(
+                    "Player used skill {}! Player's critical damage multiplier increased by 0.4",
+                    &skill
+                );
+            }
+            CharacterSkill::BattleCry => {
+                let increased_damage = (0.3 * self.get_total_damage() as f64) as u32;
+                self.temp_stat_boosts.increase_damage(increased_damage);
+                return format!(
+                    "Player used skill {}! Player's damage increased by {}",
+                    &skill, increased_damage
+                );
+            }
+            CharacterSkill::ArmorUp => {
+                let increased_defense = self.data.stats.general_stats.character_level;
+                self.temp_stat_boosts.increase_defense(increased_defense);
+                return format!(
+                    "Player used skill {}! Player's defense increased by {}",
+                    &skill, increased_defense
+                );
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -545,6 +593,17 @@ impl TemporaryStatBoosts {
             return self.critical_hit_rate = 0.0;
         }
         self.critical_hit_rate -= amount;
+    }
+
+    pub fn increase_crit_damage_multiplier(&mut self, amount: f64) {
+        self.critical_damage_multiplier += amount;
+    }
+
+    pub fn decrease_crit_damage_multiplier(&mut self, amount: f64) {
+        if amount > self.critical_damage_multiplier {
+            return self.critical_damage_multiplier = 0.0;
+        }
+        self.critical_damage_multiplier -= amount;
     }
 
     pub fn increase_max_health(&mut self, amount: u32) {
