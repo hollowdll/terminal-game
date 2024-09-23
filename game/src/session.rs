@@ -2,9 +2,11 @@ use std::io;
 
 use crate::{
     character::{
-        get_character_skill, CharacterClass, CharacterSkill, CLASS_ASSASSIN_STARTING_STATS,
-        CLASS_CLERIC_STARTING_STATS, CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS,
-        CLASS_WARRIOR_STARTING_STATS, SKILL_MANA_COST,
+        get_character_skill, CharacterClass, CharacterSkill, ASSASSIN_STATS_INCREASE_LEVEL_UP,
+        CLASS_ASSASSIN_STARTING_STATS, CLASS_CLERIC_STARTING_STATS, CLASS_KNIGHT_STARTING_STATS,
+        CLASS_MAGE_STARTING_STATS, CLASS_WARRIOR_STARTING_STATS, CLERIC_STATS_INCREASE_LEVEL_UP,
+        KNIGHT_STATS_INCREASE_LEVEL_UP, MAGE_STATS_INCREASE_LEVEL_UP, SKILL_MANA_COST,
+        WARRIOR_STATS_INCREASE_LEVEL_UP,
     },
     enemy::Enemy,
     fight::is_critical_hit,
@@ -250,10 +252,29 @@ impl PlayerCharacter {
                 .highest_character_level_achieved = next_level
         }
 
-        // increase max health and damage on level up
-        self.data.stats.combat_stats.max_health += 5;
-        self.data.stats.combat_stats.damage += 2;
-
+        // increase stats based on class
+        match &self.data.metadata.class {
+            CharacterClass::Mage => {
+                self.data.stats.combat_stats.max_health += MAGE_STATS_INCREASE_LEVEL_UP.health;
+                self.data.stats.combat_stats.damage += MAGE_STATS_INCREASE_LEVEL_UP.damage;
+            }
+            CharacterClass::Cleric => {
+                self.data.stats.combat_stats.max_health += CLERIC_STATS_INCREASE_LEVEL_UP.health;
+                self.data.stats.combat_stats.damage += CLERIC_STATS_INCREASE_LEVEL_UP.damage;
+            }
+            CharacterClass::Assassin => {
+                self.data.stats.combat_stats.max_health += ASSASSIN_STATS_INCREASE_LEVEL_UP.health;
+                self.data.stats.combat_stats.damage += ASSASSIN_STATS_INCREASE_LEVEL_UP.damage;
+            }
+            CharacterClass::Warrior => {
+                self.data.stats.combat_stats.max_health += WARRIOR_STATS_INCREASE_LEVEL_UP.health;
+                self.data.stats.combat_stats.damage += WARRIOR_STATS_INCREASE_LEVEL_UP.damage;
+            }
+            CharacterClass::Knight => {
+                self.data.stats.combat_stats.max_health += KNIGHT_STATS_INCREASE_LEVEL_UP.health;
+                self.data.stats.combat_stats.damage += KNIGHT_STATS_INCREASE_LEVEL_UP.damage;
+            }
+        }
         next_level
     }
 

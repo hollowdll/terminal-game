@@ -68,6 +68,41 @@ pub const CLASS_KNIGHT_STARTING_STATS: CombatStats = CombatStats {
     critical_hit_rate: 0.0,
 };
 
+pub const MAGE_STATS_INCREASE_LEVEL_UP: CharacterStatsIncreaseLevelUp =
+    CharacterStatsIncreaseLevelUp {
+        health: 3,
+        damage: 3,
+    };
+
+pub const CLERIC_STATS_INCREASE_LEVEL_UP: CharacterStatsIncreaseLevelUp =
+    CharacterStatsIncreaseLevelUp {
+        health: 5,
+        damage: 2,
+    };
+
+pub const ASSASSIN_STATS_INCREASE_LEVEL_UP: CharacterStatsIncreaseLevelUp =
+    CharacterStatsIncreaseLevelUp {
+        health: 5,
+        damage: 2,
+    };
+
+pub const WARRIOR_STATS_INCREASE_LEVEL_UP: CharacterStatsIncreaseLevelUp =
+    CharacterStatsIncreaseLevelUp {
+        health: 3,
+        damage: 3,
+    };
+
+pub const KNIGHT_STATS_INCREASE_LEVEL_UP: CharacterStatsIncreaseLevelUp =
+    CharacterStatsIncreaseLevelUp {
+        health: 7,
+        damage: 1,
+    };
+
+pub struct CharacterStatsIncreaseLevelUp {
+    pub health: u32,
+    pub damage: u32,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CharacterClass {
     Mage,
