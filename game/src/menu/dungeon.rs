@@ -51,9 +51,10 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
         let character = player.get_character()?;
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!(
-            "Character: {} (Level {}, Dungeon Floor {})",
+            "Character: {} (Level {} {:?}, Dungeon Floor {})",
             character.data.metadata.name,
             character.data.stats.general_stats.character_level,
+            character.data.metadata.class,
             character.data.stats.general_stats.current_dungeon_floor
         );
         execute!(stdout, cursor::MoveTo(0, 1))?;

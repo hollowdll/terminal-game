@@ -76,9 +76,10 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
 
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!(
-            "Player: {} (Level {}, EXP: {}/{})",
+            "Player: {} (Level {} {:?}, EXP: {}/{})",
             character.data.metadata.name,
             character.data.stats.general_stats.character_level,
+            character.data.metadata.class,
             character.data.stats.general_stats.current_exp,
             character.data.stats.general_stats.required_exp
         );

@@ -137,7 +137,7 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
-    let mut start_column: u16 = 1;
+    let start_column: u16 = 2;
     let mut no_characters = false;
 
     if player.data.characters.is_empty() {
@@ -146,20 +146,22 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
 
     for (key, val) in &player.data.characters {
         menu_items.push(format!(
-            "{} (Level {}, Dungeon Floor {})",
+            "{} (Level {} {:?}, Dungeon Floor {})",
             key,
             val.stats.general_stats.character_level,
-            val.stats.general_stats.current_dungeon_floor
+            &val.metadata.class,
+            val.stats.general_stats.current_dungeon_floor,
         ))
     }
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if no_characters {
-            println!("No characters found");
+            println!("Esc = Back");
             execute!(stdout, cursor::MoveTo(0, 1))?;
+            println!("No characters found");
+            execute!(stdout, cursor::MoveTo(0, 2))?;
         } else {
-            start_column = 2;
             println!("Esc = Back, D = Delete character");
             execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("Select a character");
@@ -345,7 +347,7 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
 
     let menu_items = vec!["Yes", "No"];
     let mut selected_index = 0;
-    let start_column: u16 = 2;
+    let start_column: u16 = 4;
     let mut enter_name_column: u16 = 2;
     let mut character_created = false;
     let mut msg = "";
@@ -392,9 +394,9 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Create the following character?");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!("  Name: {}", name);
+        println!("Name: {}", name);
         execute!(stdout, cursor::MoveTo(0, 2))?;
-        println!("  Class: {:?}", selected_class);
+        println!("Class: {:?}", selected_class);
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -457,7 +459,11 @@ pub fn menu_choose_character_class() -> io::Result<CharacterClass> {
                 println!("  {}", item);
             }
         }
-        execute!(stdout, cursor::MoveTo(0, start_column + 6))?;
+        execute!(
+            stdout,
+            cursor::MoveTo(0, start_column + 6),
+            Clear(ClearType::FromCursorDown)
+        )?;
         let selected_class = match menu_items[selected_index] {
             "Mage" => CharacterClass::Mage,
             "Cleric" => CharacterClass::Cleric,

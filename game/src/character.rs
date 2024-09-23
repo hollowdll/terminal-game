@@ -184,8 +184,8 @@ pub fn delete_game_character(name: &str, player: &mut Player) -> bool {
     }
 }
 
-pub fn random_exp_amount(min_exp: u32, max_exp: u32, multiplier: u32, dungeon_floor: u32) -> u32 {
+pub fn random_exp_amount(min_exp: u32, max_exp: u32, multiplier: u32) -> u32 {
     let mut rng = thread_rng();
     let base_exp = rng.gen_range(min_exp..=max_exp);
-    return base_exp * multiplier + (base_exp / 4 * dungeon_floor);
+    return base_exp * multiplier;
 }

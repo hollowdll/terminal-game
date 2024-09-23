@@ -15,26 +15,26 @@ pub const ITEM_RARITY_DROP_RATES: ItemRarityDropRates = ItemRarityDropRates {
 pub const WEAPON_BASE_VALUES: WeaponBaseValues = WeaponBaseValues {
     min_damage: 12,
     max_damage: 15,
-    min_crit_hit_rate: 0.15,
-    max_crit_hit_rate: 0.20,
+    min_crit_hit_rate: 0.12,
+    max_crit_hit_rate: 0.15,
 };
 pub const ARMOR_BASE_VALUES: ArmorBaseValues = ArmorBaseValues {
-    min_health: 20,
-    max_health: 25,
+    min_health: 15,
+    max_health: 20,
     min_defense: 1,
-    max_defense: 3,
+    max_defense: 2,
 };
 pub const RING_BASE_VALUES: RingBaseValues = RingBaseValues {
     min_mana: 20,
     max_mana: 25,
 };
 pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues {
-    min_damage: 5,
-    max_damage: 7,
-    min_crit_hit_rate: 0.08,
-    max_crit_hit_rate: 0.12,
-    min_health: 10,
-    max_health: 15,
+    min_damage: 4,
+    max_damage: 6,
+    min_crit_hit_rate: 0.06,
+    max_crit_hit_rate: 0.10,
+    min_health: 7,
+    max_health: 10,
     min_defense: 1,
     max_defense: 2,
     min_mana: 10,
@@ -500,8 +500,8 @@ pub fn create_starter_weapon(character_class: &CharacterClass) -> WeaponItem {
         1,
         ItemRarity::Common,
         WeaponItemStats {
-            damage: WEAPON_BASE_VALUES.max_damage,
-            crit_hit_rate: WEAPON_BASE_VALUES.max_crit_hit_rate,
+            damage: WEAPON_BASE_VALUES.min_damage,
+            crit_hit_rate: WEAPON_BASE_VALUES.min_crit_hit_rate,
         },
         Vec::new(),
     )
@@ -616,7 +616,7 @@ pub fn random_armor_enchantment(
     match rand_num {
         0 => {
             let health = rng.gen_range(base_values.min_health..=base_values.max_health)
-                + (5 * dungeon_floor);
+                + (4 * dungeon_floor);
             return Enchantment::Health(health);
         }
         1 => {
@@ -646,7 +646,7 @@ pub fn random_ring_enchantment(
         }
         2 => {
             let health = rng.gen_range(base_values.min_health..=base_values.max_health)
-                + (4 * dungeon_floor);
+                + (3 * dungeon_floor);
             return Enchantment::Health(health);
         }
         3 => {

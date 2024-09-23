@@ -38,12 +38,7 @@ pub fn give_normal_enemy_drops(
 ) -> NormalEnemyDrops {
     let gold = random_gold_amount(BASE_GOLD_MIN, BASE_GOLD_MAX, GOLD_MULTIPLIER_NORMAL_ENEMY);
     character.give_gold(gold);
-    let exp = random_exp_amount(
-        BASE_EXP_MIN,
-        BASE_EXP_MAX,
-        EXP_MULTIPLIER_NORMAL_ENEMY,
-        enemy_level,
-    );
+    let exp = random_exp_amount(BASE_EXP_MIN, BASE_EXP_MAX, EXP_MULTIPLIER_NORMAL_ENEMY);
     character.gain_exp(exp);
 
     let equipment_item_category = random_equipment_item();
@@ -81,12 +76,7 @@ pub fn give_normal_enemy_drops(
 pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) -> BossEnemyDrops {
     let gold = random_gold_amount(BASE_GOLD_MIN, BASE_GOLD_MAX, GOLD_MULTIPLIER_BOSS_ENEMY);
     character.give_gold(gold);
-    let exp = random_exp_amount(
-        BASE_EXP_MIN,
-        BASE_EXP_MAX,
-        EXP_MULTIPLIER_BOSS_ENEMY,
-        enemy_level,
-    );
+    let exp = random_exp_amount(BASE_EXP_MIN, BASE_EXP_MAX, EXP_MULTIPLIER_BOSS_ENEMY);
     character.gain_exp(exp);
 
     let mut item_display_names = Vec::new();
