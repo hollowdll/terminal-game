@@ -13,7 +13,7 @@ pub const BASE_EXP_MAX: u32 = 125;
 pub const SKILL_MANA_COST: u32 = 60;
 pub const SKILL_DESCRIPTION_MAGIC_PROJECTILE: &str =
     "Deals 20% of the enemy's maximum health as damage.";
-pub const SKILL_DESCRIPTION_RECOVER: &str = "Restores 35% of the player's maximum health points.";
+pub const SKILL_DESCRIPTION_RECOVER: &str = "Restores 45% of the player's maximum health points.";
 pub const SKILL_DESCRIPTION_STEALTH: &str =
     "Increases the player's critical damage multiplier by 0.4 for the rest of the fight.";
 pub const SKILL_DESCRIPTION_BATTLE_CRY: &str =
@@ -91,6 +91,26 @@ pub enum CharacterSkill {
 
 pub fn max_game_characters_reached(player: &Player, cfg: &GameConfig) -> bool {
     return player.data.characters.len() >= cfg.max_game_characters;
+}
+
+pub fn get_character_skill(class: &CharacterClass) -> CharacterSkill {
+    match class {
+        CharacterClass::Mage => CharacterSkill::MagicProjectile,
+        CharacterClass::Cleric => CharacterSkill::Recover,
+        CharacterClass::Assassin => CharacterSkill::Stealth,
+        CharacterClass::Warrior => CharacterSkill::BattleCry,
+        CharacterClass::Knight => CharacterSkill::ArmorUp,
+    }
+}
+
+pub fn get_character_skill_description(skill: &CharacterSkill) -> &str {
+    match skill {
+        CharacterSkill::MagicProjectile => SKILL_DESCRIPTION_MAGIC_PROJECTILE,
+        CharacterSkill::Recover => SKILL_DESCRIPTION_RECOVER,
+        CharacterSkill::Stealth => SKILL_DESCRIPTION_STEALTH,
+        CharacterSkill::BattleCry => SKILL_DESCRIPTION_BATTLE_CRY,
+        CharacterSkill::ArmorUp => SKILL_DESCRIPTION_ARMOR_UP,
+    }
 }
 
 pub fn create_new_game_character(
