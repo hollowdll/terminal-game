@@ -10,9 +10,7 @@ use crate::{
     character::{
         create_new_game_character, delete_game_character, get_character_skill,
         get_character_skill_description, get_class_starting_stats, load_game_character,
-        max_game_characters_reached, CharacterClass, CLASS_ASSASSIN_STARTING_STATS,
-        CLASS_CLERIC_STARTING_STATS, CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS,
-        CLASS_WARRIOR_STARTING_STATS,
+        max_game_characters_reached, CharacterClass,
     },
     config::GameConfig,
     game::save_game,

@@ -1,4 +1,5 @@
 use crate::{
+    character::CharacterClass,
     enemy::{generate_random_boss_enemy, generate_random_normal_enemy, Enemy},
     shop::{generate_shop_items, ShopItems},
 };
@@ -20,12 +21,12 @@ pub struct DungeonFloor {
 }
 
 impl DungeonFloor {
-    pub fn new(floor: u32, rooms: HashMap<RoomCoordinates, Room>) -> Self {
+    pub fn new(floor: u32, rooms: HashMap<RoomCoordinates, Room>, class: &CharacterClass) -> Self {
         Self {
             floor,
             rooms,
             boss: Some(generate_random_boss_enemy(floor)),
-            shop_items: generate_shop_items(floor),
+            shop_items: generate_shop_items(floor, class),
         }
     }
 
@@ -118,14 +119,14 @@ pub enum Direction {
     Unknown,
 }
 
-pub fn generate_random_dungeon_floor(floor: u32) -> DungeonFloor {
+pub fn generate_random_dungeon_floor(floor: u32, class: &CharacterClass) -> DungeonFloor {
     let mut rooms = HashMap::new();
     let start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0), 1);
     rooms.insert(start_room.coords.clone(), start_room.clone());
     generate_random_rooms(start_room, &mut rooms, FLOOR_LENGTH_SCALE);
     randomize_treasure_room(&mut rooms);
     randomize_enemy_rooms(&mut rooms, NORMAL_ENEMIES_PER_FLOOR, floor);
-    return DungeonFloor::new(floor, rooms);
+    return DungeonFloor::new(floor, rooms, class);
 }
 
 fn connect_rooms(

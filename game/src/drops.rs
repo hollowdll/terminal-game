@@ -50,7 +50,11 @@ pub fn give_normal_enemy_drops(
     let mut item_display_name = "?Unknown?".to_string();
     match equipment_item_category {
         ItemCategory::Weapon => {
-            let weapon = generate_random_weapon(WEAPON_BASE_VALUES, enemy_level);
+            let weapon = generate_random_weapon(
+                WEAPON_BASE_VALUES,
+                enemy_level,
+                &character.data.metadata.class,
+            );
             character.give_weapon(&weapon);
             item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
         }
@@ -90,7 +94,11 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
         let equipment_item_category = random_equipment_item();
         match equipment_item_category {
             ItemCategory::Weapon => {
-                let weapon = generate_random_weapon(WEAPON_BASE_VALUES, enemy_level);
+                let weapon = generate_random_weapon(
+                    WEAPON_BASE_VALUES,
+                    enemy_level,
+                    &character.data.metadata.class,
+                );
                 character.give_weapon(&weapon);
                 item_display_names.push(get_item_display_name(CharacterItem::Weapon(&weapon)));
             }
@@ -132,7 +140,11 @@ pub fn give_treasure_chest_drops(
     let mut item_display_name = "?Unknown?".to_string();
     match equipment_item_category {
         ItemCategory::Weapon => {
-            let weapon = generate_random_weapon(WEAPON_BASE_VALUES, dungeon_floor);
+            let weapon = generate_random_weapon(
+                WEAPON_BASE_VALUES,
+                dungeon_floor,
+                &character.data.metadata.class,
+            );
             character.give_weapon(&weapon);
             item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
         }

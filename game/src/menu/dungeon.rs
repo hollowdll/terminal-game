@@ -83,6 +83,7 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                     "Start Dungeon Floor" => {
                         let mut dungeon_floor = generate_random_dungeon_floor(
                             character.data.stats.general_stats.current_dungeon_floor,
+                            &character.data.metadata.class,
                         );
                         let mut next_room_coords = RoomCoordinates::new(0, 0);
                         loop {

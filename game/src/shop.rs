@@ -1,4 +1,5 @@
 use crate::{
+    character::CharacterClass,
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
         get_item_purchase_value, get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem,
@@ -58,7 +59,7 @@ impl ShopItems {
     }
 }
 
-pub fn generate_shop_items(floor: u32) -> ShopItems {
+pub fn generate_shop_items(floor: u32, class: &CharacterClass) -> ShopItems {
     ShopItems {
         consumables: vec![
             ConsumableItem::new_health_potion(ItemRarity::Common),
@@ -72,7 +73,7 @@ pub fn generate_shop_items(floor: u32) -> ShopItems {
             ConsumableItem::new_mana_potion(ItemRarity::Epic),
             ConsumableItem::new_mana_potion(ItemRarity::Legendary),
         ],
-        weapon: Some(generate_random_weapon(WEAPON_BASE_VALUES, floor)),
+        weapon: Some(generate_random_weapon(WEAPON_BASE_VALUES, floor, class)),
         armor: Some(generate_random_armor(ARMOR_BASE_VALUES, floor)),
         ring: Some(generate_random_ring(RING_BASE_VALUES, floor)),
     }
