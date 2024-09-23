@@ -5,7 +5,13 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::items::{ArmorItem, ConsumableItem, RingItem, WeaponItem};
+use crate::{
+    character::{
+        CharacterClass, CLASS_ASSASSIN_STARTING_STATS, CLASS_CLERIC_STARTING_STATS,
+        CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS, CLASS_WARRIOR_STARTING_STATS,
+    },
+    items::{ArmorItem, ConsumableItem, RingItem, WeaponItem},
+};
 use std::{collections::HashMap, io};
 
 const SAVEFILE_NAME: &str = "terminal_rpg_game_data";
@@ -57,11 +63,20 @@ pub struct CharacterData {
 }
 
 impl CharacterData {
-    pub fn new(character_name: &str) -> Self {
+    pub fn new(character_name: &str, class: CharacterClass) -> Self {
+        let starting_stats = match class {
+            CharacterClass::Mage => CLASS_MAGE_STARTING_STATS,
+            CharacterClass::Cleric => CLASS_CLERIC_STARTING_STATS,
+            CharacterClass::Assassin => CLASS_ASSASSIN_STARTING_STATS,
+            CharacterClass::Warrior => CLASS_WARRIOR_STARTING_STATS,
+            CharacterClass::Knight => CLASS_KNIGHT_STARTING_STATS,
+        };
+
         Self {
             metadata: CharacterMetadata {
                 name: character_name.to_owned(),
                 created_at: Utc::now().timestamp(),
+                class,
             },
             stats: CharacterStats {
                 general_stats: GeneralStats {
@@ -74,14 +89,7 @@ impl CharacterData {
                     highest_character_level_achieved: 1,
                     deaths: 0,
                 },
-                combat_stats: CombatStats {
-                    max_health: STARTING_HEALTH,
-                    max_mana: STARTING_MANA,
-                    defense: STARTING_DEFENSE,
-                    damage: STARTING_DAMAGE,
-                    critical_damage_multiplier: STARTING_CRITICAL_DAMAGE_MULTIPLIER,
-                    critical_hit_rate: STARTING_CRITICAL_HIT_RATE,
-                },
+                combat_stats: starting_stats,
             },
             currency: CharacterCurrency { gold: 0 },
             inventory: CharacterInventory {
@@ -105,6 +113,7 @@ pub struct CharacterMetadata {
     pub name: String,
     /// Unix timestamp when the character was created in seconds.
     pub created_at: i64,
+    pub class: CharacterClass,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

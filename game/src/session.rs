@@ -1,6 +1,10 @@
 use std::io;
 
 use crate::{
+    character::{
+        CharacterClass, CLASS_ASSASSIN_STARTING_STATS, CLASS_CLERIC_STARTING_STATS,
+        CLASS_KNIGHT_STARTING_STATS, CLASS_MAGE_STARTING_STATS, CLASS_WARRIOR_STARTING_STATS,
+    },
     enemy::Enemy,
     fight::is_critical_hit,
     game_data::{
@@ -462,18 +466,20 @@ impl PlayerCharacter {
         self.data.stats.general_stats.current_exp = 0;
         self.data.stats.general_stats.required_exp = STARTING_REQUIRED_EXP;
         self.data.stats.general_stats.total_exp = 0;
-        self.data.stats.combat_stats.max_health = STARTING_HEALTH;
-        self.data.stats.combat_stats.max_mana = STARTING_MANA;
-        self.data.stats.combat_stats.defense = STARTING_DEFENSE;
-        self.data.stats.combat_stats.damage = STARTING_DAMAGE;
-        self.data.stats.combat_stats.critical_damage_multiplier =
-            STARTING_CRITICAL_DAMAGE_MULTIPLIER;
-        self.data.stats.combat_stats.critical_hit_rate = STARTING_CRITICAL_HIT_RATE;
-        self.temp_stats.current_health = STARTING_HEALTH;
-        self.temp_stats.current_mana = STARTING_MANA;
+        match self.data.metadata.class {
+            CharacterClass::Mage => self.data.stats.combat_stats = CLASS_MAGE_STARTING_STATS,
+            CharacterClass::Cleric => self.data.stats.combat_stats = CLASS_CLERIC_STARTING_STATS,
+            CharacterClass::Assassin => {
+                self.data.stats.combat_stats = CLASS_ASSASSIN_STARTING_STATS
+            }
+            CharacterClass::Warrior => self.data.stats.combat_stats = CLASS_WARRIOR_STARTING_STATS,
+            CharacterClass::Knight => self.data.stats.combat_stats = CLASS_KNIGHT_STARTING_STATS,
+        }
+        self.temp_stats.current_health = self.data.stats.combat_stats.max_health;
+        self.temp_stats.current_mana = self.data.stats.combat_stats.max_mana;
         self.temp_stat_boosts.reset();
 
-        let weapon = create_starter_weapon();
+        let weapon = create_starter_weapon(&self.data.metadata.class);
         self.give_weapon(&weapon);
         self.equip_weapon(&weapon.id);
     }
