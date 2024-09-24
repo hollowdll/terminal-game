@@ -1,6 +1,9 @@
 use crate::{
     character::CharacterClass,
-    enemy::{generate_random_boss_enemy, generate_random_normal_enemy, Enemy},
+    enemy::{
+        generate_random_ancient_enemy, generate_random_boss_enemy, generate_random_normal_enemy,
+        Enemy,
+    },
     shop::{generate_shop_items, ShopItems},
 };
 use rand::{thread_rng, Rng};
@@ -18,15 +21,23 @@ pub struct DungeonFloor {
     pub rooms: HashMap<RoomCoordinates, Room>,
     pub boss: Option<Enemy>,
     pub shop_items: ShopItems,
+    pub ancient_ruins: bool,
 }
 
 impl DungeonFloor {
-    pub fn new(floor: u32, rooms: HashMap<RoomCoordinates, Room>, class: &CharacterClass) -> Self {
+    pub fn new(
+        floor: u32,
+        rooms: HashMap<RoomCoordinates, Room>,
+        boss: Enemy,
+        shop_items: ShopItems,
+        ancient_ruins: bool,
+    ) -> Self {
         Self {
             floor,
             rooms,
-            boss: Some(generate_random_boss_enemy(floor)),
-            shop_items: generate_shop_items(floor, class),
+            boss: Some(boss),
+            shop_items,
+            ancient_ruins,
         }
     }
 
@@ -126,7 +137,48 @@ pub fn generate_random_dungeon_floor(floor: u32, class: &CharacterClass) -> Dung
     generate_random_rooms(start_room, &mut rooms, FLOOR_LENGTH_SCALE);
     randomize_treasure_room(&mut rooms);
     randomize_enemy_rooms(&mut rooms, NORMAL_ENEMIES_PER_FLOOR, floor);
-    return DungeonFloor::new(floor, rooms, class);
+    let boss = generate_random_boss_enemy(floor);
+    let shop_items = generate_shop_items(floor, class);
+    return DungeonFloor::new(floor, rooms, boss, shop_items, false);
+}
+
+pub fn generate_ancient_ruins(level: u32, class: &CharacterClass) -> DungeonFloor {
+    let mut rooms = HashMap::new();
+    let mut start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0), 1);
+    let mut treasure_room = Room::new(RoomKind::TwoWayUpDown, RoomCoordinates::new(0, 1), 2);
+    treasure_room.treasure = true;
+    let mut boss_entrance_room = Room::new(RoomKind::BossEntrance, RoomCoordinates::new(0, 2), 3);
+    let mut boss_room = Room::new(RoomKind::Boss, RoomCoordinates::new(0, 3), 4);
+
+    connect_rooms(
+        &mut start_room,
+        &mut treasure_room,
+        &Direction::Up,
+        &Direction::Down,
+    );
+    rooms.insert(start_room.coords.clone(), start_room.clone());
+    connect_rooms(
+        &mut treasure_room,
+        &mut boss_entrance_room,
+        &Direction::Up,
+        &Direction::Down,
+    );
+    rooms.insert(treasure_room.coords.clone(), treasure_room.clone());
+    connect_rooms(
+        &mut boss_entrance_room,
+        &mut boss_room,
+        &Direction::Up,
+        &Direction::Down,
+    );
+    rooms.insert(
+        boss_entrance_room.coords.clone(),
+        boss_entrance_room.clone(),
+    );
+    rooms.insert(boss_room.coords.clone(), boss_room.clone());
+
+    let boss = generate_random_ancient_enemy(level);
+    let shop_items = generate_shop_items(level, class);
+    return DungeonFloor::new(level, rooms, boss, shop_items, true);
 }
 
 fn connect_rooms(

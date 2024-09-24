@@ -33,6 +33,7 @@ pub const BOSS_ENEMY_NAMES: [&str; 3] = [
 ];
 
 pub const ANCIENT_ENEMY_NAME_KNIGHT: &str = "Ancient Knight";
+pub const ANCIENT_ENEMY_NAMES: [&str; 1] = [ANCIENT_ENEMY_NAME_KNIGHT];
 
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     health: 40,
@@ -350,4 +351,11 @@ pub fn generate_random_boss_enemy(dungeon_floor: u32) -> Enemy {
     let index = rng.gen_range(0..BOSS_ENEMY_NAMES.len());
     let name = BOSS_ENEMY_NAMES[index];
     Enemy::new_boss(dungeon_floor, name, &BOSS_ENEMY_BASE_STATS)
+}
+
+pub fn generate_random_ancient_enemy(level: u32) -> Enemy {
+    let mut rng = thread_rng();
+    let index = rng.gen_range(0..ANCIENT_ENEMY_NAMES.len());
+    let name = ANCIENT_ENEMY_NAMES[index];
+    Enemy::new_ancient(level, name, &ANCIENT_ENEMY_BASE_STATS)
 }
