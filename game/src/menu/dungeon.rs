@@ -120,7 +120,7 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             let character = player.get_character_mut()?;
                             character.consume_ancient_ruins_key();
                             let mut dungeon_floor = generate_ancient_ruins(
-                                character.data.stats.general_stats.character_level,
+                                character.data.stats.general_stats.current_dungeon_floor,
                                 &character.data.metadata.class,
                             );
                             let mut next_room_coords = RoomCoordinates::new(0, 0);
@@ -266,7 +266,7 @@ pub fn menu_dungeon_floor(
 
         start_column = match current_room.kind {
             RoomKind::Start => display_start_room(start_column)?,
-            RoomKind::Boss => display_boss_room(start_column, dungeon_floor.floor + 1)?,
+            RoomKind::Boss => display_boss_room(start_column)?,
             RoomKind::BossEntrance => display_boss_entrance_room(start_column)?,
             RoomKind::TwoWayUpDown => display_two_way_up_down_room(start_column)?,
             RoomKind::TwoWayLeftRight => display_two_way_left_right_room(start_column)?,
@@ -356,24 +356,11 @@ pub fn menu_dungeon_floor(
                         })
                     }
                     "Open Treasure Chest" => {
-                        if dungeon_floor.ancient_ruins {
-                            menu_open_treasure_chest(
-                                player
-                                    .get_character()?
-                                    .data
-                                    .stats
-                                    .general_stats
-                                    .character_level,
-                                player.get_character_mut()?,
-                                current_room,
-                            )?;
-                        } else {
-                            menu_open_treasure_chest(
-                                dungeon_floor.floor,
-                                player.get_character_mut()?,
-                                current_room,
-                            )?;
-                        }
+                        menu_open_treasure_chest(
+                            dungeon_floor.floor,
+                            player.get_character_mut()?,
+                            current_room,
+                        )?;
                         menu_items.remove(selected_index);
                         selected_index = 0;
                     }

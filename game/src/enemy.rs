@@ -8,7 +8,7 @@ pub const EXP_MULTIPLIER_ANCIENT_ENEMY: u32 = 4;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
 pub const GOLD_MULTIPLIER_ANCIENT_ENEMY: u32 = 4;
-pub const ENEMY_SKILL_CHANCE: f64 = 0.30;
+pub const ENEMY_SKILL_CHANCE: f64 = 0.35;
 pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
 pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;
 
@@ -32,7 +32,7 @@ pub const BOSS_ENEMY_NAMES: [&str; 3] = [
     BOSS_ENEMY_NAME_UNDEAD_SORCERER,
 ];
 
-pub const ANCIENT_ENEMY_NAME_KNIGHT: &str = "Ancient Knight";
+pub const ANCIENT_ENEMY_NAME_KNIGHT: &str = "Lancelot, the Divine Knight";
 pub const ANCIENT_ENEMY_NAMES: [&str; 1] = [ANCIENT_ENEMY_NAME_KNIGHT];
 
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
@@ -53,7 +53,7 @@ pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
 pub const ANCIENT_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     health: 200,
     defense: 3,
-    damage: 18,
+    damage: 16,
 };
 
 #[derive(Debug, Clone)]
@@ -91,7 +91,7 @@ impl Enemy {
                 max_health: base_stats.health + (35 * dungeon_floor),
                 current_health: base_stats.health + (35 * dungeon_floor),
                 defense: base_stats.defense + (1 * dungeon_floor),
-                damage: base_stats.damage + (5 * dungeon_floor),
+                damage: base_stats.damage + (4 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -115,10 +115,10 @@ impl Enemy {
             kind: EnemyKind::Boss,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (75 * dungeon_floor),
-                current_health: base_stats.health + (75 * dungeon_floor),
+                max_health: base_stats.health + (55 * dungeon_floor),
+                current_health: base_stats.health + (55 * dungeon_floor),
                 defense: base_stats.defense + (2 * dungeon_floor),
-                damage: base_stats.damage + (6 * dungeon_floor),
+                damage: base_stats.damage + (5 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -140,9 +140,9 @@ impl Enemy {
             kind: EnemyKind::Ancient,
             level,
             stats: EnemyStats {
-                max_health: base_stats.health + (85 * level),
-                current_health: base_stats.health + (85 * level),
-                defense: base_stats.defense + (2 * level),
+                max_health: base_stats.health + (75 * level),
+                current_health: base_stats.health + (75 * level),
+                defense: base_stats.defense + (3 * level),
                 damage: base_stats.damage + (7 * level),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
@@ -293,7 +293,7 @@ impl Enemy {
                 }
                 EnemySkill::DivineBlessing => {
                     let restored_health =
-                        self.restore_health((0.1 * self.stats.max_health as f64) as u32);
+                        self.restore_health((0.05 * self.stats.max_health as f64) as u32);
                     let increased_damage = self.level / 2;
                     self.increase_damage(increased_damage);
                     return format!(

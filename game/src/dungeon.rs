@@ -142,7 +142,7 @@ pub fn generate_random_dungeon_floor(floor: u32, class: &CharacterClass) -> Dung
     return DungeonFloor::new(floor, rooms, boss, shop_items, false);
 }
 
-pub fn generate_ancient_ruins(level: u32, class: &CharacterClass) -> DungeonFloor {
+pub fn generate_ancient_ruins(floor: u32, class: &CharacterClass) -> DungeonFloor {
     let mut rooms = HashMap::new();
     let mut start_room = Room::new(RoomKind::Start, RoomCoordinates::new(0, 0), 1);
     let mut treasure_room = Room::new(RoomKind::TwoWayUpDown, RoomCoordinates::new(0, 1), 2);
@@ -176,9 +176,9 @@ pub fn generate_ancient_ruins(level: u32, class: &CharacterClass) -> DungeonFloo
     );
     rooms.insert(boss_room.coords.clone(), boss_room.clone());
 
-    let boss = generate_random_ancient_enemy(level);
-    let shop_items = generate_shop_items(level, class);
-    return DungeonFloor::new(level, rooms, boss, shop_items, true);
+    let boss = generate_random_ancient_enemy(floor);
+    let shop_items = generate_shop_items(floor, class);
+    return DungeonFloor::new(floor, rooms, boss, shop_items, true);
 }
 
 fn connect_rooms(

@@ -14,7 +14,7 @@ pub const BASE_EXP_MAX: u32 = 125;
 
 pub const SKILL_MANA_COST: u32 = 60;
 pub const SKILL_DESCRIPTION_MAGIC_PROJECTILE: &str =
-    "Deals 30% of the enemy's maximum health as pure damage.";
+    "Deals 24% of the enemy's maximum health as pure damage.";
 pub const SKILL_DESCRIPTION_RECOVER: &str = "Restores 45% of the player's maximum health points.";
 pub const SKILL_DESCRIPTION_STEALTH: &str =
     "Increases the player's critical damage multiplier by 0.4 for the rest of the fight.";

@@ -172,11 +172,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                                     menu_boss_enemy_fight_victory(enemy.level, character)?;
                                 }
                                 EnemyKind::Ancient => {
-                                    menu_ancient_enemy_fight_victory(
-                                        enemy.level,
-                                        enemy.name,
-                                        character,
-                                    )?;
+                                    menu_ancient_enemy_fight_victory(enemy.level, character)?;
                                 }
                             }
                             if character.data.stats.general_stats.character_level > character_level
@@ -315,12 +311,11 @@ fn menu_boss_enemy_fight_victory(
 
 fn menu_ancient_enemy_fight_victory(
     enemy_level: u32,
-    enemy_name: &str,
     character: &mut PlayerCharacter,
 ) -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
-    let drops = give_ancient_enemy_drops(character, enemy_level, enemy_name);
+    let drops = give_ancient_enemy_drops(character, enemy_level);
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;

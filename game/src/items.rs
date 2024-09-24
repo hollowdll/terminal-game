@@ -63,8 +63,6 @@ pub const ITEM_MANA_POTION: ItemInfo = ItemInfo {
 // Weapon items //
 //-------------//
 
-pub const WEAPON_NAME_ANCIENT_KNIGHT: &str = "Greatsword";
-
 pub const ITEM_SWORD: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Sword"),
     description: Cow::Borrowed("A sword that increases offensive stats."),
@@ -92,12 +90,6 @@ pub const ITEM_DAGGER: ItemInfo = ItemInfo {
 pub const ITEM_HALBERD: ItemInfo = ItemInfo {
     name: Cow::Borrowed("Halberd"),
     description: Cow::Borrowed("A halberd that increases offensive stats."),
-    category: ItemCategory::Weapon,
-};
-
-pub const ITEM_DIVINE_GREATSWORD: ItemInfo = ItemInfo {
-    name: Cow::Borrowed(WEAPON_NAME_ANCIENT_KNIGHT),
-    description: Cow::Borrowed("A mythical greatsword that increases offensive stats."),
     category: ItemCategory::Weapon,
 };
 
@@ -759,21 +751,49 @@ pub fn generate_random_consumable() -> ConsumableItem {
     }
 }
 
-pub fn create_mythical_weapon(level: u32, item_info: ItemInfo) -> WeaponItem {
+pub fn create_mythical_weapon(level: u32, class: &CharacterClass) -> WeaponItem {
     let damage = 20 + (3 * level);
     let crit_hit_rate = 0.20;
     let mut enchantments: Vec<Enchantment> = Vec::new();
 
-    match item_info.name.as_ref() {
-        WEAPON_NAME_ANCIENT_KNIGHT => {
+    let item_info = match class {
+        CharacterClass::Mage => {
             enchantments.push(Enchantment::Damage(2 * level));
             enchantments.push(Enchantment::Damage(2 * level));
             enchantments.push(Enchantment::Damage(2 * level));
             enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
+            ITEM_STAFF
         }
-        _ => {}
-    }
+        CharacterClass::Cleric => {
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::CritHitRate(0.05));
+            ITEM_HALBERD
+        }
+        CharacterClass::Assassin => {
+            enchantments.push(Enchantment::CritHitRate(0.05));
+            enchantments.push(Enchantment::CritHitRate(0.05));
+            enchantments.push(Enchantment::CritHitRate(0.05));
+            enchantments.push(Enchantment::CritHitRate(0.05));
+
+            ITEM_DAGGER
+        }
+        CharacterClass::Warrior => {
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            ITEM_AXE
+        }
+        CharacterClass::Knight => {
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::Damage(2 * level));
+            enchantments.push(Enchantment::CritHitRate(0.05));
+            ITEM_SWORD
+        }
+    };
 
     WeaponItem::new(
         item_info,

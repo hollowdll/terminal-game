@@ -558,7 +558,7 @@ impl PlayerCharacter {
         let skill = get_character_skill(&self.data.metadata.class);
         match skill {
             CharacterSkill::MagicProjectile => {
-                let damage = (enemy.stats.max_health as f64 * 0.30) as u32;
+                let damage = (enemy.stats.max_health as f64 * 0.24) as u32;
                 let damage_taken = enemy.take_pure_damage(damage);
                 return format!(
                     "Player used skill {}! Enemy took {} damage",
@@ -566,9 +566,8 @@ impl PlayerCharacter {
                 );
             }
             CharacterSkill::Recover => {
-                let heal_percentage = 0.45;
                 let restored_health =
-                    self.restore_health((heal_percentage * self.get_total_health() as f64) as u32);
+                    self.restore_health((0.45 * self.get_total_health() as f64) as u32);
                 return format!(
                     "Player used skill {}! Player restored {} health points",
                     &skill, restored_health
