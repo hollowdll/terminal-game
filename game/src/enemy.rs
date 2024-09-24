@@ -30,6 +30,8 @@ pub const BOSS_ENEMY_NAMES: [&str; 3] = [
     BOSS_ENEMY_NAME_UNDEAD_SORCERER,
 ];
 
+pub const ANCIENT_ENEMY_NAME_KNIGHT: &str = "Ancient Knight";
+
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     health: 40,
     defense: 0,
@@ -45,12 +47,18 @@ pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     defense: 2,
     damage: 14,
 };
+pub const ANCIENT_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
+    health: 200,
+    defense: 3,
+    damage: 18,
+};
 
 #[derive(Debug, Clone)]
 pub enum EnemySkill {
     Smash,
     FireBreath,
     StatusAilment,
+    DivineBlessing,
     Unknown,
 }
 
@@ -119,8 +127,34 @@ impl Enemy {
         }
     }
 
+    pub fn new_ancient(level: u32, name: &'static str, base_stats: &EnemyBaseStats) -> Self {
+        let skill = match name {
+            ANCIENT_ENEMY_NAME_KNIGHT => EnemySkill::DivineBlessing,
+            _ => EnemySkill::Unknown,
+        };
+        Self {
+            name,
+            kind: EnemyKind::Ancient,
+            level,
+            stats: EnemyStats {
+                max_health: base_stats.health + (85 * level),
+                current_health: base_stats.health + (85 * level),
+                defense: base_stats.defense + (2 * level),
+                damage: base_stats.damage + (8 * level),
+                crit_hit_rate: ENEMY_CRIT_HIT_RATE,
+                crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
+            },
+            stat_boosts: EnemyStatBoosts {
+                defense: 0,
+                damage: 0,
+            },
+            skill: Some(skill),
+        }
+    }
+
     pub fn get_display_name(&self) -> String {
         match self.kind {
+            EnemyKind::Ancient => format!("{} [Ancient] (Level {})", self.name, self.level),
             EnemyKind::Normal => format!("{} (Level {})", self.name, self.level),
             EnemyKind::Boss => format!("{} [Boss] (Level {})", self.name, self.level),
         }
@@ -221,7 +255,7 @@ impl Enemy {
         format!("Enemy attacked! Player took {} damage", damage_taken)
     }
 
-    pub fn use_skill(&self, character: &mut PlayerCharacter) -> String {
+    pub fn use_skill(&mut self, character: &mut PlayerCharacter) -> String {
         if let Some(skill) = &self.skill {
             match skill {
                 EnemySkill::Smash => {
@@ -254,6 +288,17 @@ impl Enemy {
                         reduced_mana,
                     );
                 }
+                EnemySkill::DivineBlessing => {
+                    let restored_health =
+                        self.restore_health((0.1 * self.stats.max_health as f64) as u32);
+                    let increased_damage = self.level / 2;
+                    self.increase_damage(increased_damage);
+                    return format!(
+                        "Enemy used skill Divine Blessing! Enemy restored {} health points. Enemy's damage was increased by {}",
+                        restored_health,
+                        increased_damage,
+                    );
+                }
                 _ => return "Enemy tried to use an unknown skill".to_string(),
             }
         }
@@ -279,6 +324,7 @@ pub struct EnemyStatBoosts {
 
 #[derive(Debug, Clone)]
 pub enum EnemyKind {
+    Ancient,
     Boss,
     Normal,
 }

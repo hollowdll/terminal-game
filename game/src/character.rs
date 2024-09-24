@@ -191,6 +191,7 @@ pub fn create_new_game_character(
     if cfg.dev_mode {
         player_character.give_test_items();
         player_character.give_gold(1500);
+        player_character.give_ancient_ruins_key(1);
     }
 
     player.character = Some(player_character);

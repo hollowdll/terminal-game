@@ -90,6 +90,10 @@ impl PlayerCharacter {
         self.data.currency.gold += amount;
     }
 
+    pub fn give_ancient_ruins_key(&mut self, amount: u32) {
+        self.data.inventory.ancient_ruins_keys += amount;
+    }
+
     pub fn give_consumable(&mut self, item: &ConsumableItem, amount: u32) {
         if let Some(item) = self
             .data

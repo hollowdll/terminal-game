@@ -112,6 +112,9 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
     let consumable = generate_random_consumable();
     character.give_consumable(&consumable, 1);
     let ancient_ruins_key = is_chance_success(ANCIENT_RUINS_KEY_DROP_RATE);
+    if ancient_ruins_key {
+        character.give_ancient_ruins_key(1);
+    }
 
     BossEnemyDrops {
         gold,

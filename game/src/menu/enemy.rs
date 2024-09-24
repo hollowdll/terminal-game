@@ -171,6 +171,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                                 EnemyKind::Boss => {
                                     menu_boss_enemy_fight_victory(enemy.level, character)?;
                                 }
+                                _ => {}
                             }
                             if character.data.stats.general_stats.character_level > character_level
                             {
