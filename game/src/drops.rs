@@ -16,7 +16,7 @@ use crate::{
     util::is_chance_success,
 };
 
-pub const ANCIENT_RUINS_KEY_DROP_RATE: f64 = 0.35;
+pub const ANCIENT_RUINS_KEY_DROP_RATE: f64 = 0.45;
 
 pub struct NormalEnemyDrops {
     pub gold: u32,

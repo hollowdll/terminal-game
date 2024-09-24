@@ -222,8 +222,9 @@ pub fn menu_dungeon_floor(
                 if victory {
                     dungeon_floor.boss = None;
                     if !dungeon_floor.ancient_ruins {
-                        let character = player.get_character_mut()?;
-                        character.dungeon_floor_completed(dungeon_floor.floor + 1);
+                        player
+                            .get_character_mut()?
+                            .dungeon_floor_completed(dungeon_floor.floor + 1);
                     }
                     save_game(player)?;
                 } else {
