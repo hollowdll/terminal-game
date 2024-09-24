@@ -4,8 +4,10 @@ use crate::{fight::is_critical_hit, session::PlayerCharacter};
 
 pub const EXP_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const EXP_MULTIPLIER_BOSS_ENEMY: u32 = 3;
+pub const EXP_MULTIPLIER_ANCIENT_ENEMY: u32 = 4;
 pub const GOLD_MULTIPLIER_NORMAL_ENEMY: u32 = 1;
 pub const GOLD_MULTIPLIER_BOSS_ENEMY: u32 = 3;
+pub const GOLD_MULTIPLIER_ANCIENT_ENEMY: u32 = 4;
 pub const ENEMY_SKILL_CHANCE: f64 = 0.30;
 pub const ENEMY_CRIT_HIT_RATE: f64 = 0.20;
 pub const ENEMY_CRIT_DAMAGE_MULTIPLIER: f64 = 2.0;

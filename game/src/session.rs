@@ -512,6 +512,7 @@ impl PlayerCharacter {
         self.data.inventory.clear_weapons();
         self.data.inventory.clear_armors();
         self.data.inventory.clear_rings();
+        self.data.inventory.ancient_ruins_keys = 0;
         self.data.currency.gold = 0;
         self.data.stats.general_stats.character_level = 1;
         self.data.stats.general_stats.current_dungeon_floor = 1;
