@@ -157,7 +157,7 @@ impl Enemy {
 
     pub fn get_display_name(&self) -> String {
         match self.kind {
-            EnemyKind::Ancient => format!("{} [Ancient] (Level {})", self.name, self.level),
+            EnemyKind::Ancient => format!("{} [Ancient Boss] (Level {})", self.name, self.level),
             EnemyKind::Normal => format!("{} (Level {})", self.name, self.level),
             EnemyKind::Boss => format!("{} [Boss] (Level {})", self.name, self.level),
         }

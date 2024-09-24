@@ -154,6 +154,7 @@ pub fn menu_shop_buy_items(
                         match &menu_items[selected_index] {
                             CharacterItemOwned::Consumable(item) => {
                                 buy_consumable(item, character);
+                                execute!(stdout, Clear(ClearType::All))?;
                             }
                             CharacterItemOwned::Weapon(_) => {
                                 if shop_items.buy_weapon(character) {

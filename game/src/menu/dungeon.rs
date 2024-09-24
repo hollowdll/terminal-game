@@ -1,7 +1,7 @@
 use crate::{
     drops::give_treasure_chest_drops,
     dungeon::{
-        generate_random_dungeon_floor,
+        generate_ancient_ruins, generate_random_dungeon_floor,
         room::{
             display_boss_entrance_room, display_boss_room, display_start_room,
             display_two_way_down_left_room, display_two_way_down_right_room,
@@ -92,6 +92,7 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             &character.data.metadata.class,
                         );
                         let mut next_room_coords = RoomCoordinates::new(0, 0);
+
                         loop {
                             let opts =
                                 menu_dungeon_floor(&mut dungeon_floor, player, &next_room_coords)?;
@@ -114,7 +115,42 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             }
                         }
                     }
-                    "Enter Ancient Ruins (Ancient Ruins Key required)" => {}
+                    "Enter Ancient Ruins (Ancient Ruins Key required)" => {
+                        if player.get_character()?.can_enter_ancient_ruins() {
+                            let character = player.get_character_mut()?;
+                            character.consume_ancient_ruins_key();
+                            let mut dungeon_floor = generate_ancient_ruins(
+                                character.data.stats.general_stats.character_level,
+                                &character.data.metadata.class,
+                            );
+                            let mut next_room_coords = RoomCoordinates::new(0, 0);
+
+                            loop {
+                                let opts = menu_dungeon_floor(
+                                    &mut dungeon_floor,
+                                    player,
+                                    &next_room_coords,
+                                )?;
+                                if opts.return_to_main_menu {
+                                    return Ok(true);
+                                }
+                                if opts.game_over {
+                                    player.get_character_mut()?.reset_character_on_death();
+                                    save_game(player)?;
+                                    execute!(stdout, Clear(ClearType::All))?;
+                                    break;
+                                }
+                                if opts.dungeon_completed {
+                                    save_game(player)?;
+                                    execute!(stdout, Clear(ClearType::All))?;
+                                    break;
+                                }
+                                if let Some(coords) = opts.next_room_coords {
+                                    next_room_coords = coords;
+                                }
+                            }
+                        }
+                    }
                     "Return to main menu" => break,
                     _ => {}
                 },
@@ -209,12 +245,19 @@ pub fn menu_dungeon_floor(
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room, F = Next Floor)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        match current_room.kind {
-            RoomKind::Boss => println!("Dungeon Floor {}, Boss Room", dungeon_floor.floor),
-            _ => println!(
-                "Dungeon Floor {}, Room {}",
-                dungeon_floor.floor, current_room.room_num
-            ),
+        if !dungeon_floor.ancient_ruins {
+            match current_room.kind {
+                RoomKind::Boss => println!("Dungeon Floor {}, Boss Room", dungeon_floor.floor),
+                _ => println!(
+                    "Dungeon Floor {}, Room {}",
+                    dungeon_floor.floor, current_room.room_num
+                ),
+            }
+        } else {
+            match current_room.kind {
+                RoomKind::Boss => println!("Ancient Ruins, Boss Room"),
+                _ => println!("Ancient Ruins, Room {}", current_room.room_num),
+            }
         }
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
@@ -310,11 +353,24 @@ pub fn menu_dungeon_floor(
                         })
                     }
                     "Open Treasure Chest" => {
-                        menu_open_treasure_chest(
-                            dungeon_floor.floor,
-                            player.get_character_mut()?,
-                            current_room,
-                        )?;
+                        if dungeon_floor.ancient_ruins {
+                            menu_open_treasure_chest(
+                                player
+                                    .get_character()?
+                                    .data
+                                    .stats
+                                    .general_stats
+                                    .character_level,
+                                player.get_character_mut()?,
+                                current_room,
+                            )?;
+                        } else {
+                            menu_open_treasure_chest(
+                                dungeon_floor.floor,
+                                player.get_character_mut()?,
+                                current_room,
+                            )?;
+                        }
                         menu_items.remove(selected_index);
                         selected_index = 0;
                     }

@@ -151,6 +151,7 @@ pub fn give_ancient_enemy_drops(
         _ => ITEM_DIVINE_GREATSWORD,
     };
     let weapon = create_mythical_weapon(enemy_level, item_info);
+    character.give_weapon(&weapon);
     let consumable = generate_random_consumable();
     character.give_consumable(&consumable, 3);
 

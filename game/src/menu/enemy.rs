@@ -189,7 +189,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                         if player_turn {
                             player_turn = false;
                             match enemy.kind {
-                                EnemyKind::Boss => {
+                                EnemyKind::Boss | EnemyKind::Ancient => {
                                     if is_chance_success(ENEMY_SKILL_CHANCE) {
                                         fight_text = enemy.use_skill(character);
                                     } else {

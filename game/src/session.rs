@@ -94,6 +94,13 @@ impl PlayerCharacter {
         self.data.inventory.ancient_ruins_keys += amount;
     }
 
+    pub fn consume_ancient_ruins_key(&mut self) {
+        if self.data.inventory.ancient_ruins_keys == 0 {
+            return;
+        }
+        self.data.inventory.ancient_ruins_keys -= 1;
+    }
+
     pub fn give_consumable(&mut self, item: &ConsumableItem, amount: u32) {
         if let Some(item) = self
             .data
@@ -539,6 +546,10 @@ impl PlayerCharacter {
 
     pub fn has_enough_mana_for_skill(&self) -> bool {
         self.temp_stats.current_mana >= SKILL_MANA_COST
+    }
+
+    pub fn can_enter_ancient_ruins(&self) -> bool {
+        self.data.inventory.ancient_ruins_keys >= 1
     }
 
     /// Returns enemy fight text.
