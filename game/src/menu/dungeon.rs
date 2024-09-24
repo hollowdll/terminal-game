@@ -221,8 +221,10 @@ pub fn menu_dungeon_floor(
                 let victory = menu_enemy_encounter(boss, player.get_character_mut()?)?;
                 if victory {
                     dungeon_floor.boss = None;
-                    let character = player.get_character_mut()?;
-                    character.dungeon_floor_completed(dungeon_floor.floor + 1);
+                    if !dungeon_floor.ancient_ruins {
+                        let character = player.get_character_mut()?;
+                        character.dungeon_floor_completed(dungeon_floor.floor + 1);
+                    }
                     save_game(player)?;
                 } else {
                     return Ok(DungeonFloorMenuOptions {
