@@ -23,7 +23,12 @@ pub const NORMAL_ENEMY_NAMES: [&str; 4] = [
 
 pub const BOSS_ENEMY_NAME_OGRE_KING: &str = "Ogre King";
 pub const BOSS_ENEMY_NAME_FIRE_DRAGON: &str = "Fire Dragon";
-pub const BOSS_ENEMY_NAMES: [&str; 2] = [BOSS_ENEMY_NAME_OGRE_KING, BOSS_ENEMY_NAME_FIRE_DRAGON];
+pub const BOSS_ENEMY_NAME_UNDEAD_SORCERER: &str = "Undead Sorcerer";
+pub const BOSS_ENEMY_NAMES: [&str; 3] = [
+    BOSS_ENEMY_NAME_OGRE_KING,
+    BOSS_ENEMY_NAME_FIRE_DRAGON,
+    BOSS_ENEMY_NAME_UNDEAD_SORCERER,
+];
 
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     health: 40,
@@ -36,25 +41,16 @@ pub const GREATER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     damage: 9,
 };
 pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
-    health: 120,
+    health: 100,
     defense: 2,
     damage: 14,
 };
-
-pub struct NormalEnemyNames {
-    pub skeleton: &'static str,
-    pub goblin: &'static str,
-}
-
-pub struct BossEnemyNames {
-    pub ogre_king: &'static str,
-    pub fire_dragon: &'static str,
-}
 
 #[derive(Debug, Clone)]
 pub enum EnemySkill {
     Smash,
     FireBreath,
+    StatusAilment,
     Unknown,
 }
 
@@ -100,6 +96,7 @@ impl Enemy {
         let skill = match name {
             BOSS_ENEMY_NAME_OGRE_KING => EnemySkill::Smash,
             BOSS_ENEMY_NAME_FIRE_DRAGON => EnemySkill::FireBreath,
+            BOSS_ENEMY_NAME_UNDEAD_SORCERER => EnemySkill::StatusAilment,
             _ => EnemySkill::Unknown,
         };
         Self {
@@ -244,6 +241,17 @@ impl Enemy {
                         "Enemy used skill Fire Breath! Player took {} damage. Player's defense was reduced by {}",
                         damage_taken,
                         reduced_defense
+                    );
+                }
+                EnemySkill::StatusAilment => {
+                    let reduced_damage = self.level;
+                    let reduced_mana = 15;
+                    character.temp_stat_boosts.decrease_damage(reduced_damage);
+                    character.consume_mana(reduced_mana);
+                    return format!(
+                        "Enemy used skill Status Ailment! Player's damage was reduced by {}. Player's mana was reduced by {}",
+                        reduced_damage,
+                        reduced_mana,
                     );
                 }
                 _ => return "Enemy tried to use an unknown skill".to_string(),

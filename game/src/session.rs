@@ -200,6 +200,8 @@ impl PlayerCharacter {
                 self.temp_stat_boosts.decrease_defense(armor.stats.defense);
                 self.temp_stat_boosts
                     .remove_enchantment_values(&armor.enchantments);
+                self.adjust_current_health();
+                self.adjust_current_mana();
                 self.equipped_items.armor = None;
                 return true;
             }
@@ -214,6 +216,8 @@ impl PlayerCharacter {
                 self.temp_stat_boosts.decrease_max_mana(ring.stats.mana);
                 self.temp_stat_boosts
                     .remove_enchantment_values(&ring.enchantments);
+                self.adjust_current_health();
+                self.adjust_current_mana();
                 self.equipped_items.ring = None;
                 return true;
             }
@@ -453,6 +457,20 @@ impl PlayerCharacter {
             self.temp_stats.current_mana = 0;
         }
         self.temp_stats.current_mana -= amount;
+    }
+
+    fn adjust_current_health(&mut self) {
+        let max_health = self.get_total_health();
+        if self.temp_stats.current_health > max_health {
+            self.temp_stats.current_health = max_health;
+        }
+    }
+
+    fn adjust_current_mana(&mut self) {
+        let max_mana = self.get_total_mana();
+        if self.temp_stats.current_mana > max_mana {
+            self.temp_stats.current_mana = max_mana;
+        }
     }
 
     pub fn is_dead(&self) -> bool {
