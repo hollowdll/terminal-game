@@ -465,7 +465,7 @@ impl PlayerCharacter {
 
     pub fn consume_mana(&mut self, amount: u32) {
         if amount >= self.temp_stats.current_mana {
-            self.temp_stats.current_mana = 0;
+            return self.temp_stats.current_mana = 0;
         }
         self.temp_stats.current_mana -= amount;
     }
