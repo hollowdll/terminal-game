@@ -2,8 +2,9 @@ use crate::{
     character::CharacterClass,
     items::{
         generate_random_armor, generate_random_ring, generate_random_weapon, get_item_display_name,
-        get_item_purchase_value, get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem,
-        ItemRarity, RingItem, WeaponItem, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        get_item_purchase_value, get_item_sell_value, random_item_rarity, ArmorItem, CharacterItem,
+        ConsumableItem, ItemRarity, RingItem, WeaponItem, ARMOR_BASE_VALUES,
+        ITEM_RARITY_DROP_RATES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
 };
@@ -73,9 +74,22 @@ pub fn generate_shop_items(floor: u32, class: &CharacterClass) -> ShopItems {
             ConsumableItem::new_mana_potion(ItemRarity::Epic),
             ConsumableItem::new_mana_potion(ItemRarity::Legendary),
         ],
-        weapon: Some(generate_random_weapon(WEAPON_BASE_VALUES, floor, class)),
-        armor: Some(generate_random_armor(ARMOR_BASE_VALUES, floor)),
-        ring: Some(generate_random_ring(RING_BASE_VALUES, floor)),
+        weapon: Some(generate_random_weapon(
+            random_item_rarity(&ITEM_RARITY_DROP_RATES),
+            WEAPON_BASE_VALUES,
+            floor,
+            class,
+        )),
+        armor: Some(generate_random_armor(
+            random_item_rarity(&ITEM_RARITY_DROP_RATES),
+            ARMOR_BASE_VALUES,
+            floor,
+        )),
+        ring: Some(generate_random_ring(
+            random_item_rarity(&ITEM_RARITY_DROP_RATES),
+            RING_BASE_VALUES,
+            floor,
+        )),
     }
 }
 

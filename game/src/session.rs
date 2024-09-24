@@ -12,9 +12,8 @@ use crate::{
     fight::is_critical_hit,
     game_data::{CharacterData, GameData, STARTING_REQUIRED_EXP},
     items::{
-        create_starter_weapon, generate_random_armor, generate_random_ring, generate_random_weapon,
-        get_item_display_name, ArmorItem, CharacterItem, ConsumableItem, Enchantment, ItemRarity,
-        RingItem, WeaponItem, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        create_starter_weapon, get_item_display_name, ArmorItem, CharacterItem, ConsumableItem,
+        Enchantment, ItemRarity, RingItem, WeaponItem,
     },
 };
 
@@ -303,16 +302,6 @@ impl PlayerCharacter {
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Rare), 3);
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Epic), 2);
         self.give_consumable(&ConsumableItem::new_health_potion(ItemRarity::Legendary), 1);
-        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
-        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
-        self.give_armor(&generate_random_armor(ARMOR_BASE_VALUES, 1));
-        self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
-        self.give_ring(&generate_random_ring(RING_BASE_VALUES, 1));
-        self.give_weapon(&generate_random_weapon(
-            WEAPON_BASE_VALUES,
-            1,
-            &self.data.metadata.class,
-        ));
     }
 
     /// Returns true if deleted.

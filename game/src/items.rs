@@ -559,6 +559,7 @@ pub fn num_enchantments(rarity: &ItemRarity) -> u8 {
         ItemRarity::Rare => 2,
         ItemRarity::Epic => 3,
         ItemRarity::Legendary => 4,
+        ItemRarity::Mythical => 5,
         _ => 0,
     }
 }
@@ -660,6 +661,7 @@ pub fn random_ring_enchantment(
 }
 
 pub fn generate_random_weapon(
+    rarity: ItemRarity,
     base_values: WeaponBaseValues,
     dungeon_floor: u32,
     character_class: &CharacterClass,
@@ -669,7 +671,6 @@ pub fn generate_random_weapon(
         rng.gen_range(base_values.min_damage..=base_values.max_damage) + (3 * dungeon_floor);
     let crit_hit_rate =
         rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
-    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
     let enchantments = generate_item_enchantments(
         num_enchantments(&rarity),
         ItemCategory::Weapon,
@@ -696,13 +697,16 @@ pub fn generate_random_weapon(
     )
 }
 
-pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -> ArmorItem {
+pub fn generate_random_armor(
+    rarity: ItemRarity,
+    base_values: ArmorBaseValues,
+    dungeon_floor: u32,
+) -> ArmorItem {
     let mut rng = thread_rng();
     let health =
         rng.gen_range(base_values.min_health..=base_values.max_health) + (8 * dungeon_floor);
     let defense =
         rng.gen_range(base_values.min_defense..=base_values.max_defense) + (2 * dungeon_floor);
-    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
     let enchantments = generate_item_enchantments(
         num_enchantments(&rarity),
         ItemCategory::Armor,
@@ -719,10 +723,13 @@ pub fn generate_random_armor(base_values: ArmorBaseValues, dungeon_floor: u32) -
     )
 }
 
-pub fn generate_random_ring(base_values: RingBaseValues, dungeon_floor: u32) -> RingItem {
+pub fn generate_random_ring(
+    rarity: ItemRarity,
+    base_values: RingBaseValues,
+    dungeon_floor: u32,
+) -> RingItem {
     let mut rng = thread_rng();
     let mana = rng.gen_range(base_values.min_mana..=base_values.max_mana);
-    let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
     let enchantments = generate_item_enchantments(
         num_enchantments(&rarity),
         ItemCategory::Ring,
@@ -749,60 +756,4 @@ pub fn generate_random_consumable() -> ConsumableItem {
         1 => ConsumableItem::new_mana_potion(rarity),
         _ => ConsumableItem::new_health_potion(rarity),
     }
-}
-
-pub fn create_mythical_weapon(level: u32, class: &CharacterClass) -> WeaponItem {
-    let damage = 20 + (3 * level);
-    let crit_hit_rate = 0.20;
-    let mut enchantments: Vec<Enchantment> = Vec::new();
-
-    let item_info = match class {
-        CharacterClass::Mage => {
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            ITEM_STAFF
-        }
-        CharacterClass::Cleric => {
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::CritHitRate(0.05));
-            ITEM_HALBERD
-        }
-        CharacterClass::Assassin => {
-            enchantments.push(Enchantment::CritHitRate(0.05));
-            enchantments.push(Enchantment::CritHitRate(0.05));
-            enchantments.push(Enchantment::CritHitRate(0.05));
-            enchantments.push(Enchantment::CritHitRate(0.05));
-
-            ITEM_DAGGER
-        }
-        CharacterClass::Warrior => {
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            ITEM_AXE
-        }
-        CharacterClass::Knight => {
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::Damage(2 * level));
-            enchantments.push(Enchantment::CritHitRate(0.05));
-            ITEM_SWORD
-        }
-    };
-
-    WeaponItem::new(
-        item_info,
-        level,
-        ItemRarity::Mythical,
-        WeaponItemStats {
-            damage,
-            crit_hit_rate,
-        },
-        enchantments,
-    )
 }

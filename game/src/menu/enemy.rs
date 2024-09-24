@@ -334,7 +334,7 @@ fn menu_ancient_enemy_fight_victory(
             drops.consumable_item_name, drops.consumable_item_amount
         );
         execute!(stdout, cursor::MoveTo(0, 6))?;
-        println!("    {}", drops.mythical_weapon_name);
+        println!("    {}", drops.mythical_equipment_item_name);
         execute!(stdout, cursor::MoveTo(0, 8))?;
         println!("> Continue");
 

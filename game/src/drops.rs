@@ -6,15 +6,16 @@ use crate::{
         GOLD_MULTIPLIER_ANCIENT_ENEMY, GOLD_MULTIPLIER_BOSS_ENEMY, GOLD_MULTIPLIER_NORMAL_ENEMY,
     },
     items::{
-        create_mythical_weapon, generate_random_armor, generate_random_consumable,
-        generate_random_ring, generate_random_weapon, get_item_display_name, random_equipment_item,
-        CharacterItem, ItemCategory, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
+        generate_random_armor, generate_random_consumable, generate_random_ring,
+        generate_random_weapon, get_item_display_name, random_equipment_item, random_item_rarity,
+        CharacterItem, ItemCategory, ItemRarity, ARMOR_BASE_VALUES, ITEM_RARITY_DROP_RATES,
+        RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
     util::is_chance_success,
 };
 
-pub const ANCIENT_RUINS_KEY_DROP_RATE: f64 = 0.40;
+pub const ANCIENT_RUINS_KEY_DROP_RATE: f64 = 0.35;
 
 pub struct NormalEnemyDrops {
     pub gold: u32,
@@ -34,7 +35,7 @@ pub struct BossEnemyDrops {
 pub struct AncientEnemyDrops {
     pub gold: u32,
     pub exp: u32,
-    pub mythical_weapon_name: String,
+    pub mythical_equipment_item_name: String,
     pub consumable_item_name: String,
     pub consumable_item_amount: u32,
 }
@@ -58,6 +59,7 @@ pub fn give_normal_enemy_drops(
     match equipment_item_category {
         ItemCategory::Weapon => {
             let weapon = generate_random_weapon(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
                 WEAPON_BASE_VALUES,
                 enemy_level,
                 &character.data.metadata.class,
@@ -66,12 +68,20 @@ pub fn give_normal_enemy_drops(
             item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
         }
         ItemCategory::Armor => {
-            let armor = generate_random_armor(ARMOR_BASE_VALUES, enemy_level);
+            let armor = generate_random_armor(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                ARMOR_BASE_VALUES,
+                enemy_level,
+            );
             character.give_armor(&armor);
             item_display_name = get_item_display_name(CharacterItem::Armor(&armor));
         }
         ItemCategory::Ring => {
-            let ring = generate_random_ring(RING_BASE_VALUES, enemy_level);
+            let ring = generate_random_ring(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                RING_BASE_VALUES,
+                enemy_level,
+            );
             character.give_ring(&ring);
             item_display_name = get_item_display_name(CharacterItem::Ring(&ring));
         }
@@ -97,6 +107,7 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
         match equipment_item_category {
             ItemCategory::Weapon => {
                 let weapon = generate_random_weapon(
+                    random_item_rarity(&ITEM_RARITY_DROP_RATES),
                     WEAPON_BASE_VALUES,
                     enemy_level,
                     &character.data.metadata.class,
@@ -105,12 +116,20 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
                 item_display_names.push(get_item_display_name(CharacterItem::Weapon(&weapon)));
             }
             ItemCategory::Armor => {
-                let armor = generate_random_armor(ARMOR_BASE_VALUES, enemy_level);
+                let armor = generate_random_armor(
+                    random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                    ARMOR_BASE_VALUES,
+                    enemy_level,
+                );
                 character.give_armor(&armor);
                 item_display_names.push(get_item_display_name(CharacterItem::Armor(&armor)));
             }
             ItemCategory::Ring => {
-                let ring = generate_random_ring(RING_BASE_VALUES, enemy_level);
+                let ring = generate_random_ring(
+                    random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                    RING_BASE_VALUES,
+                    enemy_level,
+                );
                 character.give_ring(&ring);
                 item_display_names.push(get_item_display_name(CharacterItem::Ring(&ring)));
             }
@@ -143,15 +162,37 @@ pub fn give_ancient_enemy_drops(
     let exp = random_exp_amount(BASE_EXP_MIN, BASE_EXP_MAX, EXP_MULTIPLIER_ANCIENT_ENEMY);
     character.gain_exp(exp);
 
-    let weapon = create_mythical_weapon(enemy_level, &character.data.metadata.class);
-    character.give_weapon(&weapon);
+    let equipment_item_category = random_equipment_item();
+    let mythical_equipment_item_name = match equipment_item_category {
+        ItemCategory::Weapon => {
+            let weapon = generate_random_weapon(
+                ItemRarity::Mythical,
+                WEAPON_BASE_VALUES,
+                enemy_level,
+                &character.data.metadata.class,
+            );
+            character.give_weapon(&weapon);
+            get_item_display_name(CharacterItem::Weapon(&weapon))
+        }
+        ItemCategory::Armor => {
+            let armor = generate_random_armor(ItemRarity::Mythical, ARMOR_BASE_VALUES, enemy_level);
+            character.give_armor(&armor);
+            get_item_display_name(CharacterItem::Armor(&armor))
+        }
+        ItemCategory::Ring => {
+            let ring = generate_random_ring(ItemRarity::Mythical, RING_BASE_VALUES, enemy_level);
+            character.give_ring(&ring);
+            get_item_display_name(CharacterItem::Ring(&ring))
+        }
+        _ => "?Unknown?".to_string(),
+    };
     let consumable = generate_random_consumable();
     character.give_consumable(&consumable, 3);
 
     AncientEnemyDrops {
         gold,
         exp,
-        mythical_weapon_name: get_item_display_name(CharacterItem::Weapon(&weapon)),
+        mythical_equipment_item_name,
         consumable_item_name: get_item_display_name(CharacterItem::Consumable(&consumable)),
         consumable_item_amount: 3,
     }
@@ -168,18 +209,30 @@ pub fn give_treasure_chest_drops(
     let mut item_display_name = "?Unknown?".to_string();
     match equipment_item_category {
         ItemCategory::Weapon => {
-            let weapon =
-                generate_random_weapon(WEAPON_BASE_VALUES, level, &character.data.metadata.class);
+            let weapon = generate_random_weapon(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                WEAPON_BASE_VALUES,
+                level,
+                &character.data.metadata.class,
+            );
             character.give_weapon(&weapon);
             item_display_name = get_item_display_name(CharacterItem::Weapon(&weapon));
         }
         ItemCategory::Armor => {
-            let armor = generate_random_armor(ARMOR_BASE_VALUES, level);
+            let armor = generate_random_armor(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                ARMOR_BASE_VALUES,
+                level,
+            );
             character.give_armor(&armor);
             item_display_name = get_item_display_name(CharacterItem::Armor(&armor));
         }
         ItemCategory::Ring => {
-            let ring = generate_random_ring(RING_BASE_VALUES, level);
+            let ring = generate_random_ring(
+                random_item_rarity(&ITEM_RARITY_DROP_RATES),
+                RING_BASE_VALUES,
+                level,
+            );
             character.give_ring(&ring);
             item_display_name = get_item_display_name(CharacterItem::Ring(&ring));
         }
