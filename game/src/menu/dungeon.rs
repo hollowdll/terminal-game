@@ -201,7 +201,7 @@ pub fn menu_dungeon_floor(
     loop {
         let mut start_column = 2;
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room)");
+        println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room, F = Next Floor)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         match current_room.kind {
             RoomKind::Boss => println!("Dungeon Floor {}, Boss Room", dungeon_floor.floor),

@@ -20,10 +20,6 @@ use crate::{
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
 
-const OPTION_LOAD_GAME: &str = "Load Game";
-const OPTION_NEW_GAME: &str = "New Game";
-const OPTION_QUIT_GAME: &str = "Quit Game";
-
 fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
     println!("+---------------------------------------------------------------------------------------------------------+");
     execute!(out, cursor::MoveTo(0, 1))?;
@@ -46,7 +42,7 @@ fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
 /// Returned bool is true if the menu should be rerendered.
 pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
-    let menu_items = vec![OPTION_LOAD_GAME, OPTION_NEW_GAME, OPTION_QUIT_GAME];
+    let menu_items = vec!["Load Game", "New Game", "Credits", "Quit Game"];
     let mut selected_index = 0;
     let mut start_column: u16 = 7;
     let mut rerender = false;
@@ -72,7 +68,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             }
         }
 
-        execute!(stdout, cursor::MoveTo(0, start_column + 4))?;
+        execute!(stdout, cursor::MoveTo(0, start_column + 5))?;
         println!("v{}", version);
 
         if let Event::Key(KeyEvent { code, .. }) = event::read()? {
@@ -96,7 +92,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     }
 
     match menu_items[selected_index] {
-        OPTION_LOAD_GAME => {
+        "Load Game" => {
             if let Ok(go_back) = menu_load_game(player) {
                 if go_back {
                     rerender = true;
@@ -109,7 +105,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
                 }
             }
         }
-        OPTION_NEW_GAME => {
+        "New Game" => {
             if let Ok(go_back) = menu_new_game(player, cfg) {
                 if go_back {
                     rerender = true;
@@ -122,11 +118,39 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
                 }
             }
         }
-        OPTION_QUIT_GAME => {}
+        "Credits" => {
+            menu_credits()?;
+            rerender = true;
+        }
         _ => {}
     }
 
     Ok(rerender)
+}
+
+fn menu_credits() -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+
+    loop {
+        execute!(stdout, cursor::MoveTo(0, 0))?;
+        println!("Esc = Back");
+        execute!(stdout, cursor::MoveTo(0, 1))?;
+        println!("Credits");
+        execute!(stdout, cursor::MoveTo(0, 2))?;
+        println!("©2024 Juuso Hakala");
+        execute!(stdout, cursor::MoveTo(0, 3))?;
+        println!("Source Code: https://github.com/hollowdll/terminal-game");
+
+        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
+            match code {
+                KeyCode::Esc => break,
+                _ => {}
+            }
+        }
+    }
+
+    Ok(())
 }
 
 /// Returns true if should go back in menu.
