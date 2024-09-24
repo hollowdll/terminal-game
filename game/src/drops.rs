@@ -11,7 +11,10 @@ use crate::{
         ItemCategory, ARMOR_BASE_VALUES, RING_BASE_VALUES, WEAPON_BASE_VALUES,
     },
     session::PlayerCharacter,
+    util::is_chance_success,
 };
+
+pub const ANCIENT_RUINS_KEY_DROP_RATE: f64 = 0.35;
 
 pub struct NormalEnemyDrops {
     pub gold: u32,
@@ -25,6 +28,7 @@ pub struct BossEnemyDrops {
     pub equipment_item_names: Vec<String>,
     pub consumable_item_name: String,
     pub consumable_item_amount: u32,
+    pub ancient_ruins_key: bool,
 }
 
 pub struct TreasureChestDrops {
@@ -107,6 +111,7 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
     }
     let consumable = generate_random_consumable();
     character.give_consumable(&consumable, 1);
+    let ancient_ruins_key = is_chance_success(ANCIENT_RUINS_KEY_DROP_RATE);
 
     BossEnemyDrops {
         gold,
@@ -114,6 +119,7 @@ pub fn give_boss_enemy_drops(character: &mut PlayerCharacter, enemy_level: u32) 
         equipment_item_names: item_display_names,
         consumable_item_name: get_item_display_name(CharacterItem::Consumable(&consumable)),
         consumable_item_amount: 1,
+        ancient_ruins_key,
     }
 }
 

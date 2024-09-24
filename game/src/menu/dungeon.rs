@@ -43,7 +43,11 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
-    let menu_items = vec!["Start Dungeon Floor", "Return to main menu"];
+    let menu_items = vec![
+        "Start Dungeon Floor",
+        "Enter Ancient Ruins (Ancient Ruins Key required)",
+        "Return to main menu",
+    ];
     let mut selected_index = 0;
     let start_column: u16 = 1;
 
@@ -51,11 +55,12 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
         let character = player.get_character()?;
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!(
-            "Character: {} (Level {} {:?}, Dungeon Floor {})",
+            "Character: {} (Level {} {:?}, Dungeon Floor {}, Ancient Ruins Keys: {})",
             character.data.metadata.name,
             character.data.stats.general_stats.character_level,
             character.data.metadata.class,
-            character.data.stats.general_stats.current_dungeon_floor
+            character.data.stats.general_stats.current_dungeon_floor,
+            character.data.inventory.ancient_ruins_keys,
         );
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
@@ -109,6 +114,7 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                             }
                         }
                     }
+                    "Enter Ancient Ruins (Ancient Ruins Key required)" => {}
                     "Return to main menu" => break,
                     _ => {}
                 },

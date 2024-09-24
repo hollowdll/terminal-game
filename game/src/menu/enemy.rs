@@ -285,6 +285,10 @@ fn menu_boss_enemy_fight_victory(
             column += 1;
             execute!(stdout, cursor::MoveTo(0, column))?;
         }
+        if drops.ancient_ruins_key {
+            column += 1;
+            println!("    Ancient Ruins Key x1");
+        }
         execute!(stdout, cursor::MoveTo(0, column + 1))?;
         println!("> Continue");
 

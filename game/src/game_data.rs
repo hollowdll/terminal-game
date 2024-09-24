@@ -87,6 +87,7 @@ impl CharacterData {
                 armors: HashMap::new(),
                 weapons: HashMap::new(),
                 rings: HashMap::new(),
+                ancient_ruins_keys: 0,
             },
             equipment: CharacterEquipment {
                 weapon: None,
@@ -144,6 +145,7 @@ pub struct CharacterInventory {
     pub weapons: HashMap<String, WeaponItem>,
     /// HashMap key: item global id.
     pub rings: HashMap<String, RingItem>,
+    pub ancient_ruins_keys: u32,
 }
 
 impl CharacterInventory {

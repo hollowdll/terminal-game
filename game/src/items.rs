@@ -31,8 +31,8 @@ pub const RING_BASE_VALUES: RingBaseValues = RingBaseValues {
 pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues {
     min_damage: 4,
     max_damage: 6,
-    min_crit_hit_rate: 0.04,
-    max_crit_hit_rate: 0.06,
+    min_crit_hit_rate: 0.03,
+    max_crit_hit_rate: 0.05,
     min_health: 7,
     max_health: 10,
     min_defense: 1,
@@ -595,7 +595,7 @@ pub fn random_weapon_enchantment(
     match rand_num {
         0 => {
             let damage = rng.gen_range(base_values.min_damage..=base_values.max_damage)
-                + (3 * dungeon_floor);
+                + (2 * dungeon_floor);
             return Enchantment::Damage(damage);
         }
         1 => {
@@ -665,7 +665,7 @@ pub fn generate_random_weapon(
 ) -> WeaponItem {
     let mut rng = thread_rng();
     let damage =
-        rng.gen_range(base_values.min_damage..=base_values.max_damage) + (4 * dungeon_floor);
+        rng.gen_range(base_values.min_damage..=base_values.max_damage) + (3 * dungeon_floor);
     let crit_hit_rate =
         rng.gen_range(base_values.min_crit_hit_rate..=base_values.max_crit_hit_rate);
     let rarity = random_item_rarity(&ITEM_RARITY_DROP_RATES);
