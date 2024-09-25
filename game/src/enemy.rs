@@ -33,7 +33,8 @@ pub const BOSS_ENEMY_NAMES: [&str; 3] = [
 ];
 
 pub const ANCIENT_ENEMY_NAME_KNIGHT: &str = "Lancelot, the Divine Knight";
-pub const ANCIENT_ENEMY_NAMES: [&str; 1] = [ANCIENT_ENEMY_NAME_KNIGHT];
+pub const ANCIENT_ENEMY_NAME_MAGE: &str = "Wizard of the Origin";
+pub const ANCIENT_ENEMY_NAMES: [&str; 2] = [ANCIENT_ENEMY_NAME_KNIGHT, ANCIENT_ENEMY_NAME_MAGE];
 
 pub const LESSER_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     health: 40,
@@ -62,6 +63,7 @@ pub enum EnemySkill {
     FireBreath,
     StatusAilment,
     DivineBlessing,
+    Blackhole,
     Unknown,
 }
 
@@ -133,6 +135,7 @@ impl Enemy {
     pub fn new_ancient(level: u32, name: &'static str, base_stats: &EnemyBaseStats) -> Self {
         let skill = match name {
             ANCIENT_ENEMY_NAME_KNIGHT => EnemySkill::DivineBlessing,
+            ANCIENT_ENEMY_NAME_MAGE => EnemySkill::Blackhole,
             _ => EnemySkill::Unknown,
         };
         Self {
@@ -308,6 +311,19 @@ impl Enemy {
                         format!(
                             "Enemy restored {} health points. Enemy's damage was increased by {}",
                             restored_health, increased_damage
+                        ),
+                    );
+                }
+                EnemySkill::Blackhole => {
+                    let damage = (character.get_total_health() as f64 * 0.20) as u32;
+                    let damage_taken = character.take_pure_damage(damage);
+                    let reduced_mana = character.get_total_mana();
+                    character.consume_mana(reduced_mana);
+                    return (
+                        "Enemy used skill Blackhole!",
+                        format!(
+                            "Player's mana was sucked into the void! Player took {} damage",
+                            damage_taken
                         ),
                     );
                 }
