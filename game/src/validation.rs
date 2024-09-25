@@ -1,7 +1,10 @@
-use crate::{config::GameConfig, session::Player};
+use crate::session::Player;
 
-pub fn character_name_too_long(cfg: &GameConfig, name: &str) -> bool {
-    name.len() > cfg.max_game_character_name_length_bytes
+pub const MAX_GAME_CHARACTERS: usize = 5;
+pub const MAX_GAME_CHARACTER_NAME_LENGTH_BYTES: usize = 32;
+
+pub fn character_name_too_long(name: &str) -> bool {
+    name.len() > MAX_GAME_CHARACTER_NAME_LENGTH_BYTES
 }
 
 pub fn character_name_empty(name: &str) -> bool {

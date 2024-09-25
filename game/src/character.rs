@@ -5,6 +5,7 @@ use crate::{
     game_data::{CharacterData, CombatStats},
     items::create_starter_weapon,
     session::{Player, PlayerCharacter},
+    validation::MAX_GAME_CHARACTERS,
 };
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -142,8 +143,8 @@ impl fmt::Display for CharacterSkill {
     }
 }
 
-pub fn max_game_characters_reached(player: &Player, cfg: &GameConfig) -> bool {
-    return player.data.characters.len() >= cfg.max_game_characters;
+pub fn max_game_characters_reached(player: &Player) -> bool {
+    return player.data.characters.len() >= MAX_GAME_CHARACTERS;
 }
 
 pub fn get_character_skill(class: &CharacterClass) -> CharacterSkill {

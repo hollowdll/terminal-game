@@ -29,8 +29,8 @@ pub const RING_BASE_VALUES: RingBaseValues = RingBaseValues {
     max_mana: 25,
 };
 pub const ENCHANTMENT_BASE_VALUES: EnchantmentBaseValues = EnchantmentBaseValues {
-    min_damage: 4,
-    max_damage: 6,
+    min_damage: 3,
+    max_damage: 5,
     min_crit_hit_rate: 0.03,
     max_crit_hit_rate: 0.05,
     min_health: 7,

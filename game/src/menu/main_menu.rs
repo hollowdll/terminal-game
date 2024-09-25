@@ -300,7 +300,7 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let start_column: u16 = 1;
 
     execute!(stdout, Clear(ClearType::All))?;
-    if !max_game_characters_reached(player, cfg) {
+    if !max_game_characters_reached(player) {
         match menu_create_character(player, cfg) {
             Ok(character_created) => {
                 if character_created {
@@ -381,7 +381,7 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
         if character_name_empty(&name) {
             msg = "Name cannot be blank";
             is_invalid_name = true;
-        } else if character_name_too_long(cfg, &name) {
+        } else if character_name_too_long(&name) {
             msg = "Name is too long";
             is_invalid_name = true;
         } else if character_name_already_exists(player, &name) {
