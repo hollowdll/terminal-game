@@ -8,9 +8,9 @@ The goal is to build your character as strong as possible and get as far in the 
 
 # Save file
 
-The game saves your progress to a save file so you can continue playing the next time you open the game.
+The game saves your progress to a save file `terminal_rpg_game_data` so you can continue playing the next time you open the game. The game creates this file if it doesn't exist when the game is saved.
 
-The file is located in a directory `terminal-rpg-game` in the user's config directory. The location is different depending on your operating system. E.g. on Linux it is `$XDG_CONFIG_HOME` or `$HOME/.config` and on Windows Roaming AppData (C:/Users/<user>/AppData/Roaming).
+The file is located in a directory `terminal-rpg-game` in the user's config directory. The location is different depending on your operating system. E.g. on Linux it is `$XDG_CONFIG_HOME` or `$HOME/.config` and on Windows Roaming AppData (C:/Users/youruser/AppData/Roaming).
 
 # Run the game
 
@@ -45,6 +45,33 @@ Build release version
 cargo build --release
 ```
 The output binary will be placed in the target directory (target/release).
+
+# Run with Docker
+
+You can also run the game with Docker. With this you need to remember that the save file won't persist by default if the container is removed. To fix this, you need to use a Docker volume.
+
+Alternatively map the savefile's path from your host machine to the container so you can play with the same save file both on the host machine and in containers.
+
+Clone this repo with Git if not done yet and go to the repo's root directory:
+```sh
+git clone https://github.com/hollowdll/terminal-game.git
+cd path/to/your/clone/location/terminal-game
+```
+
+Build the image
+```sh
+docker build -t terminal-rpg .
+```
+
+Create a container and run the game (Persists save file to a volume)
+```sh
+docker run --name terminal_rpg -v terminal_rpg_game_data:/root/.config/terminal-rpg-game --rm -it terminal-rpg
+```
+
+Create a container and run the game (Mount your host machine save file to the container)
+```sh
+docker run --name terminal_rpg -v <your_savefile_path>:/root/.config/terminal-rpg-game/terminal_rpg_game_data --rm -it terminal-rpg
+```
 
 # Configuration
 
