@@ -1,4 +1,0 @@
-chest drop: gold (multiplier 2x), 1 random rarity equipment item
-enemy drop: gold (multiplier 1x), 1 random rarity equipment item
-boss drop: gold (multiplier 3x), 2 random rarity equipment item, 2 random rarity potions
-shop: buy consumable items for gold (potions and stat boosts)

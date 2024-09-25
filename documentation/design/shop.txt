@@ -1,7 +1,0 @@
-Shop
-- Buy items for gold
-- Each dungeon floor's shop has 5 randomized items
-- Shop items' levels are based on the dungeon floor number
-- Item cost based on item rarity and level
-- Sell items for gold
-- Item sell value based on item rarity and level
