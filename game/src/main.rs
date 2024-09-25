@@ -6,13 +6,13 @@ use crossterm::{
         LeaveAlternateScreen,
     },
 };
-use game::{
+use std::io;
+use terminal_rpg::{
     config::GameConfig,
     game_data::{create_savefile_if_not_exists, load_save_file},
     menu::main_menu::main_menu,
     session::Player,
 };
-use std::io;
 
 fn main() -> io::Result<()> {
     if let Err(e) = run() {
