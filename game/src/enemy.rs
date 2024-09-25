@@ -51,7 +51,7 @@ pub const BOSS_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
     damage: 14,
 };
 pub const ANCIENT_ENEMY_BASE_STATS: EnemyBaseStats = EnemyBaseStats {
-    health: 200,
+    health: 250,
     defense: 3,
     damage: 16,
 };
@@ -88,10 +88,10 @@ impl Enemy {
             kind: EnemyKind::Normal,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (35 * dungeon_floor),
-                current_health: base_stats.health + (35 * dungeon_floor),
+                max_health: base_stats.health + (40 * dungeon_floor),
+                current_health: base_stats.health + (40 * dungeon_floor),
                 defense: base_stats.defense + (1 * dungeon_floor),
-                damage: base_stats.damage + (4 * dungeon_floor),
+                damage: base_stats.damage + (5 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -115,10 +115,10 @@ impl Enemy {
             kind: EnemyKind::Boss,
             level: dungeon_floor,
             stats: EnemyStats {
-                max_health: base_stats.health + (55 * dungeon_floor),
-                current_health: base_stats.health + (55 * dungeon_floor),
+                max_health: base_stats.health + (60 * dungeon_floor),
+                current_health: base_stats.health + (60 * dungeon_floor),
                 defense: base_stats.defense + (2 * dungeon_floor),
-                damage: base_stats.damage + (5 * dungeon_floor),
+                damage: base_stats.damage + (6 * dungeon_floor),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
@@ -140,10 +140,10 @@ impl Enemy {
             kind: EnemyKind::Ancient,
             level,
             stats: EnemyStats {
-                max_health: base_stats.health + (75 * level),
-                current_health: base_stats.health + (75 * level),
+                max_health: base_stats.health + (85 * level),
+                current_health: base_stats.health + (85 * level),
                 defense: base_stats.defense + (3 * level),
-                damage: base_stats.damage + (7 * level),
+                damage: base_stats.damage + (8 * level),
                 crit_hit_rate: ENEMY_CRIT_HIT_RATE,
                 crit_damage_multiplier: ENEMY_CRIT_DAMAGE_MULTIPLIER,
             },
