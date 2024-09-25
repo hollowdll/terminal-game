@@ -544,13 +544,125 @@ pub fn menu_tutorial() -> io::Result<()> {
     let mut stdout = io::stdout();
     let menu_items = vec!["Continue", "Skip Tutorial"];
     let mut selected_index = 0;
-    let start_column: u16 = 1;
+    let mut page: u8 = 1;
 
     execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("(Tutorial)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
+
+        let start_column: u16 = match page {
+            1 => {
+                println!("About the game");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("This game is a fantasy RPG game that you play in your terminal.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("The goal is to build your character as strong as possible");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("and get as far in the dungeon as you can.");
+                7
+            }
+            2 => {
+                println!("How to play");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("You play with your keyboard. No mouse required.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("In the game you travel in dungeon floors defeating enemies.");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Enemy fights are turn based.");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!("Enemies drop items, gold and EXP.");
+                execute!(stdout, cursor::MoveTo(0, 7))?;
+                println!(
+                    "Defeating the boss enemy of the floor allows you to enter the next floor."
+                );
+                execute!(stdout, cursor::MoveTo(0, 8))?;
+                println!(
+                    "Your progress will be saved when you complete the current dungeon floor."
+                );
+                10
+            }
+            3 => {
+                println!("Characters");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("You can create different characters with different classes.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("Each class has different starting stats and grows differently.");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Each class also has a unique skill that you can use in enemy fights.");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!(
+                    "Characters level up when enough EXP is gained. Leveling up increases stats."
+                );
+                execute!(stdout, cursor::MoveTo(0, 7))?;
+                println!("You can have 5 characters active at a time.");
+                9
+            }
+            4 => {
+                println!("Dungeons");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("Dungeon floors consist of different rooms.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("Floors and the enemies in them are randomly generated.");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Enemies get stronger on each floor.");
+                7
+            }
+            5 => {
+                println!("Items");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("There are equipment and consumable items.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("Equipment items make your character stronger when equipped.");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Consumables can be used in enemy fights.");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!("Items have different rarities.");
+                execute!(stdout, cursor::MoveTo(0, 7))?;
+                println!("Item rarities are Common, Uncommon, Rare, Epic, Legendary and Mythical.");
+                execute!(stdout, cursor::MoveTo(0, 8))?;
+                println!("Items can be dropped from enemies or bought in the shop.");
+                execute!(stdout, cursor::MoveTo(0, 9))?;
+                println!("Mythical items are the strongest items");
+                execute!(stdout, cursor::MoveTo(0, 10))?;
+                println!("and can only be dropped from the boss of Ancient Ruins.");
+                12
+            }
+            6 => {
+                println!("Ancient Ruins");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("Ancient ruins is a special type of dungeon.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("You need an Ancient Ruins Key to enter it.");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Ancient Ruins Key has a chance to drop from dungeon bosses.");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!("Ancient Ruins has a much stronger boss that you need to fight.");
+                execute!(stdout, cursor::MoveTo(0, 7))?;
+                println!(
+                    "The boss has better rewards than normal bosses and can drop mythical items."
+                );
+                9
+            }
+            7 => {
+                println!("Dying");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("This game is permadeath.");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("When you die, your character's progress resets");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("and you need to start from dungeon floor 1.");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!("Your character's items also reset on death.");
+                execute!(stdout, cursor::MoveTo(0, 8))?;
+                println!("This game can be challenging and requires some strategy at some points.");
+                execute!(stdout, cursor::MoveTo(0, 9))?;
+                println!("Good luck and have fun!");
+                11
+            }
+            _ => 1,
+        };
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
@@ -573,17 +685,20 @@ pub fn menu_tutorial() -> io::Result<()> {
                         selected_index += 1;
                     }
                 }
-                KeyCode::Enter => {
-                    break;
-                }
+                KeyCode::Enter => match menu_items[selected_index] {
+                    "Skip Tutorial" => break,
+                    "Continue" => {
+                        if page == 7 {
+                            break;
+                        }
+                        page += 1;
+                        execute!(stdout, Clear(ClearType::All))?;
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }
-    }
-
-    match menu_items[selected_index] {
-        "Skip Tutorial" => {}
-        _ => {}
     }
 
     Ok(())
