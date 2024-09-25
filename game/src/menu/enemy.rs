@@ -51,8 +51,8 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     execute!(stdout, Clear(ClearType::All))?;
 
     let mut selected_index = 0;
-    let start_column: u16 = 10;
     let mut fight_text = DEFAULT_FIGHT_TEXT.to_string();
+    let mut effect_text = "".to_string();
     let mut action = false;
     let mut player_turn = true;
     let player_temp_stat_boosts = character.temp_stat_boosts.clone();
@@ -104,6 +104,14 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
         execute!(stdout, cursor::MoveTo(0, 9))?;
         println!("{}", fight_text);
 
+        let start_column: u16 = match action {
+            true => {
+                execute!(stdout, cursor::MoveTo(0, 10))?;
+                println!("{}", effect_text);
+                11
+            }
+            _ => 10,
+        };
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
@@ -128,14 +136,16 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                 KeyCode::Enter => match menu_items[selected_index] {
                     "Attack" => {
                         action = true;
-                        fight_text = character.attack_enemy(enemy);
+                        let (event, effect) = character.attack_enemy(enemy);
+                        fight_text = event.to_string();
+                        effect_text = effect;
                         selected_index = 0;
                         execute!(stdout, Clear(ClearType::All))?;
                     }
                     "Use Skill" => {
                         if character.has_enough_mana_for_skill() {
                             action = true;
-                            fight_text = character.use_skill(enemy);
+                            (fight_text, effect_text) = character.use_skill(enemy);
                             selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
                         } else {
@@ -146,19 +156,23 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                         }
                     }
                     "Consumables" => {
-                        let text = menu_inventory_consumable_list(character, true, false)?;
-                        if !text.is_empty() {
+                        let (event, effect) =
+                            menu_inventory_consumable_list(character, true, false)?;
+                        if !event.is_empty() && !effect.is_empty() {
                             action = true;
-                            fight_text = text;
+                            fight_text = event;
+                            effect_text = effect;
                             selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
                         } else {
                             fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                            effect_text = "".to_string();
                         }
                     }
                     "Stats" => {
                         menu_enemy_fight_character_stats(character)?;
                         fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                        effect_text = "".to_string();
                     }
                     "Continue" => {
                         if enemy.is_dead() {
@@ -187,13 +201,19 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             match enemy.kind {
                                 EnemyKind::Boss | EnemyKind::Ancient => {
                                     if is_chance_success(ENEMY_SKILL_CHANCE) {
-                                        fight_text = enemy.use_skill(character);
+                                        let (event, effect) = enemy.use_skill(character);
+                                        fight_text = event.to_string();
+                                        effect_text = effect;
                                     } else {
-                                        fight_text = enemy.attack_player(character);
+                                        let (event, effect) = enemy.attack_player(character);
+                                        fight_text = event.to_string();
+                                        effect_text = effect;
                                     }
                                 }
                                 _ => {
-                                    fight_text = enemy.attack_player(character);
+                                    let (event, effect) = enemy.attack_player(character);
+                                    fight_text = event.to_string();
+                                    effect_text = effect;
                                 }
                             }
                         } else {
@@ -206,6 +226,7 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             action = false;
                             player_turn = true;
                             fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                            effect_text = "".to_string();
                         }
                         execute!(stdout, Clear(ClearType::All))?;
                     }

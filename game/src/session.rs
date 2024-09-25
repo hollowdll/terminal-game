@@ -478,16 +478,19 @@ impl PlayerCharacter {
     }
 
     /// Returns enemy fight text.
-    pub fn attack_enemy(&self, enemy: &mut Enemy) -> String {
+    pub fn attack_enemy(&self, enemy: &mut Enemy) -> (&str, String) {
         if is_critical_hit(self.get_total_crit_hit_rate()) {
             let damage_taken = enemy.take_damage(self.get_crit_hit_damage());
-            return format!(
-                "Player attacked! Enemy took {} damage (Critical Hit)",
-                damage_taken
+            return (
+                "Player attacked!",
+                format!("Enemy took {} damage (Critical Hit)", damage_taken),
             );
         }
         let damage_taken = enemy.take_damage(self.get_total_damage());
-        return format!("Player attacked! Enemy took {} damage", damage_taken);
+        return (
+            "Player attacked!",
+            format!("Enemy took {} damage", damage_taken),
+        );
     }
 
     pub fn dungeon_floor_completed(&mut self, next_floor: u32) {
@@ -542,47 +545,47 @@ impl PlayerCharacter {
     }
 
     /// Returns enemy fight text.
-    pub fn use_skill(&mut self, enemy: &mut Enemy) -> String {
+    pub fn use_skill(&mut self, enemy: &mut Enemy) -> (String, String) {
         self.consume_mana(SKILL_MANA_COST);
         let skill = get_character_skill(&self.data.metadata.class);
         match skill {
             CharacterSkill::MagicProjectile => {
                 let damage = (enemy.stats.max_health as f64 * 0.24) as u32;
                 let damage_taken = enemy.take_pure_damage(damage);
-                return format!(
-                    "Player used skill {}! Enemy took {} damage",
-                    &skill, damage_taken
+                return (
+                    format!("Player used skill {}!", &skill),
+                    format!("Enemy took {} damage", damage_taken),
                 );
             }
             CharacterSkill::Recover => {
                 let restored_health =
                     self.restore_health((0.45 * self.get_total_health() as f64) as u32);
-                return format!(
-                    "Player used skill {}! Player restored {} health points",
-                    &skill, restored_health
+                return (
+                    format!("Player used skill {}!", &skill),
+                    format!("Player restored {} health points", restored_health),
                 );
             }
             CharacterSkill::Stealth => {
                 self.temp_stat_boosts.increase_crit_damage_multiplier(0.4);
-                return format!(
-                    "Player used skill {}! Player's critical damage multiplier increased by 0.4",
-                    &skill
+                return (
+                    format!("Player used skill {}!", &skill),
+                    "Player's critical damage multiplier increased by 0.4".to_string(),
                 );
             }
             CharacterSkill::BattleCry => {
                 let increased_damage = (0.3 * self.get_total_damage() as f64) as u32;
                 self.temp_stat_boosts.increase_damage(increased_damage);
-                return format!(
-                    "Player used skill {}! Player's damage increased by {}",
-                    &skill, increased_damage
+                return (
+                    format!("Player used skill {}!", &skill),
+                    format!("Player's damage increased by {}", increased_damage),
                 );
             }
             CharacterSkill::ArmorUp => {
                 let increased_defense = self.data.stats.general_stats.character_level;
                 self.temp_stat_boosts.increase_defense(increased_defense);
-                return format!(
-                    "Player used skill {}! Player's defense increased by {}",
-                    &skill, increased_defense
+                return (
+                    format!("Player used skill {}!", &skill),
+                    format!("Player's defense increased by {}", increased_defense),
                 );
             }
         }

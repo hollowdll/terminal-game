@@ -246,27 +246,30 @@ impl Enemy {
     }
 
     /// Returns enemy fight text.
-    pub fn attack_player(&self, character: &mut PlayerCharacter) -> String {
+    pub fn attack_player(&self, character: &mut PlayerCharacter) -> (&str, String) {
         if is_critical_hit(self.get_total_crit_hit_rate()) {
             let damage_taken = character.take_damage(self.get_crit_hit_damage());
-            return format!(
-                "Enemy attacked! Player took {} damage (Critical Hit)",
-                damage_taken
+            return (
+                "Enemy attacked!",
+                format!("Player took {} damage (Critical Hit)", damage_taken),
             );
         }
         let damage_taken = character.take_damage(self.get_total_damage());
-        format!("Enemy attacked! Player took {} damage", damage_taken)
+        return (
+            "Enemy attacked!",
+            format!("Player took {} damage", damage_taken),
+        );
     }
 
-    pub fn use_skill(&mut self, character: &mut PlayerCharacter) -> String {
+    pub fn use_skill(&mut self, character: &mut PlayerCharacter) -> (&str, String) {
         if let Some(skill) = &self.skill {
             match skill {
                 EnemySkill::Smash => {
                     let damage = (character.get_total_health() as f64 * 0.20) as u32;
                     let damage_taken = character.take_pure_damage(damage);
-                    return format!(
-                        "Enemy used skill Smash! Player took {} damage",
-                        damage_taken
+                    return (
+                        "Enemy used skill Smash!",
+                        format!("Player took {} damage", damage_taken),
                     );
                 }
                 EnemySkill::FireBreath => {
@@ -274,10 +277,12 @@ impl Enemy {
                     let damage_taken = character.take_pure_damage(damage);
                     let reduced_defense = 2 * self.level;
                     character.temp_stat_boosts.decrease_defense(reduced_defense);
-                    return format!(
-                        "Enemy used skill Fire Breath! Player took {} damage. Player's defense was reduced by {}",
-                        damage_taken,
-                        reduced_defense
+                    return (
+                        "Enemy used skill Fire Breath!",
+                        format!(
+                            "Player took {} damage. Player's defense was reduced by {}",
+                            damage_taken, reduced_defense
+                        ),
                     );
                 }
                 EnemySkill::StatusAilment => {
@@ -285,10 +290,12 @@ impl Enemy {
                     let reduced_mana = 15;
                     character.temp_stat_boosts.decrease_damage(reduced_damage);
                     character.consume_mana(reduced_mana);
-                    return format!(
-                        "Enemy used skill Status Ailment! Player's damage was reduced by {}. Player's mana was reduced by {}",
-                        reduced_damage,
-                        reduced_mana,
+                    return (
+                        "Enemy used skill Status Ailment!",
+                        format!(
+                            "Player's damage was reduced by {}. Player's mana was reduced by {}",
+                            reduced_damage, reduced_mana
+                        ),
                     );
                 }
                 EnemySkill::DivineBlessing => {
@@ -296,16 +303,26 @@ impl Enemy {
                         self.restore_health((0.05 * self.stats.max_health as f64) as u32);
                     let increased_damage = self.level / 2;
                     self.increase_damage(increased_damage);
-                    return format!(
-                        "Enemy used skill Divine Blessing! Enemy restored {} health points. Enemy's damage was increased by {}",
-                        restored_health,
-                        increased_damage,
+                    return (
+                        "Enemy used skill Divine Blessing!",
+                        format!(
+                            "Enemy restored {} health points. Enemy's damage was increased by {}",
+                            restored_health, increased_damage
+                        ),
                     );
                 }
-                _ => return "Enemy tried to use an unknown skill".to_string(),
+                _ => {
+                    return (
+                        "Enemy tried to use an unknown skill",
+                        "Nothing happened".to_string(),
+                    )
+                }
             }
         }
-        "Enemy tried to use skill, but it doesn't have one".to_string()
+        return (
+            "Enemy tried to use skill",
+            "But it doesn't have one".to_string(),
+        );
     }
 }
 

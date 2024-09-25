@@ -82,14 +82,15 @@ pub fn menu_inventory_consumable_list(
     character: &mut PlayerCharacter,
     in_fight: bool,
     sell_items: bool,
-) -> io::Result<String> {
+) -> io::Result<(String, String)> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
     let mut menu_items = Vec::new();
     let mut selected_index = 0;
     let start_column: u16 = 2;
-    let mut use_effect_text = "".to_string();
+    let mut event_text = "".to_string();
+    let mut effect_text = "".to_string();
 
     for (_, item) in &character.data.inventory.consumables {
         menu_items.push(item.clone());
@@ -145,7 +146,7 @@ pub fn menu_inventory_consumable_list(
                 KeyCode::Char('U') | KeyCode::Char('u') => {
                     if in_fight && !menu_items.is_empty() {
                         let selected_item = &menu_items[selected_index];
-                        use_effect_text = selected_item.use_item(character);
+                        (event_text, effect_text) = selected_item.use_item(character);
                         break;
                     }
                 }
@@ -181,7 +182,7 @@ pub fn menu_inventory_consumable_list(
     }
     execute!(stdout, Clear(ClearType::All))?;
 
-    Ok(use_effect_text)
+    Ok((event_text, effect_text))
 }
 
 /// Returns true if the item was removed completely (amount in inventory 0 after deletion).
