@@ -5,7 +5,7 @@ use crate::{
 };
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -67,64 +67,66 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items_num - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => match selected_index {
-                    0 => {
-                        if let Some(id) = &character.equipped_items.weapon {
-                            if let Some(weapon) = character.data.inventory.weapons.get(id) {
-                                menu_weapon_info(weapon, false)?;
-                            }
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
                     }
-                    1 => {
-                        if let Some(id) = &character.equipped_items.armor {
-                            if let Some(armor) = character.data.inventory.armors.get(id) {
-                                menu_armor_info(armor, false)?;
-                            }
+                    KeyCode::Down => {
+                        if selected_index < menu_items_num - 1 {
+                            selected_index += 1;
                         }
                     }
-                    2 => {
-                        if let Some(id) = &character.equipped_items.ring {
-                            if let Some(ring) = character.data.inventory.rings.get(id) {
-                                menu_ring_info(ring, false)?;
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    KeyCode::Enter => match selected_index {
+                        0 => {
+                            if let Some(id) = &character.equipped_items.weapon {
+                                if let Some(weapon) = character.data.inventory.weapons.get(id) {
+                                    menu_weapon_info(weapon, false)?;
+                                }
                             }
                         }
-                    }
+                        1 => {
+                            if let Some(id) = &character.equipped_items.armor {
+                                if let Some(armor) = character.data.inventory.armors.get(id) {
+                                    menu_armor_info(armor, false)?;
+                                }
+                            }
+                        }
+                        2 => {
+                            if let Some(id) = &character.equipped_items.ring {
+                                if let Some(ring) = character.data.inventory.rings.get(id) {
+                                    menu_ring_info(ring, false)?;
+                                }
+                            }
+                        }
+                        _ => {}
+                    },
+                    KeyCode::Char('U') | KeyCode::Char('u') => match selected_index {
+                        0 => {
+                            if character.unequip_weapon() {
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
+                        }
+                        1 => {
+                            if character.unequip_armor() {
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
+                        }
+                        2 => {
+                            if character.unequip_ring() {
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
+                        }
+                        _ => {}
+                    },
                     _ => {}
-                },
-                KeyCode::Char('U') | KeyCode::Char('u') => match selected_index {
-                    0 => {
-                        if character.unequip_weapon() {
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                    1 => {
-                        if character.unequip_armor() {
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                    2 => {
-                        if character.unequip_ring() {
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                    _ => {}
-                },
-                _ => {}
+                }
             }
         }
     }

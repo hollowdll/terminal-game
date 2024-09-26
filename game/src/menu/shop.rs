@@ -1,6 +1,6 @@
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -39,27 +39,29 @@ pub fn menu_shop(shop_items: &mut ShopItems, character: &mut PlayerCharacter) ->
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Buy Items" => menu_shop_buy_items(shop_items, character)?,
+                        "Sell Items" => menu_inventory(character, true)?,
+                        _ => break,
+                    },
+                    _ => {}
                 }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Buy Items" => menu_shop_buy_items(shop_items, character)?,
-                    "Sell Items" => menu_inventory(character, true)?,
-                    _ => break,
-                },
-                _ => {}
             }
         }
     }
@@ -127,61 +129,63 @@ pub fn menu_shop_buy_items(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => match &menu_items[selected_index] {
-                    CharacterItemOwned::Consumable(item) => menu_consumable_info(item, false)?,
-                    CharacterItemOwned::Weapon(item) => menu_weapon_info(item, false)?,
-                    CharacterItemOwned::Armor(item) => menu_armor_info(item, false)?,
-                    CharacterItemOwned::Ring(item) => menu_ring_info(item, false)?,
-                    _ => {}
-                },
-                KeyCode::Char('B') | KeyCode::Char('b') => {
-                    if !menu_items.is_empty() {
-                        match &menu_items[selected_index] {
-                            CharacterItemOwned::Consumable(item) => {
-                                buy_consumable(item, character);
-                                execute!(stdout, Clear(ClearType::All))?;
-                            }
-                            CharacterItemOwned::Weapon(_) => {
-                                if shop_items.buy_weapon(character) {
-                                    menu_items.remove(selected_index);
-                                    selected_index = shift_index_back(selected_index);
-                                    execute!(stdout, Clear(ClearType::All))?;
-                                }
-                            }
-                            CharacterItemOwned::Armor(_) => {
-                                if shop_items.buy_armor(character) {
-                                    menu_items.remove(selected_index);
-                                    selected_index = shift_index_back(selected_index);
-                                    execute!(stdout, Clear(ClearType::All))?;
-                                }
-                            }
-                            CharacterItemOwned::Ring(_) => {
-                                if shop_items.buy_ring(character) {
-                                    menu_items.remove(selected_index);
-                                    selected_index = shift_index_back(selected_index);
-                                    execute!(stdout, Clear(ClearType::All))?;
-                                }
-                            }
-                            _ => {}
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
                     }
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    KeyCode::Enter => match &menu_items[selected_index] {
+                        CharacterItemOwned::Consumable(item) => menu_consumable_info(item, false)?,
+                        CharacterItemOwned::Weapon(item) => menu_weapon_info(item, false)?,
+                        CharacterItemOwned::Armor(item) => menu_armor_info(item, false)?,
+                        CharacterItemOwned::Ring(item) => menu_ring_info(item, false)?,
+                        _ => {}
+                    },
+                    KeyCode::Char('B') | KeyCode::Char('b') => {
+                        if !menu_items.is_empty() {
+                            match &menu_items[selected_index] {
+                                CharacterItemOwned::Consumable(item) => {
+                                    buy_consumable(item, character);
+                                    execute!(stdout, Clear(ClearType::All))?;
+                                }
+                                CharacterItemOwned::Weapon(_) => {
+                                    if shop_items.buy_weapon(character) {
+                                        menu_items.remove(selected_index);
+                                        selected_index = shift_index_back(selected_index);
+                                        execute!(stdout, Clear(ClearType::All))?;
+                                    }
+                                }
+                                CharacterItemOwned::Armor(_) => {
+                                    if shop_items.buy_armor(character) {
+                                        menu_items.remove(selected_index);
+                                        selected_index = shift_index_back(selected_index);
+                                        execute!(stdout, Clear(ClearType::All))?;
+                                    }
+                                }
+                                CharacterItemOwned::Ring(_) => {
+                                    if shop_items.buy_ring(character) {
+                                        menu_items.remove(selected_index);
+                                        selected_index = shift_index_back(selected_index);
+                                        execute!(stdout, Clear(ClearType::All))?;
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }

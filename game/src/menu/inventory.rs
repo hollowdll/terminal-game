@@ -1,6 +1,6 @@
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -44,31 +44,33 @@ pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Consumables" => {
-                        let _ = menu_inventory_consumable_list(character, false, sell_items)?;
+                    KeyCode::Esc => {
+                        break;
                     }
-                    "Weapons" => menu_inventory_weapon_list(character, sell_items)?,
-                    "Armors" => menu_inventory_armor_list(character, sell_items)?,
-                    "Rings" => menu_inventory_ring_list(character, sell_items)?,
-                    _ => break,
-                },
-                _ => {}
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Consumables" => {
+                            let _ = menu_inventory_consumable_list(character, false, sell_items)?;
+                        }
+                        "Weapons" => menu_inventory_weapon_list(character, sell_items)?,
+                        "Armors" => menu_inventory_armor_list(character, sell_items)?,
+                        "Rings" => menu_inventory_ring_list(character, sell_items)?,
+                        _ => break,
+                    },
+                    _ => {}
+                }
             }
         }
     }
@@ -123,60 +125,62 @@ pub fn menu_inventory_consumable_list(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if !menu_items.is_empty() && selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if !menu_items.is_empty() && selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => {
-                    if !menu_items.is_empty() {
-                        menu_consumable_info(&menu_items[selected_index], sell_items)?;
-                    }
-                }
-                KeyCode::Char('U') | KeyCode::Char('u') => {
-                    if in_fight && !menu_items.is_empty() {
-                        let selected_item = &menu_items[selected_index];
-                        (event_text, effect_text) = selected_item.use_item(character);
+                    KeyCode::Esc => {
                         break;
                     }
-                }
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !in_fight && !sell_items && !menu_items.is_empty() {
-                        let deleted_all = menu_delete_consumable(
-                            character,
-                            &mut menu_items,
-                            selected_index,
-                            false,
-                        )?;
-                        if deleted_all {
-                            selected_index = shift_index_back(selected_index);
+                    KeyCode::Enter => {
+                        if !menu_items.is_empty() {
+                            menu_consumable_info(&menu_items[selected_index], sell_items)?;
                         }
                     }
-                }
-                KeyCode::Char('S') | KeyCode::Char('s') => {
-                    if sell_items && !menu_items.is_empty() {
-                        let deleted_all = menu_delete_consumable(
-                            character,
-                            &mut menu_items,
-                            selected_index,
-                            true,
-                        )?;
-                        if deleted_all {
-                            selected_index = shift_index_back(selected_index);
+                    KeyCode::Char('U') | KeyCode::Char('u') => {
+                        if in_fight && !menu_items.is_empty() {
+                            let selected_item = &menu_items[selected_index];
+                            (event_text, effect_text) = selected_item.use_item(character);
+                            break;
                         }
                     }
+                    KeyCode::Char('D') | KeyCode::Char('d') => {
+                        if !in_fight && !sell_items && !menu_items.is_empty() {
+                            let deleted_all = menu_delete_consumable(
+                                character,
+                                &mut menu_items,
+                                selected_index,
+                                false,
+                            )?;
+                            if deleted_all {
+                                selected_index = shift_index_back(selected_index);
+                            }
+                        }
+                    }
+                    KeyCode::Char('S') | KeyCode::Char('s') => {
+                        if sell_items && !menu_items.is_empty() {
+                            let deleted_all = menu_delete_consumable(
+                                character,
+                                &mut menu_items,
+                                selected_index,
+                                true,
+                            )?;
+                            if deleted_all {
+                                selected_index = shift_index_back(selected_index);
+                            }
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -222,52 +226,57 @@ pub fn menu_delete_consumable(
         println!("< x{} >", selected_amount);
         execute!(stdout, cursor::MoveTo(0, 4))?;
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Left => {
-                    if selected_amount > 1 {
-                        selected_amount -= 1;
-                    }
-                }
-                KeyCode::Right => {
-                    if selected_item.amount_in_inventory > selected_amount {
-                        selected_amount += 1;
-                    }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => {
-                    if selected_amount == selected_item.amount_in_inventory {
-                        if sell_item {
-                            let gold = sell_consumable(selected_item, selected_amount, character);
-                            if gold != 0 {
-                                menu_items.remove(selected_index);
-                                deleted_all = true;
-                            }
-                        } else {
-                            if character.delete_consumable(display_name) {
-                                menu_items.remove(selected_index);
-                                deleted_all = true;
-                            }
-                        }
-                    } else if selected_amount < selected_item.amount_in_inventory {
-                        if sell_item {
-                            let gold = sell_consumable(selected_item, selected_amount, character);
-                            if gold != 0 {
-                                selected_item.amount_in_inventory -= selected_amount;
-                            }
-                        } else {
-                            if character
-                                .decrease_consumable_inventory_amount(display_name, selected_amount)
-                            {
-                                selected_item.amount_in_inventory -= selected_amount;
-                            }
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Left => {
+                        if selected_amount > 1 {
+                            selected_amount -= 1;
                         }
                     }
-                    break;
+                    KeyCode::Right => {
+                        if selected_item.amount_in_inventory > selected_amount {
+                            selected_amount += 1;
+                        }
+                    }
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    KeyCode::Enter => {
+                        if selected_amount == selected_item.amount_in_inventory {
+                            if sell_item {
+                                let gold =
+                                    sell_consumable(selected_item, selected_amount, character);
+                                if gold != 0 {
+                                    menu_items.remove(selected_index);
+                                    deleted_all = true;
+                                }
+                            } else {
+                                if character.delete_consumable(display_name) {
+                                    menu_items.remove(selected_index);
+                                    deleted_all = true;
+                                }
+                            }
+                        } else if selected_amount < selected_item.amount_in_inventory {
+                            if sell_item {
+                                let gold =
+                                    sell_consumable(selected_item, selected_amount, character);
+                                if gold != 0 {
+                                    selected_item.amount_in_inventory -= selected_amount;
+                                }
+                            } else {
+                                if character.decrease_consumable_inventory_amount(
+                                    display_name,
+                                    selected_amount,
+                                ) {
+                                    selected_item.amount_in_inventory -= selected_amount;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -323,58 +332,60 @@ pub fn menu_inventory_weapon_list(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if !menu_items.is_empty() && selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if !menu_items.is_empty() && selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => {
-                    if !menu_items.is_empty() {
-                        menu_weapon_info(&menu_items[selected_index], sell_items)?;
+                    KeyCode::Esc => {
+                        break;
                     }
-                }
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        let selected_item = &menu_items[selected_index];
-                        let delete = menu_confirm_item_deletion(&get_item_display_name(
-                            CharacterItem::Weapon(selected_item),
-                        ))?;
-                        if delete {
-                            if character.delete_weapon(&selected_item.id) {
-                                menu_items.remove(selected_index);
-                                selected_index = shift_index_back(selected_index);
+                    KeyCode::Enter => {
+                        if !menu_items.is_empty() {
+                            menu_weapon_info(&menu_items[selected_index], sell_items)?;
+                        }
+                    }
+                    KeyCode::Char('D') | KeyCode::Char('d') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            let selected_item = &menu_items[selected_index];
+                            let delete = menu_confirm_item_deletion(&get_item_display_name(
+                                CharacterItem::Weapon(selected_item),
+                            ))?;
+                            if delete {
+                                if character.delete_weapon(&selected_item.id) {
+                                    menu_items.remove(selected_index);
+                                    selected_index = shift_index_back(selected_index);
+                                }
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    KeyCode::Char('E') | KeyCode::Char('e') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            if character.equip_weapon(&menu_items[selected_index].id) {
+                                execute!(stdout, Clear(ClearType::All))?;
                             }
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
-                }
-                KeyCode::Char('E') | KeyCode::Char('e') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        if character.equip_weapon(&menu_items[selected_index].id) {
-                            execute!(stdout, Clear(ClearType::All))?;
+                    KeyCode::Char('S') | KeyCode::Char('s') => {
+                        if !menu_items.is_empty() && sell_items {
+                            if sell_weapon(&menu_items[selected_index], character) != 0 {
+                                menu_items.remove(selected_index);
+                                selected_index = shift_index_back(selected_index);
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
                         }
                     }
+                    _ => {}
                 }
-                KeyCode::Char('S') | KeyCode::Char('s') => {
-                    if !menu_items.is_empty() && sell_items {
-                        if sell_weapon(&menu_items[selected_index], character) != 0 {
-                            menu_items.remove(selected_index);
-                            selected_index = shift_index_back(selected_index);
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                }
-                _ => {}
             }
         }
     }
@@ -430,58 +441,60 @@ pub fn menu_inventory_armor_list(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if !menu_items.is_empty() && selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if !menu_items.is_empty() && selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => {
-                    if !menu_items.is_empty() {
-                        menu_armor_info(&menu_items[selected_index], sell_items)?;
+                    KeyCode::Esc => {
+                        break;
                     }
-                }
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        let selected_item = &menu_items[selected_index];
-                        let delete = menu_confirm_item_deletion(&get_item_display_name(
-                            CharacterItem::Armor(selected_item),
-                        ))?;
-                        if delete {
-                            if character.delete_armor(&selected_item.id) {
-                                menu_items.remove(selected_index);
-                                selected_index = shift_index_back(selected_index);
+                    KeyCode::Enter => {
+                        if !menu_items.is_empty() {
+                            menu_armor_info(&menu_items[selected_index], sell_items)?;
+                        }
+                    }
+                    KeyCode::Char('D') | KeyCode::Char('d') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            let selected_item = &menu_items[selected_index];
+                            let delete = menu_confirm_item_deletion(&get_item_display_name(
+                                CharacterItem::Armor(selected_item),
+                            ))?;
+                            if delete {
+                                if character.delete_armor(&selected_item.id) {
+                                    menu_items.remove(selected_index);
+                                    selected_index = shift_index_back(selected_index);
+                                }
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    KeyCode::Char('E') | KeyCode::Char('e') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            if character.equip_armor(&menu_items[selected_index].id) {
+                                execute!(stdout, Clear(ClearType::All))?;
                             }
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
-                }
-                KeyCode::Char('E') | KeyCode::Char('e') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        if character.equip_armor(&menu_items[selected_index].id) {
-                            execute!(stdout, Clear(ClearType::All))?;
+                    KeyCode::Char('S') | KeyCode::Char('s') => {
+                        if !menu_items.is_empty() && sell_items {
+                            if sell_armor(&menu_items[selected_index], character) != 0 {
+                                menu_items.remove(selected_index);
+                                selected_index = shift_index_back(selected_index);
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
                         }
                     }
+                    _ => {}
                 }
-                KeyCode::Char('S') | KeyCode::Char('s') => {
-                    if !menu_items.is_empty() && sell_items {
-                        if sell_armor(&menu_items[selected_index], character) != 0 {
-                            menu_items.remove(selected_index);
-                            selected_index = shift_index_back(selected_index);
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                }
-                _ => {}
             }
         }
     }
@@ -537,59 +550,61 @@ pub fn menu_inventory_ring_list(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if !menu_items.is_empty() && selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if !menu_items.is_empty() && selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => {
-                    if !menu_items.is_empty() {
-                        menu_ring_info(&menu_items[selected_index], sell_items)?;
+                    KeyCode::Esc => {
+                        break;
                     }
-                }
-                KeyCode::Char('D') | KeyCode::Char('d') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        let selected_item = &menu_items[selected_index];
-                        let delete = menu_confirm_item_deletion(&get_item_display_name(
-                            CharacterItem::Ring(selected_item),
-                        ))?;
-                        if delete {
-                            if character.delete_ring(&selected_item.id) {
-                                menu_items.remove(selected_index);
-                                selected_index = shift_index_back(selected_index);
+                    KeyCode::Enter => {
+                        if !menu_items.is_empty() {
+                            menu_ring_info(&menu_items[selected_index], sell_items)?;
+                        }
+                    }
+                    KeyCode::Char('D') | KeyCode::Char('d') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            let selected_item = &menu_items[selected_index];
+                            let delete = menu_confirm_item_deletion(&get_item_display_name(
+                                CharacterItem::Ring(selected_item),
+                            ))?;
+                            if delete {
+                                if character.delete_ring(&selected_item.id) {
+                                    menu_items.remove(selected_index);
+                                    selected_index = shift_index_back(selected_index);
+                                }
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    KeyCode::Char('E') | KeyCode::Char('e') => {
+                        if !menu_items.is_empty() && !sell_items {
+                            let selected_item = &menu_items[selected_index];
+                            if character.equip_ring(&selected_item.id) {
+                                execute!(stdout, Clear(ClearType::All))?;
                             }
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
-                }
-                KeyCode::Char('E') | KeyCode::Char('e') => {
-                    if !menu_items.is_empty() && !sell_items {
-                        let selected_item = &menu_items[selected_index];
-                        if character.equip_ring(&selected_item.id) {
-                            execute!(stdout, Clear(ClearType::All))?;
+                    KeyCode::Char('S') | KeyCode::Char('s') => {
+                        if !menu_items.is_empty() && sell_items {
+                            if sell_ring(&menu_items[selected_index], character) != 0 {
+                                menu_items.remove(selected_index);
+                                selected_index = shift_index_back(selected_index);
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
                         }
                     }
+                    _ => {}
                 }
-                KeyCode::Char('S') | KeyCode::Char('s') => {
-                    if !menu_items.is_empty() && sell_items {
-                        if sell_ring(&menu_items[selected_index], character) != 0 {
-                            menu_items.remove(selected_index);
-                            selected_index = shift_index_back(selected_index);
-                            execute!(stdout, Clear(ClearType::All))?;
-                        }
-                    }
-                }
-                _ => {}
             }
         }
     }
@@ -619,12 +634,14 @@ pub fn menu_consumable_info(item: &ConsumableItem, sell_item: bool) -> io::Resul
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -657,12 +674,14 @@ pub fn menu_weapon_info(item: &WeaponItem, sell_item: bool) -> io::Result<()> {
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -695,12 +714,14 @@ pub fn menu_armor_info(item: &ArmorItem, sell_item: bool) -> io::Result<()> {
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -731,12 +752,14 @@ pub fn menu_ring_info(item: &RingItem, sell_item: bool) -> io::Result<()> {
             println!("  Sell Value: {} Gold", get_item_sell_value(&item.rarity));
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -824,22 +847,24 @@ fn menu_confirm_item_deletion(item_name: &str) -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }

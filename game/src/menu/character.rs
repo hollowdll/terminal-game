@@ -1,6 +1,6 @@
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -45,44 +45,46 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Esc => {
-                    break;
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Stats" => {
-                        menu_character_stats(&character)?;
-                    }
-                    "Inventory" => {
-                        menu_inventory(character, false)?;
-                    }
-                    "Equipment" => {
-                        menu_equipment(character)?;
-                    }
-                    "Skill" => {
-                        menu_skill(character)?;
-                    }
-                    "Return to main menu" => {
-                        let confirm = menu_confirm_return_to_main_menu()?;
-                        if confirm {
-                            return Ok(true);
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
-                    _ => break,
-                },
-                _ => {}
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Stats" => {
+                            menu_character_stats(&character)?;
+                        }
+                        "Inventory" => {
+                            menu_inventory(character, false)?;
+                        }
+                        "Equipment" => {
+                            menu_equipment(character)?;
+                        }
+                        "Skill" => {
+                            menu_skill(character)?;
+                        }
+                        "Return to main menu" => {
+                            let confirm = menu_confirm_return_to_main_menu()?;
+                            if confirm {
+                                return Ok(true);
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                        _ => break,
+                    },
+                    _ => {}
+                }
             }
         }
     }
@@ -114,22 +116,24 @@ fn menu_confirm_return_to_main_menu() -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }
@@ -156,12 +160,14 @@ pub fn menu_level_up(new_level: u32) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }

@@ -1,6 +1,6 @@
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -96,12 +96,14 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
             character.get_total_crit_hit_rate() * 100.0
         );
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }

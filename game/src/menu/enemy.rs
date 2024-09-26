@@ -8,7 +8,7 @@ use crate::{
 };
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -30,12 +30,14 @@ pub fn menu_enemy_encounter(
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("> Fight");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -121,118 +123,123 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Attack" => {
-                        action = true;
-                        let (event, effect) = character.attack_enemy(enemy);
-                        fight_text = event.to_string();
-                        effect_text = effect;
-                        selected_index = 0;
-                        execute!(stdout, Clear(ClearType::All))?;
-                    }
-                    "Use Skill" => {
-                        if character.has_enough_mana_for_skill() {
-                            action = true;
-                            (fight_text, effect_text) = character.use_skill(enemy);
-                            selected_index = 0;
-                            execute!(stdout, Clear(ClearType::All))?;
-                        } else {
-                            fight_text = format!(
-                                "Not enough mana to use skill ({} required)",
-                                SKILL_MANA_COST
-                            );
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
                     }
-                    "Consumables" => {
-                        let (event, effect) =
-                            menu_inventory_consumable_list(character, true, false)?;
-                        if !event.is_empty() && !effect.is_empty() {
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Attack" => {
                             action = true;
-                            fight_text = event;
+                            let (event, effect) = character.attack_enemy(enemy);
+                            fight_text = event.to_string();
                             effect_text = effect;
                             selected_index = 0;
                             execute!(stdout, Clear(ClearType::All))?;
-                        } else {
+                        }
+                        "Use Skill" => {
+                            if character.has_enough_mana_for_skill() {
+                                action = true;
+                                (fight_text, effect_text) = character.use_skill(enemy);
+                                selected_index = 0;
+                                execute!(stdout, Clear(ClearType::All))?;
+                            } else {
+                                fight_text = format!(
+                                    "Not enough mana to use skill ({} required)",
+                                    SKILL_MANA_COST
+                                );
+                            }
+                        }
+                        "Consumables" => {
+                            let (event, effect) =
+                                menu_inventory_consumable_list(character, true, false)?;
+                            if !event.is_empty() && !effect.is_empty() {
+                                action = true;
+                                fight_text = event;
+                                effect_text = effect;
+                                selected_index = 0;
+                                execute!(stdout, Clear(ClearType::All))?;
+                            } else {
+                                fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                                effect_text = "".to_string();
+                            }
+                        }
+                        "Stats" => {
+                            menu_enemy_fight_character_stats(character)?;
                             fight_text = DEFAULT_FIGHT_TEXT.to_string();
                             effect_text = "".to_string();
                         }
-                    }
-                    "Stats" => {
-                        menu_enemy_fight_character_stats(character)?;
-                        fight_text = DEFAULT_FIGHT_TEXT.to_string();
-                        effect_text = "".to_string();
-                    }
-                    "Continue" => {
-                        if enemy.is_dead() {
-                            let character_level =
-                                character.data.stats.general_stats.character_level;
-                            match enemy.kind {
-                                EnemyKind::Normal => {
-                                    menu_normal_enemy_fight_victory(enemy.level, character)?;
+                        "Continue" => {
+                            if enemy.is_dead() {
+                                let character_level =
+                                    character.data.stats.general_stats.character_level;
+                                match enemy.kind {
+                                    EnemyKind::Normal => {
+                                        menu_normal_enemy_fight_victory(enemy.level, character)?;
+                                    }
+                                    EnemyKind::Boss => {
+                                        menu_boss_enemy_fight_victory(enemy.level, character)?;
+                                    }
+                                    EnemyKind::Ancient => {
+                                        menu_ancient_enemy_fight_victory(enemy.level, character)?;
+                                    }
                                 }
-                                EnemyKind::Boss => {
-                                    menu_boss_enemy_fight_victory(enemy.level, character)?;
+                                if character.data.stats.general_stats.character_level
+                                    > character_level
+                                {
+                                    menu_level_up(
+                                        character.data.stats.general_stats.character_level,
+                                    )?;
                                 }
-                                EnemyKind::Ancient => {
-                                    menu_ancient_enemy_fight_victory(enemy.level, character)?;
-                                }
+                                character.temp_stat_boosts = player_temp_stat_boosts;
+                                return Ok(true);
                             }
-                            if character.data.stats.general_stats.character_level > character_level
-                            {
-                                menu_level_up(character.data.stats.general_stats.character_level)?;
-                            }
-                            character.temp_stat_boosts = player_temp_stat_boosts;
-                            return Ok(true);
-                        }
-                        if player_turn {
-                            player_turn = false;
-                            match enemy.kind {
-                                EnemyKind::Boss | EnemyKind::Ancient => {
-                                    if is_chance_success(ENEMY_SKILL_CHANCE) {
-                                        let (event, effect) = enemy.use_skill(character);
-                                        fight_text = event.to_string();
-                                        effect_text = effect;
-                                    } else {
+                            if player_turn {
+                                player_turn = false;
+                                match enemy.kind {
+                                    EnemyKind::Boss | EnemyKind::Ancient => {
+                                        if is_chance_success(ENEMY_SKILL_CHANCE) {
+                                            let (event, effect) = enemy.use_skill(character);
+                                            fight_text = event.to_string();
+                                            effect_text = effect;
+                                        } else {
+                                            let (event, effect) = enemy.attack_player(character);
+                                            fight_text = event.to_string();
+                                            effect_text = effect;
+                                        }
+                                    }
+                                    _ => {
                                         let (event, effect) = enemy.attack_player(character);
                                         fight_text = event.to_string();
                                         effect_text = effect;
                                     }
                                 }
-                                _ => {
-                                    let (event, effect) = enemy.attack_player(character);
-                                    fight_text = event.to_string();
-                                    effect_text = effect;
+                            } else {
+                                if character.is_dead() {
+                                    character.increase_deaths();
+                                    menu_enemy_fight_player_died(character)?;
+                                    character.temp_stat_boosts = player_temp_stat_boosts;
+                                    return Ok(false);
                                 }
+                                action = false;
+                                player_turn = true;
+                                fight_text = DEFAULT_FIGHT_TEXT.to_string();
+                                effect_text = "".to_string();
                             }
-                        } else {
-                            if character.is_dead() {
-                                character.increase_deaths();
-                                menu_enemy_fight_player_died(character)?;
-                                character.temp_stat_boosts = player_temp_stat_boosts;
-                                return Ok(false);
-                            }
-                            action = false;
-                            player_turn = true;
-                            fight_text = DEFAULT_FIGHT_TEXT.to_string();
-                            effect_text = "".to_string();
+                            execute!(stdout, Clear(ClearType::All))?;
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
-                    }
-                    _ => break,
-                },
-                _ => {}
+                        _ => break,
+                    },
+                    _ => {}
+                }
             }
         }
     }
@@ -263,12 +270,14 @@ fn menu_normal_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 6))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -316,12 +325,14 @@ fn menu_boss_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, column + 1))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -359,12 +370,14 @@ fn menu_ancient_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 8))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -444,12 +457,14 @@ pub fn menu_enemy_fight_player_died(character: &mut PlayerCharacter) -> io::Resu
         execute!(stdout, cursor::MoveTo(0, 8))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -495,12 +510,14 @@ fn menu_enemy_fight_character_stats(character: &PlayerCharacter) -> io::Result<(
             character.get_total_crit_hit_rate() * 100.0
         );
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }

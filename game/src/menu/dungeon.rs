@@ -16,7 +16,7 @@ use crate::{
 };
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -73,53 +73,22 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Start Dungeon Floor" => {
-                        let mut dungeon_floor = generate_random_dungeon_floor(
-                            character.data.stats.general_stats.current_dungeon_floor,
-                            &character.data.metadata.class,
-                        );
-                        let mut next_room_coords = RoomCoordinates::new(0, 0);
-
-                        loop {
-                            let opts =
-                                menu_dungeon_floor(&mut dungeon_floor, player, &next_room_coords)?;
-                            if opts.return_to_main_menu {
-                                return Ok(true);
-                            }
-                            if opts.game_over {
-                                player.get_character_mut()?.reset_character_on_death();
-                                save_game(player)?;
-                                execute!(stdout, Clear(ClearType::All))?;
-                                break;
-                            }
-                            if opts.dungeon_completed {
-                                save_game(player)?;
-                                execute!(stdout, Clear(ClearType::All))?;
-                                break;
-                            }
-                            if let Some(coords) = opts.next_room_coords {
-                                next_room_coords = coords;
-                            }
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
                     }
-                    "Enter Ancient Ruins (Ancient Ruins Key required)" => {
-                        if player.get_character()?.can_enter_ancient_ruins() {
-                            let character = player.get_character_mut()?;
-                            character.consume_ancient_ruins_key();
-                            let mut dungeon_floor = generate_ancient_ruins(
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Start Dungeon Floor" => {
+                            let mut dungeon_floor = generate_random_dungeon_floor(
                                 character.data.stats.general_stats.current_dungeon_floor,
                                 &character.data.metadata.class,
                             );
@@ -150,11 +119,47 @@ pub fn menu_start_dungeon_floor(player: &mut Player) -> io::Result<bool> {
                                 }
                             }
                         }
-                    }
-                    "Return to main menu" => break,
+                        "Enter Ancient Ruins (Ancient Ruins Key required)" => {
+                            if player.get_character()?.can_enter_ancient_ruins() {
+                                let character = player.get_character_mut()?;
+                                character.consume_ancient_ruins_key();
+                                let mut dungeon_floor = generate_ancient_ruins(
+                                    character.data.stats.general_stats.current_dungeon_floor,
+                                    &character.data.metadata.class,
+                                );
+                                let mut next_room_coords = RoomCoordinates::new(0, 0);
+
+                                loop {
+                                    let opts = menu_dungeon_floor(
+                                        &mut dungeon_floor,
+                                        player,
+                                        &next_room_coords,
+                                    )?;
+                                    if opts.return_to_main_menu {
+                                        return Ok(true);
+                                    }
+                                    if opts.game_over {
+                                        player.get_character_mut()?.reset_character_on_death();
+                                        save_game(player)?;
+                                        execute!(stdout, Clear(ClearType::All))?;
+                                        break;
+                                    }
+                                    if opts.dungeon_completed {
+                                        save_game(player)?;
+                                        execute!(stdout, Clear(ClearType::All))?;
+                                        break;
+                                    }
+                                    if let Some(coords) = opts.next_room_coords {
+                                        next_room_coords = coords;
+                                    }
+                                }
+                            }
+                        }
+                        "Return to main menu" => break,
+                        _ => {}
+                    },
                     _ => {}
-                },
-                _ => {}
+                }
             }
         }
     }
@@ -291,96 +296,99 @@ pub fn menu_dungeon_floor(
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Go Up" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: false,
-                            game_over: false,
-                            next_room_coords: current_room.adjacents.up.clone(),
-                        })
-                    }
-                    "Go Down" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: false,
-                            game_over: false,
-                            next_room_coords: current_room.adjacents.down.clone(),
-                        })
-                    }
-                    "Go Right" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: false,
-                            game_over: false,
-                            next_room_coords: current_room.adjacents.right.clone(),
-                        })
-                    }
-                    "Go Left" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: false,
-                            game_over: false,
-                            next_room_coords: current_room.adjacents.left.clone(),
-                        })
-                    }
-                    "Enter Shop" => {
-                        menu_shop(&mut dungeon_floor.shop_items, player.get_character_mut()?)?;
-                    }
-                    "Enter Boss Room" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: false,
-                            game_over: false,
-                            next_room_coords: current_room.adjacents.up.clone(),
-                        })
-                    }
-                    "Enter Next Floor" => {
-                        return Ok(DungeonFloorMenuOptions {
-                            return_to_main_menu: false,
-                            dungeon_completed: true,
-                            game_over: false,
-                            next_room_coords: None,
-                        })
-                    }
-                    "Open Treasure Chest" => {
-                        menu_open_treasure_chest(
-                            dungeon_floor.floor,
-                            player.get_character_mut()?,
-                            current_room,
-                        )?;
-                        menu_items.remove(selected_index);
-                        selected_index = 0;
-                    }
-                    _ => break,
-                },
-                KeyCode::Esc => {
-                    if let Ok(return_to_main_menu) = menu_character(player.get_character_mut()?) {
-                        if return_to_main_menu {
-                            return Ok(DungeonFloorMenuOptions {
-                                return_to_main_menu: true,
-                                dungeon_completed: false,
-                                game_over: false,
-                                next_room_coords: None,
-                            });
-                        } else {
-                            execute!(stdout, Clear(ClearType::All))?;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
                     }
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Go Up" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: current_room.adjacents.up.clone(),
+                            })
+                        }
+                        "Go Down" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: current_room.adjacents.down.clone(),
+                            })
+                        }
+                        "Go Right" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: current_room.adjacents.right.clone(),
+                            })
+                        }
+                        "Go Left" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: current_room.adjacents.left.clone(),
+                            })
+                        }
+                        "Enter Shop" => {
+                            menu_shop(&mut dungeon_floor.shop_items, player.get_character_mut()?)?;
+                        }
+                        "Enter Boss Room" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: false,
+                                game_over: false,
+                                next_room_coords: current_room.adjacents.up.clone(),
+                            })
+                        }
+                        "Enter Next Floor" => {
+                            return Ok(DungeonFloorMenuOptions {
+                                return_to_main_menu: false,
+                                dungeon_completed: true,
+                                game_over: false,
+                                next_room_coords: None,
+                            })
+                        }
+                        "Open Treasure Chest" => {
+                            menu_open_treasure_chest(
+                                dungeon_floor.floor,
+                                player.get_character_mut()?,
+                                current_room,
+                            )?;
+                            menu_items.remove(selected_index);
+                            selected_index = 0;
+                        }
+                        _ => break,
+                    },
+                    KeyCode::Esc => {
+                        if let Ok(return_to_main_menu) = menu_character(player.get_character_mut()?)
+                        {
+                            if return_to_main_menu {
+                                return Ok(DungeonFloorMenuOptions {
+                                    return_to_main_menu: true,
+                                    dungeon_completed: false,
+                                    game_over: false,
+                                    next_room_coords: None,
+                                });
+                            } else {
+                                execute!(stdout, Clear(ClearType::All))?;
+                            }
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -414,12 +422,14 @@ pub fn menu_open_treasure_chest(
         execute!(stdout, cursor::MoveTo(0, 5))?;
         println!("> Continue");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Enter => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }

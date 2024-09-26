@@ -4,7 +4,7 @@ use crate::{
 };
 use crossterm::{
     cursor,
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -30,12 +30,14 @@ pub fn menu_skill(character: &PlayerCharacter) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!("  Mana Cost: {}", SKILL_MANA_COST);
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => {
-                    break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => {
+                        break;
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
