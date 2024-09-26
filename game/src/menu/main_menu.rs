@@ -144,10 +144,12 @@ fn menu_credits() -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 3))?;
         println!("Source Code: https://github.com/hollowdll/terminal-game");
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Esc => break,
-                _ => {}
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Esc => break,
+                    _ => {}
+                }
             }
         }
     }
@@ -196,39 +198,41 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if !menu_items.is_empty() && selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Esc => break,
-                KeyCode::Enter => {
-                    if !menu_items.is_empty() {
-                        let character_name =
-                            extract_first_word(menu_items[selected_index].as_str());
-                        load_game_character(character_name, player);
-                        return Ok(false);
-                    }
-                }
-                KeyCode::Char('d') | KeyCode::Char('D') => {
-                    if !menu_items.is_empty() {
-                        let name = extract_first_word(menu_items[selected_index].as_str());
-                        let deleted = menu_confirm_character_deletion(player, name)?;
-                        if deleted {
-                            menu_items.remove(selected_index);
-                            selected_index = 0;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if !menu_items.is_empty() && selected_index > 0 {
+                            selected_index -= 1;
                         }
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
+                    KeyCode::Down => {
+                        if !menu_items.is_empty() && selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Esc => break,
+                    KeyCode::Enter => {
+                        if !menu_items.is_empty() {
+                            let character_name =
+                                extract_first_word(menu_items[selected_index].as_str());
+                            load_game_character(character_name, player);
+                            return Ok(false);
+                        }
+                    }
+                    KeyCode::Char('d') | KeyCode::Char('D') => {
+                        if !menu_items.is_empty() {
+                            let name = extract_first_word(menu_items[selected_index].as_str());
+                            let deleted = menu_confirm_character_deletion(player, name)?;
+                            if deleted {
+                                menu_items.remove(selected_index);
+                                selected_index = 0;
+                            }
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
@@ -261,22 +265,24 @@ fn menu_confirm_character_deletion(player: &mut Player, character_name: &str) ->
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }
@@ -330,22 +336,24 @@ fn menu_new_game(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }
@@ -422,22 +430,24 @@ pub fn menu_create_character(player: &mut Player, cfg: &GameConfig) -> io::Resul
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }
@@ -520,23 +530,25 @@ pub fn menu_choose_character_class() -> io::Result<CharacterClass> {
             starting_stats.critical_hit_rate * 100.0
         );
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        execute!(stdout, Clear(ClearType::All))?;
+                        return Ok(selected_class);
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    execute!(stdout, Clear(ClearType::All))?;
-                    return Ok(selected_class);
-                }
-                _ => {}
             }
         }
     }
@@ -675,30 +687,32 @@ pub fn menu_tutorial() -> io::Result<()> {
             }
         }
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Enter => match menu_items[selected_index] {
-                    "Skip Tutorial" => break,
-                    "Continue" => {
-                        if page == 7 {
-                            break;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
                         }
-                        page += 1;
-                        execute!(stdout, Clear(ClearType::All))?;
                     }
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
+                    }
+                    KeyCode::Enter => match menu_items[selected_index] {
+                        "Skip Tutorial" => break,
+                        "Continue" => {
+                            if page == 7 {
+                                break;
+                            }
+                            page += 1;
+                            execute!(stdout, Clear(ClearType::All))?;
+                        }
+                        _ => {}
+                    },
                     _ => {}
-                },
-                _ => {}
+                }
             }
         }
     }
