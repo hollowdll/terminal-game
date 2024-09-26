@@ -32,6 +32,6 @@ pub fn is_chance_success(rate: f64) -> bool {
     thread_rng().gen_range(0.0..1.0) < rate
 }
 
-pub fn debounce_input() {
-    thread::sleep(Duration::from_millis(100))
+pub fn wait(millis: u64) {
+    thread::sleep(Duration::from_millis(millis))
 }

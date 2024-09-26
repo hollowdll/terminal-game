@@ -1,6 +1,6 @@
 use crossterm::{
     cursor::{self, Hide, Show},
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
 };
@@ -16,7 +16,7 @@ use crate::{
     game::save_game,
     menu::dungeon::menu_start_dungeon_floor,
     session::Player,
-    util::{debounce_input, extract_first_word},
+    util::extract_first_word,
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
 
@@ -50,7 +50,6 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     execute!(stdout, Clear(ClearType::All))?;
     loop {
-        debounce_input();
         execute!(stdout, cursor::MoveTo(0, 0))?;
         let _ = print_ascii_title(&stdout);
 
@@ -72,22 +71,24 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
         execute!(stdout, cursor::MoveTo(0, start_column + 5))?;
         println!("v{}", version);
 
-        if let Event::Key(KeyEvent { code, .. }) = event::read()? {
-            match code {
-                KeyCode::Up => {
-                    if selected_index > 0 {
-                        selected_index -= 1;
+        if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
+            if kind == KeyEventKind::Press {
+                match code {
+                    KeyCode::Up => {
+                        if selected_index > 0 {
+                            selected_index -= 1;
+                        }
                     }
-                }
-                KeyCode::Down => {
-                    if selected_index < menu_items.len() - 1 {
-                        selected_index += 1;
+                    KeyCode::Down => {
+                        if selected_index < menu_items.len() - 1 {
+                            selected_index += 1;
+                        }
                     }
+                    KeyCode::Enter => {
+                        break;
+                    }
+                    _ => {}
                 }
-                KeyCode::Enter => {
-                    break;
-                }
-                _ => {}
             }
         }
     }
