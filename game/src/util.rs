@@ -1,6 +1,6 @@
 use chrono::{TimeZone, Utc};
 use rand::{thread_rng, Rng};
-use std::env;
+use std::{env, thread, time::Duration};
 
 pub fn extract_first_word(s: &str) -> &str {
     s.split_whitespace().next().unwrap_or("")
@@ -30,4 +30,8 @@ pub fn shift_index_back(index: usize) -> usize {
 /// Rate should be between 0 and 1.
 pub fn is_chance_success(rate: f64) -> bool {
     thread_rng().gen_range(0.0..1.0) < rate
+}
+
+pub fn debounce_input() {
+    thread::sleep(Duration::from_millis(100))
 }

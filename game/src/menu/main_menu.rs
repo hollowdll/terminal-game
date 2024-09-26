@@ -16,7 +16,7 @@ use crate::{
     game::save_game,
     menu::dungeon::menu_start_dungeon_floor,
     session::Player,
-    util::extract_first_word,
+    util::{debounce_input, extract_first_word},
     validation::{character_name_already_exists, character_name_empty, character_name_too_long},
 };
 
@@ -50,6 +50,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
     execute!(stdout, Clear(ClearType::All))?;
     loop {
+        debounce_input();
         execute!(stdout, cursor::MoveTo(0, 0))?;
         let _ = print_ascii_title(&stdout);
 
