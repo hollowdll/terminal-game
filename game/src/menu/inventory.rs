@@ -2,6 +2,7 @@ use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
+    style::ResetColor,
     terminal::{Clear, ClearType},
 };
 use std::io;
@@ -13,7 +14,7 @@ use crate::{
     },
     session::PlayerCharacter,
     shop::{sell_armor, sell_consumable, sell_ring, sell_weapon},
-    util::shift_index_back,
+    util::{set_rarity_text_color, shift_index_back},
 };
 
 pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::Result<()> {

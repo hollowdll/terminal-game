@@ -1,6 +1,17 @@
 use chrono::{TimeZone, Utc};
+use crossterm::{
+    execute,
+    style::{Color, ResetColor, SetForegroundColor},
+};
 use rand::{thread_rng, Rng};
-use std::{env, thread, time::Duration};
+use std::{
+    env,
+    io::{self, Stdout},
+    thread,
+    time::Duration,
+};
+
+use crate::items::ItemRarity;
 
 pub fn extract_first_word(s: &str) -> &str {
     s.split_whitespace().next().unwrap_or("")
@@ -34,4 +45,24 @@ pub fn is_chance_success(rate: f64) -> bool {
 
 pub fn wait(millis: u64) {
     thread::sleep(Duration::from_millis(millis))
+}
+
+pub fn set_rarity_text_color(stdout: &mut Stdout, rarity: &ItemRarity) -> io::Result<()> {
+    match rarity {
+        ItemRarity::Common => execute!(stdout, SetForegroundColor(Color::White))?,
+        ItemRarity::Uncommon => execute!(stdout, SetForegroundColor(Color::Green))?,
+        ItemRarity::Rare => execute!(stdout, SetForegroundColor(Color::Blue))?,
+        ItemRarity::Epic => execute!(stdout, SetForegroundColor(Color::Magenta))?,
+        ItemRarity::Legendary => execute!(
+            stdout,
+            SetForegroundColor(Color::Rgb {
+                r: 255,
+                g: 165,
+                b: 0
+            })
+        )?,
+        ItemRarity::Mythical => execute!(stdout, SetForegroundColor(Color::Red))?,
+        _ => execute!(stdout, ResetColor)?,
+    }
+    Ok(())
 }
