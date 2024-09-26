@@ -78,3 +78,16 @@ docker run --name terminal_rpg -v <your_savefile_path>:/root/.config/terminal-rp
 Build time environment variables:
 
 - `TERM_RPG_GAME_MODE` - Sets the mode the binary will be built in. When set to "development", enables some features useful in development.
+
+# Releases
+
+This section is for the developer.
+
+Run the script `release.sh` in the project root to build new release files.
+```sh
+./release.sh 0.1.0
+```
+This will output a new version directory to `releases` directory in the game crate directory. It contains compressed archives of the game binary for supported platforms (Linux .tar.gz and Windows .zip).
+
+It also creates a checksums.txt file that contains the sha256 checksums of the archives. With this users can verify that they install the right file.
+
