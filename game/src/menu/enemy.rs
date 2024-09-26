@@ -479,7 +479,7 @@ fn menu_enemy_fight_character_stats(character: &PlayerCharacter) -> io::Result<(
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) = Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Combat Stats");
         execute!(stdout, cursor::MoveTo(0, 2))?;

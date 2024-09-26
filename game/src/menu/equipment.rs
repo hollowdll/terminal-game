@@ -21,7 +21,7 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Item Info, U = Unequip Item");
+        println!("(Esc) Back, (Enter) Item Info, (U) Unequip Item");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Equipment");
         execute!(stdout, cursor::MoveTo(0, 2))?;

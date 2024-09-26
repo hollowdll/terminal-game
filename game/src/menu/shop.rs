@@ -25,7 +25,7 @@ pub fn menu_shop(shop_items: &mut ShopItems, character: &mut PlayerCharacter) ->
     execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Shop");
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -96,7 +96,7 @@ pub fn menu_shop_buy_items(
     execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back, Enter = Item Info, B = Buy Item");
+        println!("(Esc) Back, (Enter) Item Info, (B) Buy Item");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Buy Items (Gold: {})", character.data.currency.gold);
 

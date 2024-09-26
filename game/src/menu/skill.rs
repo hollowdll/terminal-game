@@ -17,7 +17,7 @@ pub fn menu_skill(character: &PlayerCharacter) -> io::Result<()> {
     loop {
         let skill = get_character_skill(&character.data.metadata.class);
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Skill");
         execute!(stdout, cursor::MoveTo(0, 2))?;

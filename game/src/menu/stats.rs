@@ -14,7 +14,7 @@ pub fn menu_character_stats(character: &PlayerCharacter) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Character Stats");
         execute!(stdout, cursor::MoveTo(0, 2))?;

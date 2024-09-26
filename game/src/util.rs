@@ -1,13 +1,12 @@
 use chrono::{TimeZone, Utc};
 use crossterm::{
     execute,
-    style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor},
+    style::{Color, SetBackgroundColor, SetForegroundColor},
 };
 use rand::{thread_rng, Rng};
 use std::{
     env,
-    io::{self, Stdout},
-    os::unix::io,
+    io::{self},
     thread,
     time::Duration,
 };

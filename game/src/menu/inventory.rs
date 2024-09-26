@@ -2,7 +2,6 @@ use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
-    style::ResetColor,
     terminal::{Clear, ClearType},
 };
 use std::io;
@@ -27,7 +26,7 @@ pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Inventory (Gold: {})", character.data.currency.gold);
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -102,11 +101,11 @@ pub fn menu_inventory_consumable_list(
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if in_fight {
-            println!("Esc = Back, Enter = Item Info, U = Use Item");
+            println!("(Esc) Back, (Enter) Item Info, (U) Use Item");
         } else if sell_items {
-            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+            println!("(Esc) Back, (Enter) Item Info, (S) Sell Item");
         } else {
-            println!("Esc = Back, Enter = Item Info, D = Delete Item");
+            println!("(Esc) Back, (Enter) Item Info, (D) Delete Item");
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Consumables");
@@ -207,9 +206,9 @@ pub fn menu_delete_consumable(
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if sell_item {
-            println!("Esc = Back, Enter = Sell, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+            println!("(Esc) Back, (Enter) Sell, (<-) Decrease amount, (->) Increase amount");
         } else {
-            println!("Esc = Back, Enter = Delete, Arrow Left = Decrease amount, Arrow Right = Increase amount");
+            println!("(Esc) Back, (Enter) Delete, (<-) Decrease amount, (->) Increase amount");
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         if sell_item {
@@ -303,9 +302,9 @@ pub fn menu_inventory_weapon_list(
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if sell_items {
-            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+            println!("(Esc) Back, (Enter) Item Info, (S) Sell Item");
         } else {
-            println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+            println!("(Esc) Back, (Enter) Item Info, (E) Equip Item, (D) Delete Item");
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Weapons");
@@ -341,7 +340,7 @@ pub fn menu_inventory_weapon_list(
                     println!("  {}", display_name);
                 }
             }
-            reset_text_color();
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
@@ -423,9 +422,9 @@ pub fn menu_inventory_armor_list(
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if sell_items {
-            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+            println!("(Esc) Back, (Enter) Item Info, (S) Sell Item");
         } else {
-            println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+            println!("(Esc) Back, (Enter) Item Info, (E) Equip Item, (D) Delete Item");
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Armors");
@@ -532,9 +531,9 @@ pub fn menu_inventory_ring_list(
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if sell_items {
-            println!("Esc = Back, Enter = Item Info, S = Sell Item");
+            println!("(Esc) Back, (Enter) Item Info, (S) Sell Item");
         } else {
-            println!("Esc = Back, Enter = Item Info, E = Equip Item, D = Delete Item");
+            println!("(Esc) Back, (Enter) Item Info, (E) Equip Item, (D) Delete Item");
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Rings");
@@ -631,7 +630,7 @@ pub fn menu_consumable_info(item: &ConsumableItem, sell_item: bool) -> io::Resul
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
@@ -668,7 +667,7 @@ pub fn menu_weapon_info(item: &WeaponItem, sell_item: bool) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
@@ -708,7 +707,7 @@ pub fn menu_armor_info(item: &ArmorItem, sell_item: bool) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
@@ -748,7 +747,7 @@ pub fn menu_ring_info(item: &RingItem, sell_item: bool) -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;

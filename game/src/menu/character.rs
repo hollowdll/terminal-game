@@ -31,7 +31,7 @@ pub fn menu_character(character: &mut PlayerCharacter) -> io::Result<bool> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Close Menu");
+        println!("(Esc) Close Menu");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Menu");
         execute!(stdout, cursor::MoveTo(0, 2))?;

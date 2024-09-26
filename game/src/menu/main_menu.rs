@@ -136,7 +136,7 @@ fn menu_credits() -> io::Result<()> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Esc = Back");
+        println!("(Esc) Back");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Credits");
         execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -178,12 +178,12 @@ fn menu_load_game(player: &mut Player) -> io::Result<bool> {
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
         if player.data.characters.is_empty() {
-            println!("Esc = Back");
+            println!("(Esc) Back");
             execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("No characters found");
             execute!(stdout, cursor::MoveTo(0, 2))?;
         } else {
-            println!("Esc = Back, D = Delete character");
+            println!("(Esc) = Back, (D) = Delete character");
             execute!(stdout, cursor::MoveTo(0, 1))?;
             println!("Select a character");
             execute!(stdout, cursor::MoveTo(0, 2))?;
@@ -563,7 +563,7 @@ pub fn menu_tutorial() -> io::Result<()> {
     execute!(stdout, Clear(ClearType::All))?;
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("(Tutorial)");
+        println!("[Tutorial]");
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
         let start_column: u16 = match page {

@@ -251,7 +251,7 @@ pub fn menu_dungeon_floor(
     loop {
         let mut start_column = 2;
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!("Keyboard (Esc = Open Menu), Map (S = Shop, B = Boss Room, N = Next Floor)");
+        println!("(Esc) Open Menu, Map Markers (S = Shop, B = Boss Room, N = Next Floor)");
         execute!(stdout, cursor::MoveTo(0, 1))?;
         if !dungeon_floor.ancient_ruins {
             match current_room.kind {
