@@ -6,6 +6,15 @@ The game is programmed in the Rust language and requires only the game binary to
 
 The goal is to build your character as strong as possible and get as far in the dungeon as you can. You can get equippable items as you progress that make your character stronger. At the end of a dungeon, there is a boss fight that you need to win to advance to the next dungeon floor. The enemies get stronger on each floor. Enemies, items, drops and dungeon rooms are all randomized.
 
+# Install
+
+Release coming very soon.
+
+Extract tar archive on Linux
+```sh
+tar xzf <archive>.tar.gz
+```
+
 # Save file
 
 The game saves your progress to a save file `terminal_rpg_game_data` so you can continue playing the next time you open the game. The game creates this file if it doesn't exist when the game is saved.
