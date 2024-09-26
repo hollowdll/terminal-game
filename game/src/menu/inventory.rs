@@ -14,7 +14,7 @@ use crate::{
     },
     session::PlayerCharacter,
     shop::{sell_armor, sell_consumable, sell_ring, sell_weapon},
-    util::{set_rarity_text_color, shift_index_back},
+    util::{reset_text_color, set_rarity_text_color, shift_index_back},
 };
 
 pub fn menu_inventory(character: &mut PlayerCharacter, sell_items: bool) -> io::Result<()> {
@@ -320,17 +320,28 @@ pub fn menu_inventory_weapon_list(
             let display_name = &get_item_display_name(CharacterItem::Weapon(&item));
             if i == selected_index {
                 if item.is_equipped(&character) {
-                    println!("> {} [Equipped]", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
-                    println!("> {}", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
                 }
             } else {
                 if item.is_equipped(&character) {
-                    println!("  {} [Equipped]", display_name);
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("  {}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
+                    set_rarity_text_color(&item.rarity)?;
                     println!("  {}", display_name);
                 }
             }
+            reset_text_color();
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {

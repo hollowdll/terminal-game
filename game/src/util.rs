@@ -1,12 +1,13 @@
 use chrono::{TimeZone, Utc};
 use crossterm::{
     execute,
-    style::{Color, ResetColor, SetForegroundColor},
+    style::{Color, ResetColor, SetBackgroundColor, SetForegroundColor},
 };
 use rand::{thread_rng, Rng};
 use std::{
     env,
     io::{self, Stdout},
+    os::unix::io,
     thread,
     time::Duration,
 };
@@ -47,22 +48,24 @@ pub fn wait(millis: u64) {
     thread::sleep(Duration::from_millis(millis))
 }
 
-pub fn set_rarity_text_color(stdout: &mut Stdout, rarity: &ItemRarity) -> io::Result<()> {
+pub fn set_rarity_text_color(rarity: &ItemRarity) -> io::Result<()> {
+    let mut stdout = io::stdout();
     match rarity {
         ItemRarity::Common => execute!(stdout, SetForegroundColor(Color::White))?,
         ItemRarity::Uncommon => execute!(stdout, SetForegroundColor(Color::Green))?,
         ItemRarity::Rare => execute!(stdout, SetForegroundColor(Color::Blue))?,
-        ItemRarity::Epic => execute!(stdout, SetForegroundColor(Color::Magenta))?,
-        ItemRarity::Legendary => execute!(
-            stdout,
-            SetForegroundColor(Color::Rgb {
-                r: 255,
-                g: 165,
-                b: 0
-            })
-        )?,
+        ItemRarity::Epic => execute!(stdout, SetForegroundColor(Color::DarkCyan))?,
+        ItemRarity::Legendary => execute!(stdout, SetForegroundColor(Color::Yellow))?,
         ItemRarity::Mythical => execute!(stdout, SetForegroundColor(Color::Red))?,
-        _ => execute!(stdout, ResetColor)?,
+        _ => execute!(stdout, SetForegroundColor(Color::Reset))?,
     }
     Ok(())
+}
+
+pub fn reset_text_color() -> io::Result<()> {
+    execute!(io::stdout(), SetForegroundColor(Color::Reset))
+}
+
+pub fn reset_background_color() -> io::Result<()> {
+    execute!(io::stdout(), SetBackgroundColor(Color::Reset))
 }
