@@ -119,9 +119,16 @@ pub fn menu_inventory_consumable_list(
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             let name = get_item_display_name(CharacterItem::Consumable(&item));
             if i == selected_index {
-                println!("> {} x{}", name, item.amount_in_inventory);
+                print!("> ");
+                set_rarity_text_color(&item.rarity)?;
+                print!("{}", name);
+                reset_text_color()?;
+                print!(" x{}", item.amount_in_inventory);
             } else {
-                println!("  {} x{}", name, item.amount_in_inventory);
+                set_rarity_text_color(&item.rarity)?;
+                print!("  {}", name);
+                reset_text_color()?;
+                print!(" x{}", item.amount_in_inventory);
             }
         }
 
@@ -439,17 +446,28 @@ pub fn menu_inventory_armor_list(
             let display_name = &get_item_display_name(CharacterItem::Armor(&item));
             if i == selected_index {
                 if item.is_equipped(&character) {
-                    println!("> {} [Equipped]", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
-                    println!("> {}", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
                 }
             } else {
                 if item.is_equipped(&character) {
-                    println!("  {} [Equipped]", display_name);
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("  {}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
+                    set_rarity_text_color(&item.rarity)?;
                     println!("  {}", display_name);
                 }
             }
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
@@ -548,17 +566,28 @@ pub fn menu_inventory_ring_list(
             let display_name = &get_item_display_name(CharacterItem::Ring(&item));
             if i == selected_index {
                 if item.is_equipped(&character) {
-                    println!("> {} [Equipped]", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
-                    println!("> {}", display_name);
+                    print!("> ");
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("{}", display_name);
                 }
             } else {
                 if item.is_equipped(&character) {
-                    println!("  {} [Equipped]", display_name);
+                    set_rarity_text_color(&item.rarity)?;
+                    print!("  {}", display_name);
+                    reset_text_color()?;
+                    print!(" [Equipped]");
                 } else {
+                    set_rarity_text_color(&item.rarity)?;
                     println!("  {}", display_name);
                 }
             }
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
@@ -634,8 +663,10 @@ pub fn menu_consumable_info(item: &ConsumableItem, sell_item: bool) -> io::Resul
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
-
-        println!("  Rarity: {:?}", item.rarity);
+        print!("  Rarity: ");
+        set_rarity_text_color(&item.rarity)?;
+        print!("{:?}", item.rarity);
+        reset_text_color()?;
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
         println!("  Effect: {}", item.effect);
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
@@ -671,10 +702,12 @@ pub fn menu_weapon_info(item: &WeaponItem, sell_item: bool) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
-
         println!("  Level: {}", item.level);
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
-        println!("  Rarity: {:?}", item.rarity);
+        print!("  Rarity: ");
+        set_rarity_text_color(&item.rarity)?;
+        print!("{:?}", item.rarity);
+        reset_text_color()?;
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
         println!("  Damage: {}", item.stats.damage);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
@@ -711,10 +744,12 @@ pub fn menu_armor_info(item: &ArmorItem, sell_item: bool) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
-
         println!("  Level: {}", item.level);
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
-        println!("  Rarity: {:?}", item.rarity);
+        print!("  Rarity: ");
+        set_rarity_text_color(&item.rarity)?;
+        print!("{:?}", item.rarity);
+        reset_text_color()?;
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
         println!("  Health: {}", item.stats.health);
         execute!(stdout, cursor::MoveTo(0, start_column + 3))?;
@@ -751,10 +786,12 @@ pub fn menu_ring_info(item: &RingItem, sell_item: bool) -> io::Result<()> {
         execute!(stdout, cursor::MoveTo(0, 1))?;
         println!("Item Info");
         let start_column = display_item_basic_info(&item.info, 2)?;
-
         println!("  Level: {}", item.level);
         execute!(stdout, cursor::MoveTo(0, start_column + 1))?;
-        println!("  Rarity: {:?}", item.rarity);
+        print!("  Rarity: ");
+        set_rarity_text_color(&item.rarity)?;
+        print!("{:?}", item.rarity);
+        reset_text_color()?;
         execute!(stdout, cursor::MoveTo(0, start_column + 2))?;
         println!("  Mana: {}", item.stats.mana);
         let column = display_item_enchantments(&item.enchantments, start_column + 3)?;
