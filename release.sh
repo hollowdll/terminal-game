@@ -36,8 +36,8 @@ echo "Compressing binaries"
 LINUX_TAR="${OUTPUT_DIR}/${BINARY_NAME}_${VERSION}_linux.tar.gz"
 WINDOWS_ZIP="${OUTPUT_DIR}/${BINARY_NAME}_${VERSION}_windows.zip"
 
-tar -czvf $LINUX_TAR target/x86_64-unknown-linux-gnu/release/${BINARY_NAME}
-zip $WINDOWS_ZIP target/x86_64-pc-windows-gnu/release/${BINARY_NAME}.exe
+tar -czvf $LINUX_TAR -C target/x86_64-unknown-linux-gnu/release $BINARY_NAME
+zip $WINDOWS_ZIP -j target/x86_64-pc-windows-gnu/release/${BINARY_NAME}.exe
 
 echo "Generating SHA256 checksums"
 CHECKSUM_FILE="$OUTPUT_DIR/checksums.txt"
