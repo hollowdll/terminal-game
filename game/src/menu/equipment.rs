@@ -1,5 +1,5 @@
 use crate::{
-    items::{get_item_display_name, CharacterItem, ItemRarity},
+    items::{get_item_display_name, get_item_level_display, CharacterItem, ItemRarity},
     menu::inventory::{menu_armor_info, menu_ring_info, menu_weapon_info},
     session::PlayerCharacter,
     util::{reset_text_color, set_rarity_text_color},
@@ -27,35 +27,38 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
         println!("Equipment");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
-        let (weapon_name, weapon_rarity) = match &character.equipped_items.weapon {
+        let (weapon_name, weapon_lvl, weapon_rarity) = match &character.equipped_items.weapon {
             Some(id) => match character.data.inventory.weapons.get(id) {
                 Some(weapon) => (
                     get_item_display_name(CharacterItem::Weapon(weapon)),
+                    weapon.level,
                     &weapon.rarity,
                 ),
-                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
+                None => ("?Unknown?".to_owned(), 0, &ItemRarity::Unknown),
             },
-            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
+            None => ("Not equipped".to_owned(), 0, &ItemRarity::Unknown),
         };
-        let (armor_name, armor_rarity) = match &character.equipped_items.armor {
+        let (armor_name, armor_lvl, armor_rarity) = match &character.equipped_items.armor {
             Some(id) => match character.data.inventory.armors.get(id) {
                 Some(armor) => (
                     get_item_display_name(CharacterItem::Armor(armor)),
+                    armor.level,
                     &armor.rarity,
                 ),
-                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
+                None => ("?Unknown?".to_owned(), 0, &ItemRarity::Unknown),
             },
-            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
+            None => ("Not equipped".to_owned(), 0, &ItemRarity::Unknown),
         };
-        let (ring_name, ring_rarity) = match &character.equipped_items.ring {
+        let (ring_name, ring_lvl, ring_rarity) = match &character.equipped_items.ring {
             Some(id) => match character.data.inventory.rings.get(id) {
                 Some(ring) => (
                     get_item_display_name(CharacterItem::Ring(ring)),
+                    ring.level,
                     &ring.rarity,
                 ),
-                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
+                None => ("?Unknown?".to_owned(), 0, &ItemRarity::Unknown),
             },
-            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
+            None => ("Not equipped".to_owned(), 0, &ItemRarity::Unknown),
         };
 
         for i in 0..menu_items_num {
@@ -70,16 +73,28 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
                     print!("Weapon:");
                     set_rarity_text_color(weapon_rarity)?;
                     print!(" {}", weapon_name);
+                    if weapon_lvl > 0 {
+                        reset_text_color()?;
+                        print!(" {}", get_item_level_display(weapon_lvl));
+                    }
                 }
                 1 => {
                     print!("Armor:");
                     set_rarity_text_color(armor_rarity)?;
                     print!(" {}", armor_name);
+                    if armor_lvl > 0 {
+                        reset_text_color()?;
+                        print!(" {}", get_item_level_display(armor_lvl));
+                    }
                 }
                 2 => {
                     print!("Ring:");
                     set_rarity_text_color(ring_rarity)?;
                     print!(" {}", ring_name);
+                    if ring_lvl > 0 {
+                        reset_text_color()?;
+                        print!(" {}", get_item_level_display(ring_lvl));
+                    }
                 }
                 _ => println!("?Unknown?"),
             }

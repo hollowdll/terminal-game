@@ -8,8 +8,8 @@ use std::io;
 
 use crate::{
     items::{
-        get_item_display_name, get_item_sell_value, ArmorItem, CharacterItem, ConsumableItem,
-        Enchantment, ItemInfo, RingItem, WeaponItem,
+        get_item_display_name, get_item_level_display, get_item_sell_value, ArmorItem,
+        CharacterItem, ConsumableItem, Enchantment, ItemInfo, ItemRarity, RingItem, WeaponItem,
     },
     session::PlayerCharacter,
     shop::{sell_armor, sell_consumable, sell_ring, sell_weapon},
@@ -220,10 +220,15 @@ pub fn menu_delete_consumable(
         }
         execute!(stdout, cursor::MoveTo(0, 1))?;
         if sell_item {
-            println!("Sell item {}", display_name);
+            print!("Sell item ");
+            set_rarity_text_color(&selected_item.rarity)?;
+            print!("{}", display_name);
         } else {
-            println!("Delete item {}", display_name);
+            print!("Delete item ");
+            set_rarity_text_color(&selected_item.rarity)?;
+            print!("{}", display_name);
         }
+        reset_text_color()?;
         execute!(stdout, cursor::MoveTo(0, 2))?;
         if sell_item {
             println!("Specify the amount to sell:");
@@ -324,28 +329,33 @@ pub fn menu_inventory_weapon_list(
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
-            let display_name = &get_item_display_name(CharacterItem::Weapon(&item));
+            let name = &get_item_display_name(CharacterItem::Weapon(&item));
+            let lvl = &get_item_level_display(item.level);
             if i == selected_index {
                 if item.is_equipped(&character) {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             } else {
                 if item.is_equipped(&character) {
                     set_rarity_text_color(&item.rarity)?;
-                    print!("  {}", display_name);
+                    print!("  {}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     set_rarity_text_color(&item.rarity)?;
-                    println!("  {}", display_name);
+                    print!("  {}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             }
             reset_text_color()?;
@@ -375,9 +385,10 @@ pub fn menu_inventory_weapon_list(
                     KeyCode::Char('D') | KeyCode::Char('d') => {
                         if !menu_items.is_empty() && !sell_items {
                             let selected_item = &menu_items[selected_index];
-                            let delete = menu_confirm_item_deletion(&get_item_display_name(
-                                CharacterItem::Weapon(selected_item),
-                            ))?;
+                            let delete = menu_confirm_item_deletion(
+                                &get_item_display_name(CharacterItem::Weapon(selected_item)),
+                                &selected_item.rarity,
+                            )?;
                             if delete {
                                 if character.delete_weapon(&selected_item.id) {
                                     menu_items.remove(selected_index);
@@ -444,28 +455,33 @@ pub fn menu_inventory_armor_list(
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
-            let display_name = &get_item_display_name(CharacterItem::Armor(&item));
+            let name = &get_item_display_name(CharacterItem::Armor(&item));
+            let lvl = &get_item_level_display(item.level);
             if i == selected_index {
                 if item.is_equipped(&character) {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             } else {
                 if item.is_equipped(&character) {
                     set_rarity_text_color(&item.rarity)?;
-                    print!("  {}", display_name);
+                    print!("  {}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     set_rarity_text_color(&item.rarity)?;
-                    println!("  {}", display_name);
+                    print!("  {}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             }
             reset_text_color()?;
@@ -495,9 +511,10 @@ pub fn menu_inventory_armor_list(
                     KeyCode::Char('D') | KeyCode::Char('d') => {
                         if !menu_items.is_empty() && !sell_items {
                             let selected_item = &menu_items[selected_index];
-                            let delete = menu_confirm_item_deletion(&get_item_display_name(
-                                CharacterItem::Armor(selected_item),
-                            ))?;
+                            let delete = menu_confirm_item_deletion(
+                                &get_item_display_name(CharacterItem::Armor(selected_item)),
+                                &selected_item.rarity,
+                            )?;
                             if delete {
                                 if character.delete_armor(&selected_item.id) {
                                     menu_items.remove(selected_index);
@@ -564,28 +581,33 @@ pub fn menu_inventory_ring_list(
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
-            let display_name = &get_item_display_name(CharacterItem::Ring(&item));
+            let name = &get_item_display_name(CharacterItem::Ring(&item));
+            let lvl = &get_item_level_display(item.level);
             if i == selected_index {
                 if item.is_equipped(&character) {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     print!("> ");
                     set_rarity_text_color(&item.rarity)?;
-                    print!("{}", display_name);
+                    print!("{}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             } else {
                 if item.is_equipped(&character) {
                     set_rarity_text_color(&item.rarity)?;
-                    print!("  {}", display_name);
+                    print!("  {}", name);
                     reset_text_color()?;
-                    print!(" [Equipped]");
+                    print!(" {} [Equipped]", lvl);
                 } else {
                     set_rarity_text_color(&item.rarity)?;
-                    println!("  {}", display_name);
+                    print!("  {}", name);
+                    reset_text_color()?;
+                    print!(" {}", lvl);
                 }
             }
             reset_text_color()?;
@@ -615,9 +637,10 @@ pub fn menu_inventory_ring_list(
                     KeyCode::Char('D') | KeyCode::Char('d') => {
                         if !menu_items.is_empty() && !sell_items {
                             let selected_item = &menu_items[selected_index];
-                            let delete = menu_confirm_item_deletion(&get_item_display_name(
-                                CharacterItem::Ring(selected_item),
-                            ))?;
+                            let delete = menu_confirm_item_deletion(
+                                &get_item_display_name(CharacterItem::Ring(selected_item)),
+                                &selected_item.rarity,
+                            )?;
                             if delete {
                                 if character.delete_ring(&selected_item.id) {
                                     menu_items.remove(selected_index);
@@ -871,7 +894,7 @@ pub fn display_item_enchantments(
     Ok(current_column)
 }
 
-fn menu_confirm_item_deletion(item_name: &str) -> io::Result<bool> {
+fn menu_confirm_item_deletion(item_name: &str, rarity: &ItemRarity) -> io::Result<bool> {
     let mut stdout = io::stdout();
     execute!(stdout, Clear(ClearType::All))?;
 
@@ -881,10 +904,11 @@ fn menu_confirm_item_deletion(item_name: &str) -> io::Result<bool> {
 
     loop {
         execute!(stdout, cursor::MoveTo(0, 0))?;
-        println!(
-            "Delete item {}? It cannot be restored once deleted.",
-            item_name
-        );
+        print!("Delete item ");
+        set_rarity_text_color(rarity)?;
+        print!("{}", item_name);
+        reset_text_color()?;
+        print!("? It cannot be restored once deleted.");
         execute!(stdout, cursor::MoveTo(0, 1))?;
 
         for (i, item) in menu_items.iter().enumerate() {

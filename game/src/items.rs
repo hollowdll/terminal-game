@@ -440,25 +440,20 @@ pub fn get_item_display_name<'a>(item: CharacterItem<'a>) -> String {
             format!("{:?} {}", consumable.rarity, consumable.info.name)
         }
         CharacterItem::Weapon(weapon) => {
-            format!(
-                "{:?} {} (Level {})",
-                weapon.rarity, weapon.info.name, weapon.level
-            )
+            format!("{:?} {}", weapon.rarity, weapon.info.name)
         }
         CharacterItem::Armor(armor) => {
-            format!(
-                "{:?} {} (Level {})",
-                armor.rarity, armor.info.name, armor.level
-            )
+            format!("{:?} {}", armor.rarity, armor.info.name)
         }
         CharacterItem::Ring(ring) => {
-            format!(
-                "{:?} {} (Level {})",
-                ring.rarity, ring.info.name, ring.level
-            )
+            format!("{:?} {}", ring.rarity, ring.info.name)
         }
         _ => format!("?Unknown?"),
     }
+}
+
+pub fn get_item_level_display<'a>(level: u32) -> String {
+    format!("(Level {})", level)
 }
 
 /// Returns the purchase value of an item in gold.
