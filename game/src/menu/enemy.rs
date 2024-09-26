@@ -2,9 +2,10 @@ use crate::{
     character::SKILL_MANA_COST,
     drops::{give_ancient_enemy_drops, give_boss_enemy_drops, give_normal_enemy_drops},
     enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
+    items::get_item_level_display,
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
-    util::is_chance_success,
+    util::{is_chance_success, reset_text_color, set_rarity_text_color},
 };
 use crossterm::{
     cursor,
@@ -266,8 +267,13 @@ fn menu_normal_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 3))?;
         println!("  EXP: {}", drops.exp);
         execute!(stdout, cursor::MoveTo(0, 4))?;
-        println!("  Item: {}", drops.equipment_item_name);
-        execute!(stdout, cursor::MoveTo(0, 6))?;
+        println!("  Items:");
+        execute!(stdout, cursor::MoveTo(0, 5))?;
+        set_rarity_text_color(&drops.equipment_item.rarity)?;
+        print!("    {}", drops.equipment_item.name);
+        reset_text_color()?;
+        print!(" {}", get_item_level_display(drops.equipment_item.lvl));
+        execute!(stdout, cursor::MoveTo(0, 7))?;
         println!("> Continue");
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
@@ -306,17 +312,21 @@ fn menu_boss_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!("  Items:");
         execute!(stdout, cursor::MoveTo(0, 5))?;
-        println!(
-            "    {} x{}",
-            drops.consumable_item_name, drops.consumable_item_amount
-        );
+        set_rarity_text_color(&drops.consumable_item.rarity)?;
+        print!("    {}", drops.consumable_item.name);
+        reset_text_color()?;
+        print!(" x{}", drops.consumable_item_amount);
         execute!(stdout, cursor::MoveTo(0, 6))?;
 
         let mut column = 6;
-        for item in &drops.equipment_item_names {
-            println!("    {}", item);
+        for item in &drops.equipment_items {
+            set_rarity_text_color(&item.rarity)?;
+            print!("    {}", item.name);
+            reset_text_color()?;
+            print!(" {}", get_item_level_display(item.lvl));
             column += 1;
             execute!(stdout, cursor::MoveTo(0, column))?;
+            reset_text_color()?;
         }
         if drops.ancient_ruins_key {
             column += 1;
@@ -361,12 +371,15 @@ fn menu_ancient_enemy_fight_victory(
         execute!(stdout, cursor::MoveTo(0, 4))?;
         println!("  Items:");
         execute!(stdout, cursor::MoveTo(0, 5))?;
-        println!(
-            "    {} x{}",
-            drops.consumable_item_name, drops.consumable_item_amount
-        );
+        set_rarity_text_color(&drops.consumable_item.rarity)?;
+        print!("    {}", drops.consumable_item.name);
+        reset_text_color()?;
+        print!(" x{}", drops.consumable_item_amount);
         execute!(stdout, cursor::MoveTo(0, 6))?;
-        println!("    {}", drops.mythical_equipment_item_name);
+        set_rarity_text_color(&drops.equipment_item.rarity)?;
+        print!("    {}", drops.equipment_item.name);
+        reset_text_color()?;
+        print!(" {}", get_item_level_display(drops.equipment_item.lvl));
         execute!(stdout, cursor::MoveTo(0, 8))?;
         println!("> Continue");
 

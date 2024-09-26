@@ -11,8 +11,10 @@ use crate::{
         DungeonFloor, Room, RoomCoordinates, RoomKind,
     },
     game::save_game,
+    items::get_item_level_display,
     menu::{character::menu_character, shop::menu_shop},
     session::{Player, PlayerCharacter},
+    util::{reset_text_color, set_rarity_text_color},
 };
 use crossterm::{
     cursor,
@@ -418,8 +420,13 @@ pub fn menu_open_treasure_chest(
         execute!(stdout, cursor::MoveTo(0, 2))?;
         println!("  Gold: {}", drops.gold);
         execute!(stdout, cursor::MoveTo(0, 3))?;
-        println!("  Item: {}", drops.equipment_item_name);
-        execute!(stdout, cursor::MoveTo(0, 5))?;
+        println!("  Items:");
+        execute!(stdout, cursor::MoveTo(0, 4))?;
+        set_rarity_text_color(&drops.equipment_item.rarity)?;
+        print!("    {}", drops.equipment_item.name);
+        reset_text_color()?;
+        print!(" {}", get_item_level_display(drops.equipment_item.lvl));
+        execute!(stdout, cursor::MoveTo(0, 6))?;
         println!("> Continue");
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
