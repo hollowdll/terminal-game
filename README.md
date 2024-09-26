@@ -83,6 +83,16 @@ Build time environment variables:
 
 This section is for the developer.
 
+On Debian the following package is needed to cross-compile to Windows
+```sh
+# Install
+sudo apt install gcc-mingw-w64-x64-64
+
+# Verify installation
+x86_64-w64-mingw32-gcc --version
+```
+Other Linux distros not tested.
+
 Run the script `release.sh` in the project root to build new release files.
 ```sh
 ./release.sh 0.1.0
