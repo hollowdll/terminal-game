@@ -130,6 +130,7 @@ pub fn menu_inventory_consumable_list(
                 reset_text_color()?;
                 print!(" x{}", item.amount_in_inventory);
             }
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {

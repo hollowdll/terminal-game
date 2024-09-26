@@ -1,7 +1,8 @@
 use crate::{
-    items::{get_item_display_name, CharacterItem},
+    items::{get_item_display_name, CharacterItem, ItemRarity},
     menu::inventory::{menu_armor_info, menu_ring_info, menu_weapon_info},
     session::PlayerCharacter,
+    util::{reset_text_color, set_rarity_text_color},
 };
 use crossterm::{
     cursor,
@@ -26,45 +27,63 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
         println!("Equipment");
         execute!(stdout, cursor::MoveTo(0, 2))?;
 
-        let weapon_text = match &character.equipped_items.weapon {
+        let (weapon_name, weapon_rarity) = match &character.equipped_items.weapon {
             Some(id) => match character.data.inventory.weapons.get(id) {
-                Some(weapon) => get_item_display_name(CharacterItem::Weapon(weapon)),
-                None => "?Unknown?".to_owned(),
+                Some(weapon) => (
+                    get_item_display_name(CharacterItem::Weapon(weapon)),
+                    &weapon.rarity,
+                ),
+                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
             },
-            None => "Not equipped".to_owned(),
+            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
         };
-        let armor_text = match &character.equipped_items.armor {
+        let (armor_name, armor_rarity) = match &character.equipped_items.armor {
             Some(id) => match character.data.inventory.armors.get(id) {
-                Some(armor) => get_item_display_name(CharacterItem::Armor(armor)),
-                None => "?Unknown?".to_owned(),
+                Some(armor) => (
+                    get_item_display_name(CharacterItem::Armor(armor)),
+                    &armor.rarity,
+                ),
+                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
             },
-            None => "Not equipped".to_owned(),
+            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
         };
-        let ring_text = match &character.equipped_items.ring {
+        let (ring_name, ring_rarity) = match &character.equipped_items.ring {
             Some(id) => match character.data.inventory.rings.get(id) {
-                Some(ring) => get_item_display_name(CharacterItem::Ring(ring)),
-                None => "?Unknown?".to_owned(),
+                Some(ring) => (
+                    get_item_display_name(CharacterItem::Ring(ring)),
+                    &ring.rarity,
+                ),
+                None => ("?Unknown?".to_owned(), &ItemRarity::Unknown),
             },
-            None => "Not equipped".to_owned(),
+            None => ("Not equipped".to_owned(), &ItemRarity::Unknown),
         };
 
         for i in 0..menu_items_num {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
             if i == selected_index {
-                match i {
-                    0 => println!("> Weapon: {}", weapon_text),
-                    1 => println!("> Armor: {}", armor_text),
-                    2 => println!("> Ring: {}", ring_text),
-                    _ => println!("> ?Unknown?"),
-                }
+                print!("> ");
             } else {
-                match i {
-                    0 => println!("  Weapon: {}", weapon_text),
-                    1 => println!("  Armor: {}", armor_text),
-                    2 => println!("  Ring: {}", ring_text),
-                    _ => println!("  ?Unknown?"),
-                }
+                print!("  ");
             }
+            match i {
+                0 => {
+                    print!("Weapon:");
+                    set_rarity_text_color(weapon_rarity)?;
+                    print!(" {}", weapon_name);
+                }
+                1 => {
+                    print!("Armor:");
+                    set_rarity_text_color(armor_rarity)?;
+                    print!(" {}", armor_name);
+                }
+                2 => {
+                    print!("Ring:");
+                    set_rarity_text_color(ring_rarity)?;
+                    print!(" {}", ring_name);
+                }
+                _ => println!("?Unknown?"),
+            }
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
