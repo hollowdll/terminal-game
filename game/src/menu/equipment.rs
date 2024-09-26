@@ -28,24 +28,24 @@ pub fn menu_equipment(character: &mut PlayerCharacter) -> io::Result<()> {
 
         let weapon_text = match &character.equipped_items.weapon {
             Some(id) => match character.data.inventory.weapons.get(id) {
-                Some(weapon) => &get_item_display_name(CharacterItem::Weapon(weapon)),
-                None => "?Unknown?",
+                Some(weapon) => get_item_display_name(CharacterItem::Weapon(weapon)),
+                None => "?Unknown?".to_owned(),
             },
-            None => "Not equipped",
+            None => "Not equipped".to_owned(),
         };
         let armor_text = match &character.equipped_items.armor {
             Some(id) => match character.data.inventory.armors.get(id) {
-                Some(armor) => &get_item_display_name(CharacterItem::Armor(armor)),
-                None => "?Unknown?",
+                Some(armor) => get_item_display_name(CharacterItem::Armor(armor)),
+                None => "?Unknown?".to_owned(),
             },
-            None => "Not equipped",
+            None => "Not equipped".to_owned(),
         };
         let ring_text = match &character.equipped_items.ring {
             Some(id) => match character.data.inventory.rings.get(id) {
-                Some(ring) => &get_item_display_name(CharacterItem::Ring(ring)),
-                None => "?Unknown?",
+                Some(ring) => get_item_display_name(CharacterItem::Ring(ring)),
+                None => "?Unknown?".to_owned(),
             },
-            None => "Not equipped",
+            None => "Not equipped".to_owned(),
         };
 
         for i in 0..menu_items_num {
