@@ -12,7 +12,7 @@ Below is a short gameplay video of the game
 
 ![gameplay video](https://imgur.com/a/NkTp335)
 
-<iframe class="imgur-embed" width="560" height="315" frameborder="0" src="https://imgur.com/whLAJ9m/embed"></iframe>
+https://i.imgur.com/whLAJ9m.mp4
 
 Below is a short gameplay video of a boss fight
 
