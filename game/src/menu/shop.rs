@@ -7,13 +7,16 @@ use crossterm::{
 use std::io;
 
 use crate::{
-    items::{get_item_display_name, get_item_purchase_value, CharacterItem, CharacterItemOwned},
+    items::{
+        get_item_display_name, get_item_level_display, get_item_purchase_value, CharacterItem,
+        CharacterItemOwned, ItemRarity,
+    },
     menu::inventory::{
         menu_armor_info, menu_consumable_info, menu_inventory, menu_ring_info, menu_weapon_info,
     },
     session::PlayerCharacter,
     shop::{buy_consumable, ShopItems},
-    util::shift_index_back,
+    util::{reset_text_color, set_rarity_text_color, shift_index_back},
 };
 
 pub fn menu_shop(shop_items: &mut ShopItems, character: &mut PlayerCharacter) -> io::Result<()> {
@@ -102,31 +105,53 @@ pub fn menu_shop_buy_items(
 
         for (i, item) in menu_items.iter().enumerate() {
             execute!(stdout, cursor::MoveTo(0, i as u16 + start_column))?;
-            let (name, purchase_value) = match item {
+            let (name, lvl, rarity, purchase_value) = match item {
                 CharacterItemOwned::Consumable(item) => (
                     get_item_display_name(CharacterItem::Consumable(item)),
+                    0,
+                    &item.rarity,
                     get_item_purchase_value(&item.rarity),
                 ),
                 CharacterItemOwned::Weapon(item) => (
                     get_item_display_name(CharacterItem::Weapon(item)),
+                    item.level,
+                    &item.rarity,
                     get_item_purchase_value(&item.rarity),
                 ),
                 CharacterItemOwned::Armor(item) => (
                     get_item_display_name(CharacterItem::Armor(item)),
+                    item.level,
+                    &item.rarity,
                     get_item_purchase_value(&item.rarity),
                 ),
                 CharacterItemOwned::Ring(item) => (
                     get_item_display_name(CharacterItem::Ring(item)),
+                    item.level,
+                    &item.rarity,
                     get_item_purchase_value(&item.rarity),
                 ),
-                _ => ("?Unknown?".to_string(), 0),
+                _ => ("?Unknown?".to_string(), 0, &ItemRarity::Unknown, 0),
             };
 
             if i == selected_index {
-                println!("> {}   [Cost: {} Gold]", name, purchase_value);
+                print!("> ");
+                set_rarity_text_color(rarity)?;
+                print!("{}", name);
+                reset_text_color()?;
+                if lvl > 0 {
+                    print!(" {}", get_item_level_display(lvl));
+                }
+                print!("   [Cost: {} Gold]", purchase_value);
             } else {
-                println!("  {}   [Cost: {} Gold]", name, purchase_value);
+                set_rarity_text_color(rarity)?;
+                print!("  {}", name);
+                reset_text_color()?;
+                if lvl > 0 {
+                    print!(" {}", get_item_level_display(lvl));
+                }
+                println!("   [Cost: {} Gold]", purchase_value);
             }
+            reset_text_color()?;
         }
 
         if let Event::Key(KeyEvent { code, kind, .. }) = event::read()? {
