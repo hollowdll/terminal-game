@@ -10,7 +10,7 @@ The goal is to build your character as strong as possible and get as far in the 
 
 Below is a short gameplay video of the game
 
-https://github.com/hollowdll/terminal-game/blob/main/documentation/video/gameplay_demo.mp4
+![gameplay video](./documentation/video/gameplay_demo.mp4)
 
 # Install
 
