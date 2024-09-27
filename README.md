@@ -1,16 +1,20 @@
 # Overview
 
-A terminal based classic RPG game where you fight enemies in randomly generated dungeons. No mouse required. You play with your keyboard in a fully interactive TUI mode.
+A terminal based RPG game where you fight enemies in randomly generated dungeons. No mouse required. You play with your keyboard in a fully interactive TUI mode.
 
 The game is programmed in the Rust language and requires only the game binary to play.
 
-The goal is to build your character as strong as possible and get as far in the dungeon as you can. You can get equippable items as you progress that make your character stronger. At the end of a dungeon, there is a boss fight that you need to win to advance to the next dungeon floor. The enemies get stronger on each floor. Enemies, items, drops and dungeon rooms are all randomized.
+The goal is to build your character as strong as possible and get as far in the dungeon as you can. You can get equippable items of different rarities as you progress that make your character stronger. At the end of a dungeon, there is a boss fight that you need to win to advance to the next dungeon floor. The enemies get stronger on each floor. Enemies, items, drops and dungeon rooms are all randomized.
 
 # Demo
 
 Below is a short gameplay video of the game
 
-![gameplay video](./documentation/video/gameplay_demo.mp4)
+![gameplay video](https://imgur.com/a/NkTp335)
+
+Below is a short gameplay video of a boss fight
+
+![bossfight video](https://imgur.com/a/iDIw5bI)
 
 # Install
 
@@ -20,7 +24,7 @@ SHA256 checksums are available for all releases. You can verify the downloaded f
 
 Extract tar archive on Linux
 ```sh
-tar xzvf <archive>.tar.gz
+tar xzvf terminal_rpg_<version>_linux.tar.gz
 ```
 
 # Run the game
