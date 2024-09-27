@@ -8,7 +8,7 @@ The goal is to build your character as strong as possible and get as far in the 
 
 # Install
 
-Precompiled binaries for Linux and Windows can be downloaded [here](https://github.com/hollowdll/terminal-game/releases)
+Precompiled binaries for Linux and Windows can be downloaded [here](https://github.com/hollowdll/terminal-game/releases).
 
 SHA256 checksums are available for all releases. You can verify the downloaded files against the SHA256 hashes in the checksums.txt found in every release.
 
@@ -16,12 +16,6 @@ Extract tar archive on Linux
 ```sh
 tar xzvf <archive>.tar.gz
 ```
-
-# Save file
-
-The game saves your progress to a save file `terminal_rpg_game_data` so you can continue playing the next time you open the game. The game creates this file if it doesn't exist when the game is saved.
-
-The file is located in a directory `terminal-rpg-game` in the user's config directory. The location is different depending on your operating system. E.g. on Linux it is `$XDG_CONFIG_HOME` or `$HOME/.config` and on Windows Roaming AppData (C:/Users/youruser/AppData/Roaming).
 
 # Run the game
 
@@ -35,6 +29,12 @@ Run and start the game
 ./terminal_rpg
 ```
 Make sure the file has execute permission.
+
+# Save file
+
+The game saves your progress to a save file `terminal_rpg_game_data` so you can continue playing the next time you open the game. The game creates this file if it doesn't exist when the game is saved.
+
+The file is located in a directory `terminal-rpg-game` in the user's config directory. The location is different depending on your operating system. E.g. on Linux it is `$XDG_CONFIG_HOME` or `$HOME/.config` and on Windows Roaming AppData (C:/Users/youruser/AppData/Roaming).
 
 # Build from source
 
