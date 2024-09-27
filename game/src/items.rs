@@ -476,6 +476,7 @@ pub fn get_item_sell_value(rarity: &ItemRarity) -> u32 {
         ItemRarity::Rare => 75,
         ItemRarity::Epic => 100,
         ItemRarity::Legendary => 125,
+        ItemRarity::Mythical => 150,
         _ => 0,
     }
 }
