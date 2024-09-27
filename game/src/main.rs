@@ -1,6 +1,7 @@
 use crossterm::{
     cursor::{Hide, Show},
     execute,
+    style::{Color, SetBackgroundColor},
     terminal::{
         disable_raw_mode, enable_raw_mode, Clear, ClearType, EnterAlternateScreen,
         LeaveAlternateScreen,
@@ -12,11 +13,13 @@ use terminal_rpg::{
     game_data::{create_savefile_if_not_exists, load_save_file},
     menu::main_menu::main_menu,
     session::Player,
+    util::reset_background_color,
 };
 
 fn main() -> io::Result<()> {
     if let Err(e) = run() {
         let mut stdout = io::stdout();
+        reset_background_color()?;
         execute!(stdout, LeaveAlternateScreen, Show, Clear(ClearType::All))?;
         eprintln!("Error: {}", e);
     }
@@ -37,7 +40,12 @@ fn run() -> io::Result<()> {
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, Hide)?;
+    execute!(
+        stdout,
+        EnterAlternateScreen,
+        Hide,
+        SetBackgroundColor(Color::Black)
+    )?;
 
     loop {
         if let Ok(rerender) = main_menu(&mut player, &cfg) {
