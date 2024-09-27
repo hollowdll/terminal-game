@@ -150,23 +150,26 @@ impl ConsumableItem {
     }
 
     /// Returns text telling what the item did.
-    pub fn use_item(&self, character: &mut PlayerCharacter) -> (String, String) {
+    pub fn use_item(&self, character: &mut PlayerCharacter) -> (String, ItemRarity, String) {
         let display_name = get_item_display_name(CharacterItem::Consumable(&self));
-        let mut text = "Player used an unknown item.".to_string();
+        let mut item_name = "Player used an unknown item.".to_string();
         let mut effect = "Nothing happened".to_string();
+        let mut rarity = ItemRarity::Unknown;
         match self.info.name.as_ref() {
             ITEM_HEALTH_POTION_NAME => {
                 let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
                 let restored_health = character
                     .restore_health((heal_percentage * character.get_total_health() as f64) as u32);
-                text = format!("Player used {}!", &display_name);
+                item_name = format!("{}", &display_name);
+                rarity = self.rarity.clone();
                 effect = format!("Player restored {} health points", restored_health);
             }
             ITEM_MANA_POTION_NAME => {
                 let heal_percentage = get_potion_effect_percentage(&self.rarity) as f64 / 100.0;
                 let restored_mana = character
                     .restore_mana((heal_percentage * character.get_total_mana() as f64) as u32);
-                text = format!("Player used {}!", &display_name);
+                item_name = format!("{}", &display_name);
+                rarity = self.rarity.clone();
                 effect = format!("Player restored {} mana points", restored_mana);
             }
             _ => {}
@@ -176,7 +179,7 @@ impl ConsumableItem {
         } else {
             character.delete_consumable(&display_name);
         }
-        (text, effect)
+        (item_name, rarity, effect)
     }
 }
 

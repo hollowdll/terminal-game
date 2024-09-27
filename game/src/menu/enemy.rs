@@ -2,7 +2,7 @@ use crate::{
     character::SKILL_MANA_COST,
     drops::{give_ancient_enemy_drops, give_boss_enemy_drops, give_normal_enemy_drops},
     enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
-    items::get_item_level_display,
+    items::{get_item_level_display, ItemRarity},
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
     util::{is_chance_success, reset_text_color, set_rarity_text_color},
@@ -56,6 +56,8 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
     let mut selected_index = 0;
     let mut fight_text = DEFAULT_FIGHT_TEXT.to_string();
     let mut effect_text = "".to_string();
+    let mut used_item = "".to_string();
+    let mut used_item_rarity = ItemRarity::Unknown;
     let mut action = false;
     let mut player_turn = true;
     let player_temp_stat_boosts = character.temp_stat_boosts.clone();
@@ -105,7 +107,17 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
         println!("Defense: {}", character.get_total_defense());
 
         execute!(stdout, cursor::MoveTo(0, 9))?;
-        println!("{}", fight_text);
+        if !used_item.is_empty() {
+            print!("Player used ");
+            set_rarity_text_color(&used_item_rarity)?;
+            print!("{}", used_item);
+            reset_text_color()?;
+            print!("!");
+            used_item = "".to_string();
+            used_item_rarity = ItemRarity::Unknown;
+        } else {
+            println!("{}", fight_text);
+        }
 
         let start_column: u16 = match action {
             true => {
@@ -160,17 +172,20 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
                             }
                         }
                         "Consumables" => {
-                            let (event, effect) =
+                            let (item_name, item_rarity, effect) =
                                 menu_inventory_consumable_list(character, true, false)?;
-                            if !event.is_empty() && !effect.is_empty() {
+                            if !item_name.is_empty() && !effect.is_empty() {
                                 action = true;
-                                fight_text = event;
+                                used_item = item_name;
+                                used_item_rarity = item_rarity;
                                 effect_text = effect;
                                 selected_index = 0;
                                 execute!(stdout, Clear(ClearType::All))?;
                             } else {
                                 fight_text = DEFAULT_FIGHT_TEXT.to_string();
                                 effect_text = "".to_string();
+                                used_item = "".to_string();
+                                used_item_rarity = ItemRarity::Unknown;
                             }
                         }
                         "Stats" => {

@@ -149,7 +149,7 @@ pub fn menu_shop_buy_items(
                 if lvl > 0 {
                     print!(" {}", get_item_level_display(lvl));
                 }
-                println!("   [Cost: {} Gold]", purchase_value);
+                print!("   [Cost: {} Gold]", purchase_value);
             }
             reset_text_color()?;
         }
