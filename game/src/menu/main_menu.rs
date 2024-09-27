@@ -21,20 +21,16 @@ use crate::{
 };
 
 fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
-    println!("+---------------------------------------------------------------------------------------------------------+");
+    println!("||||||||  ||||||  |||||    |||     |||  ||  |||   ||   ||||||   ||           |||||    ||||||    ||||||  ");
     execute!(out, cursor::MoveTo(0, 1))?;
-    println!("| ||||||||  ||||||  |||||    |||     |||  ||  |||   ||   ||||||   ||           |||||    ||||||    ||||||  |");
+    println!("   ||     ||      ||   ||  ||||| |||||  ||  ||||  ||  ||    ||  ||           ||   ||  ||   ||  ||       ");
     execute!(out, cursor::MoveTo(0, 2))?;
-    println!("|    ||     ||      ||   ||  ||||| |||||  ||  ||||  ||  ||    ||  ||           ||   ||  ||   ||  ||       |");
+    println!("   ||     ||||||  |||||    ||  |||  ||  ||  || || ||  ||||||||  ||           |||||    ||||||   ||  |||  ");
     execute!(out, cursor::MoveTo(0, 3))?;
-    println!("|    ||     ||||||  |||||    ||  |||  ||  ||  || || ||  ||||||||  ||           |||||    ||||||   ||  |||  |");
+    println!("   ||     ||      ||   ||  ||       ||  ||  ||  ||||  ||    ||  ||           ||   ||  ||       ||    || ");
     execute!(out, cursor::MoveTo(0, 4))?;
-    println!("|    ||     ||      ||   ||  ||       ||  ||  ||  ||||  ||    ||  ||           ||   ||  ||       ||    || |");
-    execute!(out, cursor::MoveTo(0, 5))?;
-    println!("|    ||     ||||||  ||   ||  ||       ||  ||  ||   |||  ||    ||  ||||||       ||   ||  ||        ||||||  |");
+    println!("   ||     ||||||  ||   ||  ||       ||  ||  ||   |||  ||    ||  ||||||       ||   ||  ||        ||||||\n");
     execute!(out, cursor::MoveTo(0, 6))?;
-    println!("+---------------------------------------------------------------------------------------------------------+\n");
-    execute!(out, cursor::MoveTo(0, 7))?;
 
     Ok(())
 }
@@ -44,7 +40,7 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
     let mut stdout = io::stdout();
     let menu_items = vec!["Load Game", "New Game", "Credits", "Quit Game"];
     let mut selected_index = 0;
-    let mut start_column: u16 = 7;
+    let mut start_column: u16 = 6;
     let mut rerender = false;
     let version = env!("CARGO_PKG_VERSION");
 
@@ -55,8 +51,8 @@ pub fn main_menu(player: &mut Player, cfg: &GameConfig) -> io::Result<bool> {
 
         if cfg.dev_mode {
             println!("Running in development mode");
-            execute!(stdout, cursor::MoveTo(0, 8))?;
-            start_column = 8;
+            execute!(stdout, cursor::MoveTo(0, 7))?;
+            start_column = 7;
         }
 
         for (i, item) in menu_items.iter().enumerate() {
