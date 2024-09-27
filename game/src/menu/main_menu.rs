@@ -31,7 +31,6 @@ fn print_ascii_title(mut out: &io::Stdout) -> io::Result<()> {
     execute!(out, cursor::MoveTo(0, 4))?;
     println!("   ||     ||||||  ||   ||  ||       ||  ||  ||   |||  ||    ||  ||||||       ||   ||  ||        ||||||\n");
     execute!(out, cursor::MoveTo(0, 6))?;
-
     Ok(())
 }
 

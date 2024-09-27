@@ -6,6 +6,15 @@ The game is programmed in the Rust language and requires only the game binary to
 
 The goal is to build your character as strong as possible and get as far in the dungeon as you can. You can get equippable items as you progress that make your character stronger. At the end of a dungeon, there is a boss fight that you need to win to advance to the next dungeon floor. The enemies get stronger on each floor. Enemies, items, drops and dungeon rooms are all randomized.
 
+# Demo
+
+Below is a short gameplay video of the game
+
+<video width="600" controls>
+    <source src="./documentation/video/gameplay_demo.mp4" type="video/mp4">
+    Video cannot be played.
+</video>
+
 # Install
 
 Precompiled binaries for Linux and Windows can be downloaded [here](https://github.com/hollowdll/terminal-game/releases).
