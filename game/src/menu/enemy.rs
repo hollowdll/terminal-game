@@ -5,7 +5,10 @@ use crate::{
     items::{get_item_level_display, ItemRarity},
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
-    util::{is_chance_success, reset_text_color, set_rarity_text_color},
+    util::{
+        display_health_bar, display_mana_bar, is_chance_success, reset_text_color,
+        set_rarity_text_color,
+    },
 };
 use crossterm::{
     cursor,
@@ -71,14 +74,21 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
         if action {
             menu_items = vec!["Continue"];
         }
+        let enemy_curr_health = enemy.stats.current_health;
+        let enemy_max_health = enemy.stats.max_health;
+        let player_curr_health = character.temp_stats.current_health;
+        let player_max_health = character.get_total_health();
+        let player_curr_mana = character.temp_stats.current_mana;
+        let player_max_mana = character.get_total_mana();
 
         execute!(stdout, cursor::MoveTo(0, 0))?;
         println!("Enemy: {}", enemy.get_display_name());
         execute!(stdout, cursor::MoveTo(0, 1))?;
-        println!(
-            "Health: {}/{}",
-            enemy.stats.current_health, enemy.stats.max_health
-        );
+        display_health_bar(
+            ((enemy_curr_health as f64 / enemy_max_health as f64) * 100.0).ceil() as u16,
+            enemy_curr_health,
+            enemy_max_health,
+        )?;
         execute!(stdout, cursor::MoveTo(0, 2))?;
         println!("Defense: {}", enemy.get_total_defense());
 
@@ -92,17 +102,17 @@ fn menu_enemy_fight(enemy: &mut Enemy, character: &mut PlayerCharacter) -> io::R
             character.data.stats.general_stats.required_exp
         );
         execute!(stdout, cursor::MoveTo(0, 5))?;
-        println!(
-            "Health: {}/{}",
-            character.temp_stats.current_health,
-            character.get_total_health()
-        );
+        display_health_bar(
+            ((player_curr_health as f64 / player_max_health as f64) * 100.0).ceil() as u16,
+            player_curr_health,
+            player_max_health,
+        )?;
         execute!(stdout, cursor::MoveTo(0, 6))?;
-        println!(
-            "Mana: {}/{}",
-            character.temp_stats.current_mana,
-            character.get_total_mana()
-        );
+        display_mana_bar(
+            ((player_curr_mana as f64 / player_max_mana as f64) * 100.0).ceil() as u16,
+            player_curr_mana,
+            player_max_mana,
+        )?;
         execute!(stdout, cursor::MoveTo(0, 7))?;
         println!("Defense: {}", character.get_total_defense());
 
