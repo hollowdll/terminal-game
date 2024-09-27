@@ -75,12 +75,11 @@ pub fn display_health_bar(percentage: u16, current_health: u32, max_health: u32)
     let mut filled_length = (percentage as usize * bar_length) / 100;
     let mut empty_length = bar_length - filled_length;
 
-    if percentage == 0 {
-        filled_length = 0;
-        empty_length = bar_length;
-    } else if percentage == 1 {
-        filled_length = 1;
-        empty_length = bar_length - 1;
+    if filled_length == 0 {
+        if percentage > 0 {
+            filled_length = 1;
+            empty_length = bar_length - 1;
+        }
     }
 
     print!("Health: {}/{} [", current_health, max_health);
@@ -107,12 +106,11 @@ pub fn display_mana_bar(percentage: u16, current_mana: u32, max_mana: u32) -> io
     let mut filled_length = (percentage as usize * bar_length) / 100;
     let mut empty_length = bar_length - filled_length;
 
-    if percentage == 0 {
-        filled_length = 0;
-        empty_length = bar_length;
-    } else if percentage == 1 {
-        filled_length = 1;
-        empty_length = bar_length - 1;
+    if filled_length == 0 {
+        if percentage > 0 {
+            filled_length = 1;
+            empty_length = bar_length - 1;
+        }
     }
 
     print!("Mana: {}/{} [", current_mana, max_mana);
