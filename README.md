@@ -10,10 +10,7 @@ The goal is to build your character as strong as possible and get as far in the 
 
 Below is a short gameplay video of the game
 
-<video width="600" controls>
-    <source src="./documentation/video/gameplay_demo.mp4" type="video/mp4">
-    Video cannot be played.
-</video>
+./documentation/video/gameplay_demo.mp4
 
 # Install
 
