@@ -9,6 +9,10 @@ repository = "https://github.com/hollowdll/terminal-game"
 keywords = ["terminal", "game", "tui"]
 categories = ["command-line-interface"]
 
+[[bin]]
+name = "terminal_rpg"
+path = "./src/main.rs"
+
 [dependencies]
 crossterm = "0.28"
 serde_json = "1"
