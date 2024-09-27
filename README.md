@@ -8,11 +8,13 @@ The goal is to build your character as strong as possible and get as far in the 
 
 # Install
 
-Release coming very soon.
+Precompiled binaries for Linux and Windows can be downloaded [here](https://github.com/hollowdll/terminal-game/releases)
+
+SHA256 checksums are available for all releases. You can verify the downloaded files against the SHA256 hashes in the checksums.txt found in every release.
 
 Extract tar archive on Linux
 ```sh
-tar xzf <archive>.tar.gz
+tar xzvf <archive>.tar.gz
 ```
 
 # Save file
