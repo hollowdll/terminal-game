@@ -2,18 +2,17 @@ use crate::{
     character::SKILL_MANA_COST,
     drops::{give_ancient_enemy_drops, give_boss_enemy_drops, give_normal_enemy_drops},
     enemy::{Enemy, EnemyKind, ENEMY_SKILL_CHANCE},
+    game::StatusBar,
     items::{get_item_level_display, ItemRarity},
     menu::{character::menu_level_up, inventory::menu_inventory_consumable_list},
     session::PlayerCharacter,
-    util::{
-        display_health_bar, display_mana_bar, is_chance_success, reset_text_color,
-        set_rarity_text_color,
-    },
+    util::{is_chance_success, reset_text_color, set_rarity_text_color},
 };
 use crossterm::{
     cursor,
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
+    style::{Color, SetForegroundColor},
     terminal::{Clear, ClearType},
 };
 use std::io;
@@ -560,6 +559,60 @@ fn menu_enemy_fight_character_stats(character: &PlayerCharacter) -> io::Result<(
         }
     }
     execute!(stdout, Clear(ClearType::All))?;
+
+    Ok(())
+}
+
+fn display_health_bar(percentage: u16, current_health: u32, max_health: u32) -> io::Result<()> {
+    display_status_bar(StatusBar::Health, percentage, current_health, max_health)?;
+    Ok(())
+}
+
+fn display_mana_bar(percentage: u16, current_mana: u32, max_mana: u32) -> io::Result<()> {
+    display_status_bar(StatusBar::Mana, percentage, current_mana, max_mana)?;
+    Ok(())
+}
+
+fn display_status_bar(
+    bar: StatusBar,
+    percentage: u16,
+    current_val: u32,
+    max_val: u32,
+) -> io::Result<()> {
+    let mut stdout = io::stdout();
+    let bar_length = 25;
+    let mut filled_length = (percentage as usize * bar_length) / 100;
+    let mut empty_length = bar_length - filled_length;
+
+    if filled_length == 0 {
+        if percentage > 0 {
+            filled_length = 1;
+            empty_length = bar_length - 1;
+        }
+    }
+
+    match bar {
+        StatusBar::Health => {
+            print!("Health: {}/{} [", current_val, max_val);
+            execute!(stdout, SetForegroundColor(Color::Red))?;
+        }
+        StatusBar::Mana => {
+            print!("Mana: {}/{} [", current_val, max_val);
+            execute!(stdout, SetForegroundColor(Color::DarkCyan))?;
+        }
+    }
+    print!("{}", "=".repeat(filled_length));
+    execute!(
+        stdout,
+        SetForegroundColor(Color::Rgb {
+            r: 50,
+            g: 50,
+            b: 50
+        })
+    )?;
+    print!("{}", "=".repeat(empty_length));
+    reset_text_color()?;
+    print!("]");
 
     Ok(())
 }
