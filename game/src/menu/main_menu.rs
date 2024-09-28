@@ -609,6 +609,22 @@ pub fn menu_tutorial() -> io::Result<()> {
                 9
             }
             4 => {
+                println!("Combat Stats");
+                execute!(stdout, cursor::MoveTo(0, 3))?;
+                println!("Damage: The amount of damage you deal to enemies when attacking");
+                execute!(stdout, cursor::MoveTo(0, 4))?;
+                println!("Defense: Decreases the amount of damage taken from enemy attacks");
+                execute!(stdout, cursor::MoveTo(0, 5))?;
+                println!("Health: The total amount of damage you can take from enemy attacks before dying");
+                execute!(stdout, cursor::MoveTo(0, 6))?;
+                println!("Mana: Needed to use skills");
+                execute!(stdout, cursor::MoveTo(0, 7))?;
+                println!("Critical Damage Multiplier: The damage multiplier of critical hits");
+                execute!(stdout, cursor::MoveTo(0, 8))?;
+                println!("Critical Hit Rate: The chance to land a critical hit when attacking");
+                10
+            }
+            5 => {
                 println!("Dungeons");
                 execute!(stdout, cursor::MoveTo(0, 3))?;
                 println!("Dungeon floors consist of different rooms.");
@@ -618,7 +634,7 @@ pub fn menu_tutorial() -> io::Result<()> {
                 println!("Enemies get stronger on each floor.");
                 7
             }
-            5 => {
+            6 => {
                 println!("Items");
                 execute!(stdout, cursor::MoveTo(0, 3))?;
                 println!("There are equipment and consumable items.");
@@ -638,7 +654,7 @@ pub fn menu_tutorial() -> io::Result<()> {
                 println!("and can only be dropped from the boss of Ancient Ruins.");
                 12
             }
-            6 => {
+            7 => {
                 println!("Ancient Ruins");
                 execute!(stdout, cursor::MoveTo(0, 3))?;
                 println!("Ancient ruins is a special type of dungeon.");
@@ -654,7 +670,7 @@ pub fn menu_tutorial() -> io::Result<()> {
                 );
                 9
             }
-            7 => {
+            8 => {
                 println!("Dying");
                 execute!(stdout, cursor::MoveTo(0, 3))?;
                 println!("This game is permadeath.");
@@ -698,7 +714,7 @@ pub fn menu_tutorial() -> io::Result<()> {
                     KeyCode::Enter => match menu_items[selected_index] {
                         "Skip Tutorial" => break,
                         "Continue" => {
-                            if page == 7 {
+                            if page == 8 {
                                 break;
                             }
                             page += 1;
