@@ -462,11 +462,11 @@ pub fn get_item_level_display<'a>(level: u32) -> String {
 /// Returns the purchase value of an item in gold.
 pub fn get_item_purchase_value(rarity: &ItemRarity) -> u32 {
     match rarity {
-        ItemRarity::Common => 100,
-        ItemRarity::Uncommon => 250,
-        ItemRarity::Rare => 400,
-        ItemRarity::Epic => 550,
-        ItemRarity::Legendary => 700,
+        ItemRarity::Common => 200,
+        ItemRarity::Uncommon => 400,
+        ItemRarity::Rare => 600,
+        ItemRarity::Epic => 800,
+        ItemRarity::Legendary => 1000,
         _ => 0,
     }
 }
