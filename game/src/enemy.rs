@@ -268,7 +268,7 @@ impl Enemy {
         if let Some(skill) = &self.skill {
             match skill {
                 EnemySkill::Smash => {
-                    let damage = (character.get_total_health() as f64 * 0.20) as u32;
+                    let damage = (character.get_total_health() as f64 * 0.24) as u32;
                     let damage_taken = character.take_pure_damage(damage);
                     return (
                         "Enemy used skill Smash!",
@@ -290,7 +290,7 @@ impl Enemy {
                 }
                 EnemySkill::StatusAilment => {
                     let reduced_damage = self.level;
-                    let reduced_mana = 15;
+                    let reduced_mana = 20;
                     character.temp_stat_boosts.decrease_damage(reduced_damage);
                     character.consume_mana(reduced_mana);
                     return (
