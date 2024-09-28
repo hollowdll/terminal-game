@@ -2,7 +2,7 @@
 name = "terminal_rpg"
 version = "0.1.1"
 edition = "2021"
-description = "Terminal based game."
+description = "TUI game for the terminal."
 readme = "../README.md"
 license = "GPL-3.0 license"
 repository = "https://github.com/hollowdll/terminal-game"
