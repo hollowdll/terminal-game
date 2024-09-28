@@ -8,17 +8,13 @@ The goal is to build your character as strong as possible and get as far in the 
 
 # Demo
 
-Below is a short gameplay video of the game
+Below is a short gameplay preview of the game
 
-![gameplay video](https://imgur.com/a/NkTp335)
+![Gameplay preview](./documentation/video/gameplay_demo.gif)
 
-<video width="600" controls>
-    <source src="https://i.imgur.com/whLAJ9m.mp4" type="video/mp4">
-</video>
+Below is a short gameplay preview of a boss fight
 
-Below is a short gameplay video of a boss fight
-
-![bossfight video](https://imgur.com/a/iDIw5bI)
+![Bossfight preview](./documentation/video/bossfight_demo.gif)
 
 # Install
 
