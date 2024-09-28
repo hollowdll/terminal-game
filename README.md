@@ -27,6 +27,18 @@ Extract tar archive on Linux
 tar xzvf terminal_rpg_<version>_linux.tar.gz
 ```
 
+## Install with Cargo
+
+The following command installs the game globally
+```sh
+cargo install terminal_rpg
+```
+
+You can then run it with
+```sh
+terminal_rpg
+```
+
 # Run the game
 
 Open your terminal and go to the directory where the game binary is.
