@@ -1,6 +1,6 @@
 [package]
 name = "terminal_rpg"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Terminal based game."
 readme = "../README.md"
