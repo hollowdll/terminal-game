@@ -1,3 +1,5 @@
+[![Crate Badge]][Crate]
+
 # Overview
 
 A terminal based RPG game where you fight enemies in randomly generated dungeons. No mouse required. You play with your keyboard in a fully interactive TUI mode.
@@ -133,4 +135,9 @@ Run the script `release.sh` in the project root to build new release files.
 This will output a new version directory to `releases` directory in the game crate directory. It contains compressed archives of the game binary for supported platforms (Linux .tar.gz and Windows .zip).
 
 It also creates a checksums.txt file that contains the sha256 checksums of the archives. With this users can verify that they install the right file.
+
+<!-- links -->
+
+[Crate Badge]: https://img.shields.io/crates/v/terminal_rpg.svg
+[Crate]: https://crates.io/crates/terminal_rpg
 
