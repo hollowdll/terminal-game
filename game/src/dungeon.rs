@@ -9,8 +9,6 @@ use crate::{
 use rand::{thread_rng, Rng};
 use std::collections::HashMap;
 
-pub mod room;
-
 pub const NORMAL_ENEMIES_PER_FLOOR: u32 = 3;
 pub const MIN_ROOMS_FOR_BOSS_ENTRANCE: u32 = 6;
 /// Increasing this makes dungeon floors have more rooms.
